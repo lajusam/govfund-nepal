@@ -1,0 +1,5 @@
+node_modules/
+blockchain/target/
+frontend/dist/
+*.env
+*.log
