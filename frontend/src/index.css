@@ -2,239 +2,39 @@
 @tailwind components;
 @tailwind utilities;
 
-/* ═══════════════════════════════════════════════════════
-   CINEMATIC DESIGN SYSTEM — GovFund Nepal
-   Palette: Void Black · Electric Blue · Neon Crimson · Gold
-   Typography: Syne (display) + Space Grotesk (body)
-   ═══════════════════════════════════════════════════════ */
-
 @layer base {
-  :root {
-    --color-void:     #060608;
-    --color-surface:  #0D0D10;
-    --color-elevate:  #141418;
-    --color-electric: #0A5FFF;
-    --color-crimson:  #FF1A3C;
-    --color-gold:     #E8B84B;
-    --color-text:     #F5F5F7;
-    --color-muted:    #7A7A8C;
-    --color-border:   rgba(255, 255, 255, 0.07);
-    --ease-luxury:    cubic-bezier(0.22, 1, 0.36, 1);
-  }
-
-  * { box-sizing: border-box }
-
-  html {
-    scroll-behavior: smooth;
-  }
-
   body {
-    @apply bg-white dark:bg-void text-gray-900 dark:text-[#F5F5F7] font-sans antialiased;
-    overflow-x: hidden;
+    @apply bg-white dark:bg-nepal-charcoal text-gray-900 dark:text-gray-100 font-sans transition-colors duration-300;
   }
-
   h1, h2, h3, h4, h5, h6 {
-    @apply font-display;
-    letter-spacing: -0.02em;
-  }
-
-  ::selection {
-    background: rgba(10, 95, 255, 0.35);
-    color: #fff;
+    @apply font-heading;
   }
 }
 
-/* ── Custom Cursor ───────────────────────────────────── */
-#cursor-dot {
-  pointer-events: none;
-  position: fixed;
-  z-index: 9999;
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
-  background: var(--color-electric);
-  box-shadow: 0 0 12px 3px rgba(10,95,255,0.8);
-  transform: translate(-50%, -50%);
-  transition: opacity 0.3s;
-  mix-blend-mode: screen;
-}
-
-#cursor-ring {
-  pointer-events: none;
-  position: fixed;
-  z-index: 9998;
-  width: 36px;
-  height: 36px;
-  border-radius: 50%;
-  border: 1.5px solid rgba(10, 95, 255, 0.55);
-  transform: translate(-50%, -50%);
-  transition: width 0.35s var(--ease-luxury),
-              height 0.35s var(--ease-luxury),
-              border-color 0.35s,
-              background 0.35s;
-}
-
-#cursor-ring.hovering {
-  width: 58px;
-  height: 58px;
-  border-color: rgba(255, 26, 60, 0.7);
-  background: rgba(255, 26, 60, 0.06);
-}
-
-/* ── Noise Film Grain ────────────────────────────────── */
-.noise-overlay {
-  position: fixed;
-  inset: -200%;
-  width: 400%;
-  height: 400%;
-  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 300 300' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.05'/%3E%3C/svg%3E");
-  pointer-events: none;
-  z-index: 10000;
-  opacity: 0.032;
-  animation: noiseAnim 0.12s steps(1) infinite;
-  mix-blend-mode: overlay;
-}
-
-/* ── Keyframes ───────────────────────────────────────── */
-@keyframes noiseAnim {
-  0%   { transform: translate(0,   0)   }
-  20%  { transform: translate(-3%, -3%) }
-  40%  { transform: translate(3%,  3%)  }
-  60%  { transform: translate(-4%,  1%) }
-  80%  { transform: translate(4%, -2%)  }
-  100% { transform: translate(0,   0)   }
-}
-
-@keyframes marquee {
-  from { transform: translateX(0) }
-  to   { transform: translateX(-50%) }
-}
-
-@keyframes orbFloat {
-  0%,100% { transform: translateY(0)    rotate(0deg)   scale(1)    }
-  33%      { transform: translateY(-22px) rotate(2deg)   scale(1.05) }
-  66%      { transform: translateY(10px)  rotate(-2deg)  scale(0.97) }
-}
-
-/* ── Components ─────────────────────────────────────── */
 @layer components {
-
-  /* Base dark cards */
-  .card {
-    background: var(--color-surface);
-    border-radius: 16px;
-    border: 1px solid var(--color-border);
-    transition: all 0.4s var(--ease-luxury);
-  }
-  .card-elevate {
-    background: var(--color-elevate);
-    border-radius: 16px;
-    border: 1px solid var(--color-border);
-    transition: all 0.4s var(--ease-luxury);
-  }
-
-  /* Glassmorphism */
-  .glass {
-    background: rgba(13, 13, 16, 0.65);
-    backdrop-filter: blur(20px) saturate(120%);
-    -webkit-backdrop-filter: blur(20px) saturate(120%);
-    border: 1px solid rgba(255,255,255,0.07);
-  }
-
-  /* CTA — Electric Blue */
-  .btn-electric {
-    @apply relative inline-flex items-center gap-2.5 px-8 py-4 rounded-full font-sans font-semibold text-white text-base overflow-hidden cursor-pointer;
-    background: var(--color-electric);
-    transition: box-shadow 0.4s var(--ease-luxury), transform 0.3s var(--ease-luxury), background 0.3s;
-  }
-  .btn-electric:hover {
-    background: #1F6FFF;
-    box-shadow: 0 8px 40px rgba(10,95,255,0.55), 0 0 0 4px rgba(10,95,255,0.15);
-    transform: translateY(-2px);
-  }
-  .btn-electric:active {
-    transform: translateY(0);
-  }
-
-  /* CTA — Ghost outline */
-  .btn-ghost {
-    @apply relative inline-flex items-center gap-2.5 px-8 py-4 rounded-full font-sans font-medium text-[#F5F5F7] text-base cursor-pointer;
-    border: 1px solid rgba(255,255,255,0.16);
-    transition: border-color 0.3s, background 0.3s, transform 0.3s var(--ease-luxury);
-  }
-  .btn-ghost:hover {
-    border-color: rgba(255,255,255,0.4);
-    background: rgba(255,255,255,0.05);
-    transform: translateY(-2px);
-  }
-
-  /* Glow dividers */
-  .glow-divider-blue {
-    height: 1px;
-    background: linear-gradient(90deg, transparent 0%, rgba(10,95,255,0.6) 40%, rgba(255,26,60,0.5) 60%, transparent 100%);
-  }
-  .glow-divider-crimson {
-    height: 1px;
-    background: linear-gradient(90deg, transparent 0%, rgba(255,26,60,0.6) 50%, transparent 100%);
-  }
-
-  /* Section label (overline) */
-  .section-label {
-    display: inline-block;
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 0.7rem;
-    font-weight: 500;
-    letter-spacing: 0.2em;
-    text-transform: uppercase;
-    color: var(--color-electric);
-  }
-
-  /* Live badge */
-  .badge-live {
-    @apply inline-flex items-center gap-2 px-4 py-1.5 rounded-full text-xs font-semibold tracking-wider uppercase;
-    background: rgba(10,95,255,0.12);
-    color: #5B8FFF;
-    border: 1px solid rgba(10,95,255,0.25);
-  }
-
-  /* Scrolling marquee */
-  .marquee-track {
-    display: flex;
-    width: max-content;
-    animation: marquee 22s linear infinite;
-  }
-  .marquee-track:hover { animation-play-state: paused }
-
-  /* Terminal block */
-  .terminal {
-    border-radius: 16px;
-    overflow: hidden;
-    border: 1px solid rgba(255,255,255,0.09);
-    background: #080809;
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 0.82rem;
-  }
-  .terminal-bar {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    padding: 12px 20px;
-    background: rgba(255,255,255,0.04);
-    border-bottom: 1px solid rgba(255,255,255,0.07);
-  }
-
-  /* ── Legacy classes for other pages (preserved) ── */
   .btn-primary {
     @apply px-6 py-3 bg-nepal-red hover:bg-nepal-red-dark text-white font-semibold rounded-xl
-           transition-all duration-300 shadow-lg hover:shadow-xl hover:-translate-y-0.5;
+           transition-all duration-300 shadow-lg hover:shadow-xl hover:-translate-y-0.5
+           active:translate-y-0 active:shadow-md;
   }
   .btn-secondary {
     @apply px-6 py-3 bg-nepal-navy hover:bg-nepal-navy-light text-white font-semibold rounded-xl
-           transition-all duration-300 shadow-lg;
+           transition-all duration-300 shadow-lg hover:shadow-xl;
+  }
+  .card {
+    @apply bg-white dark:bg-nepal-charcoal-light rounded-2xl shadow-lg border border-gray-100
+           dark:border-gray-800 transition-all duration-300 hover:shadow-xl;
   }
   .card-stone {
-    @apply bg-nepal-stone dark:bg-elevate rounded-2xl shadow-lg border border-nepal-stone-dark
+    @apply bg-nepal-stone dark:bg-nepal-charcoal-light rounded-2xl shadow-lg border border-nepal-stone-dark
            dark:border-gray-800 transition-all duration-300 hover:shadow-xl;
+  }
+  .stat-card {
+    @apply card p-6 text-center;
+  }
+  .glass {
+    @apply bg-white/70 dark:bg-nepal-charcoal/70 backdrop-blur-lg border border-white/20
+           dark:border-gray-700/30;
   }
   .progress-bar {
     @apply h-3 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden;
@@ -246,26 +46,42 @@
     @apply text-3xl md:text-4xl font-heading font-bold mb-2;
   }
   .section-subtitle {
-    color: var(--color-muted);
-    @apply text-lg mb-8;
+    @apply text-gray-500 dark:text-gray-400 text-lg mb-8;
   }
   .input-field {
-    @apply w-full px-4 py-3 rounded-xl border border-gray-700 bg-surface
-           focus:ring-2 focus:ring-electric focus:border-electric
-           outline-none transition-all duration-200;
+    @apply w-full px-4 py-3 rounded-xl border border-gray-200 dark:border-gray-700
+           bg-white dark:bg-nepal-charcoal focus:ring-2 focus:ring-nepal-red/50
+           focus:border-nepal-red outline-none transition-all duration-200;
   }
   .badge {
     @apply inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold;
   }
-  .badge-active    { @apply badge bg-green-900/40 text-green-400; }
-  .badge-completed { @apply badge bg-blue-900/40 text-blue-400; }
-  .badge-pending   { @apply badge bg-yellow-900/40 text-yellow-400; }
-  .stat-card       { @apply card p-6 text-center; }
+  .badge-active {
+    @apply badge bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400;
+  }
+  .badge-completed {
+    @apply badge bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400;
+  }
+  .badge-pending {
+    @apply badge bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400;
+  }
 }
 
-/* ── Scrollbar ───────────────────────────────────────── */
-::-webkit-scrollbar       { width: 5px }
-::-webkit-scrollbar-track { background: var(--color-void) }
-::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 999px }
-::-webkit-scrollbar-thumb:hover { background: rgba(10,95,255,0.55) }
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+}
+::-webkit-scrollbar-track {
+  @apply bg-gray-100 dark:bg-nepal-charcoal;
+}
+::-webkit-scrollbar-thumb {
+  @apply bg-gray-300 dark:bg-gray-600 rounded-full;
+}
+::-webkit-scrollbar-thumb:hover {
+  @apply bg-gray-400 dark:bg-gray-500;
+}
 
+/* Smooth scrolling */
+html {
+  scroll-behavior: smooth;
+}
