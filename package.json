@@ -1,0 +1,16 @@
+{
+  "name": "govfund-nepal",
+  "version": "1.0.0",
+  "description": "GovFund Nepal – monorepo root (Vercel serverless functions)",
+  "private": true,
+  "engines": {
+    "node": ">=18"
+  },
+  "dependencies": {
+    "@coral-xyz/anchor": "^0.30.1",
+    "@solana/web3.js": "^1.95.0",
+    "bs58": "^6.0.0",
+    "mongoose": "^8.7.0",
+    "tweetnacl": "^1.0.3"
+  }
+}
