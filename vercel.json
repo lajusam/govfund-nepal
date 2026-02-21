@@ -2,17 +2,9 @@
   "installCommand": "npm install && cd frontend && npm install",
   "buildCommand": "cd frontend && npm run build",
   "outputDirectory": "frontend/dist",
-  "headers": [
-    {
-      "source": "/api/(.*)",
-      "headers": [
-        { "key": "Access-Control-Allow-Origin", "value": "*" },
-        { "key": "Access-Control-Allow-Methods", "value": "GET,POST,PUT,DELETE,OPTIONS" },
-        { "key": "Access-Control-Allow-Headers", "value": "Content-Type,x-wallet-address,x-wallet-signature,x-wallet-message" }
-      ]
-    }
-  ],
   "rewrites": [
+    { "source": "/api",      "destination": "/api/server" },
+    { "source": "/api/(.*)", "destination": "/api/server" },
     { "source": "/((?!api).*)", "destination": "/index.html" }
   ]
 }
