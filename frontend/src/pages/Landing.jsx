@@ -243,8 +243,7 @@ export default function Landing() {
     ];
 
     return (
-        <div ref={wrapRef} style={{ background: '#060608', cursor: 'none' }} className="relative">
-            <CustomCursor />
+        <div ref={wrapRef} className="relative bg-white dark:bg-[#060608]">
             <Grain />
 
             {/* ─────────────────────────────────────────────
@@ -316,7 +315,7 @@ export default function Landing() {
                     >
                         <div
                             className="font-display font-extrabold leading-[0.88] tracking-[-0.03em] text-white select-none"
-                            style={{ fontSize: 'clamp(3.4rem, 9vw, 9rem)' }}
+                            style={{ fontSize: 'clamp(2rem, 4.5vw, 4.5rem)' }}
                         >
                             <div style={{ overflow: 'hidden', lineHeight: 1 }}>
                                 <SplitText text="RADICAL" delay={0.05} />
@@ -486,7 +485,7 @@ export default function Landing() {
                             variants={fadeUp}
                             custom={1}
                             className="font-display font-extrabold text-white leading-tight tracking-tight"
-                            style={{ fontSize: 'clamp(2rem, 4vw, 3.5rem)' }}
+                            style={{ fontSize: 'clamp(1.4rem, 2.8vw, 2.4rem)' }}
                         >
                             Transparency
                             <br />
@@ -535,7 +534,7 @@ export default function Landing() {
                             <motion.h2
                                 variants={fadeUp} custom={1}
                                 className="font-display font-extrabold text-white leading-tight tracking-tight"
-                                style={{ fontSize: 'clamp(2rem, 4vw, 3.5rem)' }}
+                                style={{ fontSize: 'clamp(1.4rem, 2.8vw, 2.4rem)' }}
                             >
                                 How it<br />
                                 <span style={{
@@ -636,7 +635,7 @@ export default function Landing() {
                         <motion.h2
                             variants={fadeUp} custom={1}
                             className="font-display font-extrabold text-white leading-tight tracking-tight mb-8"
-                            style={{ fontSize: 'clamp(2rem, 4vw, 3.2rem)' }}
+                            style={{ fontSize: 'clamp(1.4rem, 2.8vw, 2.4rem)' }}
                         >
                             Corruption cannot<br />
                             <span style={{ color: '#FF1A3C' }}>survive on-chain</span>
@@ -737,7 +736,7 @@ export default function Landing() {
                     <span
                         className="font-display font-extrabold uppercase select-none"
                         style={{
-                            fontSize: 'clamp(6rem, 22vw, 22rem)',
+                            fontSize: 'clamp(4rem, 14vw, 14rem)',
                             color: 'transparent',
                             WebkitTextStroke: '1px rgba(255,255,255,0.022)',
                             letterSpacing: '-0.04em',
@@ -754,7 +753,7 @@ export default function Landing() {
                     <motion.h2
                         variants={fadeUp} custom={1}
                         className="font-display font-extrabold text-white leading-tight tracking-tight mb-10"
-                        style={{ fontSize: 'clamp(2.2rem, 5vw, 4.5rem)' }}
+                        style={{ fontSize: 'clamp(1.5rem, 3vw, 2.8rem)' }}
                     >
                         Public money is{' '}
                         <span style={{ color: '#FF1A3C' }}>public trust.</span>
@@ -834,7 +833,7 @@ export default function Landing() {
                     <motion.h2
                         variants={fadeUp} custom={1}
                         className="font-display font-extrabold text-white leading-tight tracking-tight mb-8"
-                        style={{ fontSize: 'clamp(2.5rem, 7vw, 6rem)' }}
+                        style={{ fontSize: 'clamp(1.8rem, 3.5vw, 3.5rem)' }}
                     >
                         Ready to explore<br />
                         <span style={{

@@ -26,12 +26,10 @@
 
   html {
     scroll-behavior: smooth;
-    background: var(--color-void);
   }
 
   body {
-    @apply bg-void text-[#F5F5F7] font-sans antialiased;
-    background-color: var(--color-void);
+    @apply bg-white dark:bg-void text-gray-900 dark:text-[#F5F5F7] font-sans antialiased;
     overflow-x: hidden;
   }
 
