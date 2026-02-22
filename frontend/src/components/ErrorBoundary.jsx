@@ -33,15 +33,15 @@ export default class ErrorBoundary extends React.Component {
     if (this.state.hasError) {
       return (
         <div className="min-h-[60vh] flex items-center justify-center px-4">
-          <div className="max-w-lg w-full bg-white dark:bg-gray-900 rounded-2xl shadow-xl border border-red-200 dark:border-red-800 p-8 text-center">
+          <div className="max-w-lg w-full bg-earth rounded-2xl shadow-basalt-xl border border-golden/20 p-8 text-center">
             {/* Icon */}
             <div className="text-6xl mb-4">⚠️</div>
 
             {/* Title */}
-            <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">
+            <h2 className="text-2xl font-bold text-parchment mb-2">
               Something went wrong
             </h2>
-            <p className="text-gray-500 dark:text-gray-400 text-sm mb-6">
+            <p className="text-parchment-muted text-sm mb-6">
               An unexpected error occurred. This might be a temporary issue.
             </p>
 
@@ -66,20 +66,20 @@ export default class ErrorBoundary extends React.Component {
             <div className="flex gap-3 justify-center">
               <button
                 onClick={this.handleReset}
-                className="px-5 py-2.5 rounded-xl text-sm font-medium border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+                className="px-5 py-2.5 rounded-xl text-sm font-medium border border-earth-border text-parchment-muted hover:bg-earth-light hover:text-amber-glow transition-colors"
               >
                 Try Again
               </button>
               <button
                 onClick={this.handleReload}
-                className="px-5 py-2.5 rounded-xl text-sm font-medium bg-gradient-to-r from-red-600 to-red-800 text-white hover:shadow-lg transition-all"
+                className="px-5 py-2.5 rounded-xl text-sm font-medium bg-gradient-to-r from-golden to-golden-600 text-basalt font-bold hover:shadow-golden-md transition-all"
               >
                 Reload Page
               </button>
             </div>
 
             {/* Help text */}
-            <p className="text-xs text-gray-400 mt-6">
+            <p className="text-xs text-parchment-ghost mt-6">
               If this keeps happening, check your wallet connection and ensure the
               Solana program is deployed to Devnet.
             </p>

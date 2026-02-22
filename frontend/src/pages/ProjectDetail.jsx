@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useMemo } from 'react';
+﻿import React, { useEffect, useState, useMemo } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { getProject, getFeedback, submitFeedback, formatNPR, getStatusColor, getStatusBg } from '../services/api';
 import { Chart as ChartJS, CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend, Filler } from 'chart.js';
@@ -17,26 +17,26 @@ function MilestoneTracker({ milestones, total }) {
                         {/* Timeline line + dot */}
                         <div className="flex flex-col items-center">
                             <div className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold border-2 transition-all ${isCompleted ? 'bg-green-500 border-green-500 text-white' :
-                                    isActive ? 'bg-nepal-blue border-nepal-blue text-white animate-pulse' :
-                                        'bg-white dark:bg-gray-800 border-gray-300 dark:border-gray-600 text-gray-400'
+                                    isActive ? 'bg-golden border-golden text-basalt animate-pulse' :
+                                        'bg-earth-light border-earth-border text-parchment-ghost'
                                 }`}>
                                 {isCompleted ? '✓' : i + 1}
                             </div>
                             {i < milestones.length - 1 && (
-                                <div className={`w-0.5 h-12 ${isCompleted ? 'bg-green-500' : 'bg-gray-200 dark:bg-gray-700'}`}></div>
+                                <div className={`w-0.5 h-12 ${isCompleted ? 'bg-golden/70' : 'bg-earth-border'}`}></div>
                             )}
                         </div>
                         {/* Content */}
                         <div className="flex-1 pb-2">
                             <div className="flex items-center gap-2 mb-1">
-                                <h4 className="font-semibold text-sm text-nepal-navy dark:text-white">{m.title}</h4>
+                                <h4 className="font-semibold text-sm text-parchment">{m.title}</h4>
                                 <span className={`badge text-[10px] ${isCompleted ? 'badge-active' : isActive ? 'bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400' : 'badge-pending'
                                     }`}>
                                     {m.status}
                                 </span>
                             </div>
-                            <p className="text-xs text-gray-500 dark:text-gray-400">{m.description}</p>
-                            <p className="text-[10px] text-gray-400 mt-1">Updated: {new Date(m.updatedAt).toLocaleDateString()}</p>
+                            <p className="text-xs text-parchment-muted">{m.description}</p>
+                            <p className="text-[10px] text-parchment-ghost mt-1">Updated: {new Date(m.updatedAt).toLocaleDateString()}</p>
                         </div>
                     </div>
                 );
@@ -70,12 +70,12 @@ export default function ProjectDetail() {
             datasets: [{
                 label: 'Cumulative Released',
                 data: releases.map(r => r.amount),
-                borderColor: '#DC143C',
-                backgroundColor: 'rgba(220, 20, 60, 0.1)',
+                borderColor: '#FFB81C',
+                backgroundColor: 'rgba(255, 184, 28, 0.10)',
                 fill: true,
                 tension: 0.4,
                 pointRadius: 5,
-                pointBackgroundColor: '#DC143C',
+                pointBackgroundColor: '#FFB81C',
             }],
         };
     }, [project]);
@@ -92,13 +92,13 @@ export default function ProjectDetail() {
     if (loading) {
         return (
             <div className="flex items-center justify-center min-h-[60vh]">
-                <div className="w-12 h-12 border-4 border-nepal-red/30 border-t-nepal-red rounded-full animate-spin"></div>
+                <div className="w-12 h-12 border-4 border-golden/25 border-t-golden rounded-full animate-spin"></div>
             </div>
         );
     }
 
     if (!project) {
-        return <div className="text-center py-20 text-gray-400 text-lg">Project not found</div>;
+        return <div className="text-center py-20 text-parchment-muted text-lg">Project not found</div>;
     }
 
     const p = project;
@@ -108,10 +108,10 @@ export default function ProjectDetail() {
     return (
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
             {/* Breadcrumb */}
-            <div className="flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400 mb-6">
-                <Link to="/projects" className="hover:text-nepal-red transition-colors">Projects</Link>
+            <div className="flex items-center gap-2 text-sm text-parchment-muted mb-6">
+                <Link to="/projects" className="hover:text-golden transition-colors">Projects</Link>
                 <span>/</span>
-                <span className="text-nepal-navy dark:text-white font-medium">{p.name}</span>
+                <span className="text-parchment font-medium">{p.name}</span>
             </div>
 
             {/* Header */}
@@ -120,20 +120,20 @@ export default function ProjectDetail() {
                     <div>
                         <div className="flex items-center gap-3 mb-2">
                             <span className={`badge ${p.status === 'Active' ? 'badge-active' : 'badge-completed'}`}>{p.status}</span>
-                            <span className="text-sm text-gray-400">{p.province} → {p.district} → {p.sector}</span>
+                            <span className="text-sm text-parchment-muted">{p.province} → {p.district} → {p.sector}</span>
                         </div>
-                        <h1 className="text-2xl md:text-3xl font-heading font-bold text-nepal-navy dark:text-white">{p.name}</h1>
-                        <p className="text-gray-500 dark:text-gray-400 mt-2 max-w-2xl">{p.description}</p>
+                        <h1 className="text-2xl md:text-3xl font-heading font-bold text-parchment">{p.name}</h1>
+                        <p className="text-parchment-muted mt-2 max-w-2xl">{p.description}</p>
                     </div>
                     <div className="flex items-center gap-3">
-                        <div className="w-12 h-12 rounded-full bg-gray-200 dark:bg-gray-700 flex items-center justify-center">
-                            <svg className="w-7 h-7 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
+                        <div className="w-12 h-12 rounded-full bg-earth-light flex items-center justify-center">
+                            <svg className="w-7 h-7 text-parchment-ghost" fill="currentColor" viewBox="0 0 20 20">
                                 <path fillRule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clipRule="evenodd" />
                             </svg>
                         </div>
                         <div>
-                            <p className="text-xs text-gray-400">Contractor</p>
-                            <p className="font-semibold text-nepal-navy dark:text-white">{p.contractor}</p>
+                            <p className="text-xs text-parchment-ghost">Contractor</p>
+                            <p className="font-semibold text-parchment">{p.contractor}</p>
                         </div>
                     </div>
                 </div>
@@ -141,20 +141,20 @@ export default function ProjectDetail() {
                 {/* Budget overview */}
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
                     <div>
-                        <p className="text-xs text-gray-400 mb-1">Total Budget</p>
-                        <p className="text-xl font-heading font-bold text-nepal-navy dark:text-white">{formatNPR(p.totalBudget)}</p>
+                        <p className="text-xs text-parchment-ghost mb-1">Total Budget</p>
+                        <p className="text-xl font-heading font-bold text-parchment">{formatNPR(p.totalBudget)}</p>
                     </div>
                     <div>
-                        <p className="text-xs text-gray-400 mb-1">Allocated</p>
-                        <p className="text-xl font-heading font-bold text-nepal-blue">{formatNPR(p.allocatedBudget)}</p>
+                        <p className="text-xs text-parchment-ghost mb-1">Allocated</p>
+                        <p className="text-xl font-heading font-bold text-amber-glow">{formatNPR(p.allocatedBudget)}</p>
                     </div>
                     <div>
-                        <p className="text-xs text-gray-400 mb-1">Released</p>
-                        <p className="text-xl font-heading font-bold text-nepal-red">{formatNPR(p.releasedAmount)}</p>
+                        <p className="text-xs text-parchment-ghost mb-1">Released</p>
+                        <p className="text-xl font-heading font-bold text-golden">{formatNPR(p.releasedAmount)}</p>
                     </div>
                     <div>
-                        <p className="text-xs text-gray-400 mb-1">Completion</p>
-                        <p className="text-xl font-heading font-bold text-nepal-gold">{milestonePct}%</p>
+                        <p className="text-xs text-parchment-ghost mb-1">Completion</p>
+                        <p className="text-xl font-heading font-bold text-bronze-light">{milestonePct}%</p>
                     </div>
                 </div>
 
@@ -162,16 +162,16 @@ export default function ProjectDetail() {
                 <div className="mt-6 space-y-3">
                     <div>
                         <div className="flex justify-between text-xs mb-1">
-                            <span className="text-gray-500">Fund Utilization</span>
+                            <span className="text-parchment-muted">Fund Utilization</span>
                             <span className="font-semibold">{budgetPct}%</span>
                         </div>
                         <div className="progress-bar">
-                            <div className="progress-fill bg-gradient-to-r from-nepal-red to-nepal-gold" style={{ width: `${Math.min(budgetPct, 100)}%` }}></div>
+                            <div className="progress-fill bg-gradient-to-r from-golden to-amber-glow" style={{ width: `${Math.min(budgetPct, 100)}%` }}></div>
                         </div>
                     </div>
                     <div>
                         <div className="flex justify-between text-xs mb-1">
-                            <span className="text-gray-500">Milestones ({p.milestonesCompleted}/{p.milestoneCount})</span>
+                            <span className="text-parchment-muted">Milestones ({p.milestonesCompleted}/{p.milestoneCount})</span>
                             <span className="font-semibold">{milestonePct}%</span>
                         </div>
                         <div className="progress-bar">
@@ -180,8 +180,8 @@ export default function ProjectDetail() {
                     </div>
                 </div>
 
-                <div className="mt-4 text-sm text-gray-400">
-                    Estimated Completion: <span className="font-medium text-nepal-navy dark:text-white">
+                <div className="mt-4 text-sm text-parchment-muted">
+                    Estimated Completion: <span className="font-medium text-parchment">
                         {new Date(p.estimatedCompletion).toLocaleDateString('en-US', { year: 'numeric', month: 'long' })}
                     </span>
                 </div>
@@ -192,20 +192,20 @@ export default function ProjectDetail() {
                 <div className="lg:col-span-2 space-y-8">
                     {/* Milestones */}
                     <div className="card p-6">
-                        <h3 className="font-heading font-bold text-lg text-nepal-navy dark:text-white mb-6">
+                        <h3 className="font-heading font-bold text-lg text-parchment mb-6">
                             Milestone Pipeline
                         </h3>
                         {p.milestones?.length > 0 ? (
                             <MilestoneTracker milestones={p.milestones} total={p.milestoneCount} />
                         ) : (
-                            <p className="text-gray-400 text-sm">No milestones recorded yet</p>
+                            <p className="text-parchment-muted text-sm">No milestones recorded yet</p>
                         )}
                     </div>
 
                     {/* Fund Release Chart */}
                     {releaseChartData && (
                         <div className="card p-6">
-                            <h3 className="font-heading font-bold text-lg text-nepal-navy dark:text-white mb-4">
+                            <h3 className="font-heading font-bold text-lg text-parchment mb-4">
                                 Fund Release Timeline
                             </h3>
                             <Line
@@ -228,22 +228,22 @@ export default function ProjectDetail() {
                     {/* Fund Release Table */}
                     {p.fundReleases?.length > 0 && (
                         <div className="card p-6 overflow-x-auto">
-                            <h3 className="font-heading font-bold text-lg text-nepal-navy dark:text-white mb-4">
+                            <h3 className="font-heading font-bold text-lg text-parchment mb-4">
                                 Fund Release History
                             </h3>
                             <table className="w-full text-sm">
                                 <thead>
-                                    <tr className="border-b border-gray-200 dark:border-gray-700">
-                                        <th className="text-left py-3 text-gray-500 font-medium">Date</th>
-                                        <th className="text-left py-3 text-gray-500 font-medium">Amount</th>
-                                        <th className="text-left py-3 text-gray-500 font-medium">Description</th>
+                                    <tr className="border-b border-earth-border">
+                                        <th className="text-left py-3 text-parchment-muted font-medium">Date</th>
+                                        <th className="text-left py-3 text-parchment-muted font-medium">Amount</th>
+                                        <th className="text-left py-3 text-parchment-muted font-medium">Description</th>
                                     </tr>
                                 </thead>
                                 <tbody>
                                     {p.fundReleases.map((r, i) => (
-                                        <tr key={i} className="border-b border-gray-100 dark:border-gray-800 hover:bg-gray-50 dark:hover:bg-gray-800/50">
+                                        <tr key={i} className="border-b border-earth-border hover:bg-earth-light transition-colors">
                                             <td className="py-3 text-gray-600 dark:text-gray-300">{new Date(r.date).toLocaleDateString()}</td>
-                                            <td className="py-3 font-semibold text-nepal-red">{formatNPR(r.amount)}</td>
+                                            <td className="py-3 font-semibold text-golden">{formatNPR(r.amount)}</td>
                                             <td className="py-3 text-gray-600 dark:text-gray-300">{r.description}</td>
                                         </tr>
                                     ))}
@@ -254,10 +254,10 @@ export default function ProjectDetail() {
 
                     {/* Public Feedback */}
                     <div className="card p-6">
-                        <h3 className="font-heading font-bold text-lg text-nepal-navy dark:text-white mb-4">
+                        <h3 className="font-heading font-bold text-lg text-parchment mb-4">
                             Public Reviews
                         </h3>
-                        <form onSubmit={handleSubmitFeedback} className="mb-6 p-4 bg-nepal-stone dark:bg-nepal-charcoal rounded-xl">
+                        <form onSubmit={handleSubmitFeedback} className="mb-6 p-4 bg-earth rounded-xl">
                             <div className="flex items-center gap-4 mb-3">
                                 <label className="text-sm text-gray-600 dark:text-gray-300">Rating:</label>
                                 <div className="flex gap-1">
@@ -288,19 +288,19 @@ export default function ProjectDetail() {
                         {feedback.length > 0 ? (
                             <div className="space-y-4">
                                 {feedback.map((f, i) => (
-                                    <div key={i} className="p-4 bg-white dark:bg-nepal-charcoal rounded-xl border border-gray-100 dark:border-gray-800">
+                                    <div key={i} className="p-4 bg-earth rounded-xl border border-earth-border">
                                         <div className="flex items-center justify-between mb-2">
                                             <div className="flex items-center gap-2">
                                                 <div className="text-sm text-yellow-400">{'★'.repeat(f.rating)}{'☆'.repeat(5 - f.rating)}</div>
                                             </div>
-                                            <span className="text-xs text-gray-400">{new Date(f.createdAt).toLocaleDateString()}</span>
+                                            <span className="text-xs text-parchment-muted">{new Date(f.createdAt).toLocaleDateString()}</span>
                                         </div>
                                         <p className="text-sm text-gray-600 dark:text-gray-300">{f.comment}</p>
                                     </div>
                                 ))}
                             </div>
                         ) : (
-                            <p className="text-sm text-gray-400">No reviews yet. Be the first!</p>
+                            <p className="text-sm text-parchment-muted">No reviews yet. Be the first!</p>
                         )}
                     </div>
                 </div>
@@ -309,7 +309,7 @@ export default function ProjectDetail() {
                 <div className="space-y-6">
                     {/* Documents */}
                     <div className="card p-6">
-                        <h3 className="font-heading font-bold text-lg text-nepal-navy dark:text-white mb-4">
+                        <h3 className="font-heading font-bold text-lg text-parchment mb-4">
                             📄 Documents (IPFS)
                         </h3>
                         {p.documents?.length > 0 ? (
@@ -320,36 +320,36 @@ export default function ProjectDetail() {
                                         href={`https://gateway.pinata.cloud/ipfs/${doc.ipfsHash}`}
                                         target="_blank"
                                         rel="noopener noreferrer"
-                                        className="flex items-center gap-3 p-3 bg-nepal-stone dark:bg-nepal-charcoal rounded-xl hover:bg-nepal-stone-dark dark:hover:bg-gray-800 transition-colors group"
+                                        className="flex items-center gap-3 p-3 bg-earth rounded-xl hover:bg-earth-light transition-colors group"
                                     >
-                                        <div className="w-8 h-8 rounded-lg bg-nepal-red/10 flex items-center justify-center text-nepal-red text-sm">📎</div>
+                                        <div className="w-8 h-8 rounded-lg bg-golden/10 flex items-center justify-center text-golden text-sm">📎</div>
                                         <div className="flex-1 min-w-0">
-                                            <p className="text-sm font-medium text-nepal-navy dark:text-white group-hover:text-nepal-red transition-colors truncate">{doc.name}</p>
-                                            <p className="text-[10px] text-gray-400 font-mono truncate">{doc.ipfsHash}</p>
+                                            <p className="text-sm font-medium text-parchment group-hover:text-golden transition-colors truncate">{doc.name}</p>
+                                            <p className="text-[10px] text-parchment-muted font-mono truncate">{doc.ipfsHash}</p>
                                         </div>
-                                        <span className="text-gray-400 text-xs">↗</span>
+                                        <span className="text-parchment-muted text-xs">↗</span>
                                     </a>
                                 ))}
                             </div>
                         ) : (
-                            <p className="text-sm text-gray-400">No documents uploaded yet</p>
+                            <p className="text-sm text-parchment-muted">No documents uploaded yet</p>
                         )}
                     </div>
 
                     {/* Budget Allocations */}
                     {p.budgetAllocations?.length > 0 && (
                         <div className="card p-6">
-                            <h3 className="font-heading font-bold text-lg text-nepal-navy dark:text-white mb-4">
+                            <h3 className="font-heading font-bold text-lg text-parchment mb-4">
                                 💰 Budget Allocations
                             </h3>
                             <div className="space-y-3">
                                 {p.budgetAllocations.map((a, i) => (
-                                    <div key={i} className="p-3 bg-nepal-stone dark:bg-nepal-charcoal rounded-xl">
+                                    <div key={i} className="p-3 bg-earth rounded-xl">
                                         <div className="flex justify-between items-center mb-1">
-                                            <span className="text-sm font-semibold text-nepal-navy dark:text-white">{formatNPR(a.amount)}</span>
-                                            <span className="text-xs text-gray-400">{new Date(a.date).toLocaleDateString()}</span>
+                                            <span className="text-sm font-semibold text-parchment">{formatNPR(a.amount)}</span>
+                                            <span className="text-xs text-parchment-muted">{new Date(a.date).toLocaleDateString()}</span>
                                         </div>
-                                        <p className="text-xs text-gray-500">{a.description}</p>
+                                        <p className="text-xs text-parchment-muted">{a.description}</p>
                                     </div>
                                 ))}
                             </div>
@@ -358,19 +358,19 @@ export default function ProjectDetail() {
 
                     {/* Solana Explorer */}
                     <div className="card p-6">
-                        <h3 className="font-heading font-bold text-lg text-nepal-navy dark:text-white mb-4">
+                        <h3 className="font-heading font-bold text-lg text-parchment mb-4">
                             🔗 Blockchain
                         </h3>
                         <a
                             href="https://explorer.solana.com/?cluster=devnet"
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="flex items-center gap-3 p-3 bg-nepal-stone dark:bg-nepal-charcoal rounded-xl hover:bg-nepal-stone-dark dark:hover:bg-gray-800 transition-colors"
+                            className="flex items-center gap-3 p-3 bg-earth rounded-xl hover:bg-earth-light transition-colors"
                         >
                             <div className="w-8 h-8 rounded-lg bg-purple-100 dark:bg-purple-900/30 flex items-center justify-center text-purple-600 text-sm">⛓</div>
                             <div>
-                                <p className="text-sm font-medium text-nepal-navy dark:text-white">View on Solana Explorer</p>
-                                <p className="text-xs text-gray-400">Devnet Cluster</p>
+                                <p className="text-sm font-medium text-parchment">View on Solana Explorer</p>
+                                <p className="text-xs text-parchment-muted">Devnet Cluster</p>
                             </div>
                         </a>
                     </div>
@@ -379,3 +379,4 @@ export default function ProjectDetail() {
         </div>
     );
 }
+

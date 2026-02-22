@@ -76,10 +76,10 @@ function AnimatedCounter({ value, label, icon, suffix = '' }) {
                 >
                     {icon}
                 </motion.div>
-                <div className="text-2xl md:text-3xl font-heading font-bold text-nepal-navy dark:text-white mb-1">
+                <div className="text-2xl md:text-3xl font-heading font-bold text-parchment mb-1">
                     {display}
                 </div>
-                <div className="text-sm text-gray-500 dark:text-gray-400">{label}</div>
+                <div className="text-sm text-parchment-muted">{label}</div>
             </div>
         </motion.div>
     );
@@ -134,23 +134,38 @@ export default function Landing() {
     const stats = analytics?.overview || {};
 
     return (
-        <div className="overflow-hidden">
+        <div className="overflow-hidden antialiased">
             {/* ══════════════════════════════════════════
                 HERO SECTION — Kinetic Typography + Parallax
                ══════════════════════════════════════════ */}
             <section className="relative min-h-[100vh] flex items-center overflow-hidden">
-                {/* Background gradient */}
-                <div className="absolute inset-0 bg-gradient-to-br from-white via-nepal-stone/30 to-nepal-red/5 dark:from-nepal-charcoal dark:via-nepal-charcoal-light dark:to-nepal-red/10" />
+                {/* Hero background image — place file at frontend/public/hero-bg.jpg */}
+                <div className="absolute inset-0 z-0">
+                    <div
+                        className="absolute inset-0"
+                        style={{
+                            backgroundImage: `url('/hero-bg.jpg')`,
+                            backgroundSize: 'cover',
+                            backgroundPosition: 'center bottom',
+                            backgroundRepeat: 'no-repeat',
+                        }}
+                    />
+                    {/* Cinematic gradient overlays */}
+                    <div className="absolute inset-0 bg-gradient-to-b from-basalt/92 via-basalt/60 to-basalt" />
+                    <div className="absolute inset-0 bg-gradient-to-r from-basalt/75 via-transparent to-basalt/45" />
+                    {/* Dhaka pattern grain */}
+                    <div className="absolute inset-0 bg-dhaka-pattern opacity-[0.04]" />
+                </div>
 
                 {/* Floating orbs */}
-                <FloatingOrb className="top-20 left-10 w-48 h-48 bg-nepal-red/10" delay={0} />
-                <FloatingOrb className="bottom-32 right-16 w-64 h-64 bg-nepal-blue/8" delay={2} />
-                <FloatingOrb className="top-1/2 left-1/3 w-36 h-36 bg-nepal-navy/5" delay={4} />
+                <FloatingOrb className="top-20 left-10 w-48 h-48 bg-golden/10" delay={0} />
+                <FloatingOrb className="bottom-32 right-16 w-64 h-64 bg-bronze/8" delay={2} />
+                <FloatingOrb className="top-1/2 left-1/3 w-36 h-36 bg-bronze/5" delay={4} />
 
                 {/* Grid pattern overlay */}
                 <div className="absolute inset-0 opacity-[0.03] dark:opacity-[0.06]"
                     style={{
-                        backgroundImage: 'radial-gradient(circle, #003893 1px, transparent 1px)',
+                        backgroundImage: 'radial-gradient(circle, rgba(255,184,28,0.18) 1px, transparent 1px)',
                         backgroundSize: '40px 40px',
                     }}
                 />
@@ -167,9 +182,9 @@ export default function Landing() {
                     >
                         {/* Badge */}
                         <motion.div variants={fadeUp} custom={0}>
-                            <span className="inline-flex items-center gap-2 px-4 py-2 bg-nepal-red/10 dark:bg-nepal-red/20 rounded-full text-nepal-red text-sm font-semibold mb-8">
+                            <span className="inline-flex items-center gap-2 px-4 py-2 bg-golden/10 border border-golden/25 rounded-full text-golden text-sm font-semibold mb-8 on-image-text-sm">
                                 <motion.span
-                                    className="w-2 h-2 rounded-full bg-nepal-red"
+                                    className="w-2 h-2 rounded-full bg-golden"
                                     animate={{ scale: [1, 1.5, 1], opacity: [1, 0.5, 1] }}
                                     transition={{ duration: 2, repeat: Infinity }}
                                 />
@@ -182,21 +197,21 @@ export default function Landing() {
                             <motion.span
                                 variants={fadeUp}
                                 custom={1}
-                                className="block text-nepal-navy dark:text-white"
+                                className="block text-parchment on-image-text"
                             >
                                 Transparent
                             </motion.span>
                             <motion.span
                                 variants={fadeUp}
                                 custom={2}
-                                className="block bg-gradient-to-r from-nepal-red via-red-500 to-nepal-red-dark bg-clip-text text-transparent"
+                                className="block bg-gradient-to-r from-golden via-amber-glow to-golden-600 bg-clip-text text-transparent on-image-text"
                             >
                                 Government Funds
                             </motion.span>
                             <motion.span
                                 variants={fadeUp}
                                 custom={3}
-                                className="block text-nepal-navy dark:text-white"
+                                className="block text-parchment on-image-text"
                             >
                                 For Nepal
                             </motion.span>
@@ -206,10 +221,10 @@ export default function Landing() {
                         <motion.p
                             variants={fadeUp}
                             custom={4}
-                            className="text-lg md:text-xl text-gray-600 dark:text-gray-300 max-w-lg mb-10 leading-relaxed"
+                            className="text-lg md:text-xl text-parchment-dim max-w-lg mb-10 leading-relaxed on-image-text-sm"
                         >
                             Every rupee tracked. Every project verifiable. Corruption is
-                            <span className="font-semibold text-nepal-navy dark:text-white"> technically restricted </span>
+                                <span className="font-semibold text-amber-glow"> technically restricted </span>
                             by blockchain rules — not empty promises.
                         </motion.p>
 
@@ -217,7 +232,7 @@ export default function Landing() {
                         <motion.div variants={fadeUp} custom={5} className="flex flex-wrap gap-4 mb-10">
                             <Link to="/dashboard">
                                 <motion.button
-                                    whileHover={{ scale: 1.05, boxShadow: '0 20px 40px rgba(220,20,60,0.25)' }}
+                                    whileHover={{ scale: 1.05, boxShadow: '0 20px 40px rgba(255,184,28,0.40)' }}
                                     whileTap={{ scale: 0.97 }}
                                     className="btn-primary text-lg px-8 py-3"
                                 >
@@ -236,7 +251,7 @@ export default function Landing() {
                         </motion.div>
 
                         {/* Trust badges */}
-                        <motion.div variants={fadeUp} custom={6} className="flex flex-wrap items-center gap-6 text-sm text-gray-500 dark:text-gray-400">
+                        <motion.div variants={fadeUp} custom={6} className="flex flex-wrap items-center gap-6 text-sm text-parchment-muted">
                             {['Immutable Records', 'Public Verification', 'No Tampering'].map((text, i) => (
                                 <motion.div
                                     key={text}
@@ -263,14 +278,14 @@ export default function Landing() {
                         <div className="relative">
                             {/* Glow ring */}
                             <motion.div
-                                className="absolute inset-0 rounded-full bg-gradient-to-br from-nepal-red/20 to-nepal-navy/20 blur-3xl"
+                                className="absolute inset-0 rounded-full bg-gradient-to-br from-golden/20 to-bronze/20 blur-3xl"
                                 animate={{ scale: [1, 1.15, 1], rotate: [0, 180, 360] }}
                                 transition={{ duration: 20, repeat: Infinity, ease: 'linear' }}
                             />
 
                             {/* Main visual: Animated blockchain blocks */}
                             <motion.div
-                                className="relative w-80 h-80 flex items-center justify-center"
+                                className="relative z-10 w-80 h-80 flex items-center justify-center"
                                 animate={{ rotate: 360 }}
                                 transition={{ duration: 60, repeat: Infinity, ease: 'linear' }}
                             >
@@ -287,8 +302,8 @@ export default function Landing() {
                                         <motion.div
                                             className={`w-14 h-14 rounded-xl border-2 flex items-center justify-center text-lg shadow-lg ${
                                                 i % 2 === 0
-                                                    ? 'bg-nepal-red/10 border-nepal-red/30 text-nepal-red'
-                                                    : 'bg-nepal-navy/10 border-nepal-navy/30 text-nepal-navy dark:text-blue-300'
+                                                    ? 'bg-golden/10 border-golden/30 text-golden'
+                                                    : 'bg-bronze/10 border-bronze/30 text-amber-glow'
                                             }`}
                                             whileHover={{ scale: 1.3 }}
                                         >
@@ -299,7 +314,7 @@ export default function Landing() {
 
                                 {/* Center stupa icon */}
                                 <motion.div
-                                    className="absolute z-10 w-24 h-24 rounded-2xl bg-gradient-to-br from-nepal-red to-nepal-navy flex items-center justify-center shadow-2xl"
+                                    className="absolute z-10 w-24 h-24 rounded-2xl bg-gradient-to-br from-golden to-bronze flex items-center justify-center shadow-golden-lg"
                                     animate={{ rotate: -360 }}
                                     transition={{ duration: 60, repeat: Infinity, ease: 'linear' }}
                                 >
@@ -324,9 +339,9 @@ export default function Landing() {
                     animate={{ y: [0, 10, 0] }}
                     transition={{ duration: 2, repeat: Infinity }}
                 >
-                    <div className="w-6 h-10 rounded-full border-2 border-nepal-navy/30 dark:border-gray-500 flex justify-center pt-2">
+                    <div className="w-6 h-10 rounded-full border-2 border-bronze/30 flex justify-center pt-2">
                         <motion.div
-                            className="w-1.5 h-1.5 rounded-full bg-nepal-red"
+                            className="w-1.5 h-1.5 rounded-full bg-golden"
                             animate={{ y: [0, 16, 0] }}
                             transition={{ duration: 2, repeat: Infinity }}
                         />
@@ -338,7 +353,7 @@ export default function Landing() {
                 STATS SECTION — Scroll-triggered counters
                ══════════════════════════════════════════ */}
             <motion.section
-                className="py-24 bg-white dark:bg-nepal-charcoal-light relative overflow-hidden"
+                className="py-24 bg-earth relative overflow-hidden"
                 initial="hidden"
                 whileInView="visible"
                 viewport={{ once: true, amount: 0.3 }}
@@ -346,7 +361,7 @@ export default function Landing() {
             >
                 {/* Decorative line */}
                 <motion.div
-                    className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-nepal-red via-nepal-navy to-nepal-red"
+                    className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-golden via-bronze to-golden"
                     initial={{ scaleX: 0 }}
                     whileInView={{ scaleX: 1 }}
                     viewport={{ once: true }}
@@ -355,10 +370,10 @@ export default function Landing() {
 
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                     <motion.div variants={fadeUp} className="text-center mb-16">
-                        <h2 className="text-3xl md:text-4xl font-heading font-bold text-nepal-navy dark:text-white mb-3">
+                        <h2 className="text-3xl md:text-4xl font-heading font-bold text-parchment mb-3">
                             Transparency at a Glance
                         </h2>
-                        <p className="text-gray-500 dark:text-gray-400 text-lg">
+                        <p className="text-parchment-muted text-lg">
                             Real-time data from the Solana blockchain
                         </p>
                     </motion.div>
@@ -379,7 +394,7 @@ export default function Landing() {
                 HOW IT WORKS — Staggered card animation
                ══════════════════════════════════════════ */}
             <motion.section
-                className="py-24 bg-nepal-stone dark:bg-nepal-charcoal relative"
+                className="py-24 bg-basalt relative"
                 initial="hidden"
                 whileInView="visible"
                 viewport={{ once: true, amount: 0.2 }}
@@ -387,10 +402,10 @@ export default function Landing() {
             >
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                     <motion.div variants={fadeUp} className="text-center mb-16">
-                        <h2 className="text-3xl md:text-4xl font-heading font-bold text-nepal-navy dark:text-white mb-3">
+                        <h2 className="text-3xl md:text-4xl font-heading font-bold text-parchment mb-3">
                             How It Works
                         </h2>
-                        <p className="text-gray-500 dark:text-gray-400 text-lg">
+                        <p className="text-parchment-muted text-lg">
                             Blockchain-enforced transparency in 4 steps
                         </p>
                     </motion.div>
@@ -400,22 +415,22 @@ export default function Landing() {
                             {
                                 step: '01', title: 'Project Created',
                                 desc: 'Government creates a public project on the blockchain with full budget details.',
-                                icon: '📋', color: 'from-nepal-red/10 to-red-50 dark:from-nepal-red/20 dark:to-nepal-red/10',
+                                icon: '📋', color: 'from-golden/5 to-earth',
                             },
                             {
                                 step: '02', title: 'Budget Allocated',
                                 desc: 'Funds allocated from treasury. Cannot exceed declared total budget — enforced by smart contract.',
-                                icon: '💵', color: 'from-blue-50 to-nepal-navy/5 dark:from-blue-900/20 dark:to-nepal-navy/10',
+                                icon: '💵', color: 'from-bronze/8 to-earth',
                             },
                             {
                                 step: '03', title: 'Funds Released',
                                 desc: 'Every release recorded on-chain. Cannot exceed allocated amount. Tamper-proof history.',
-                                icon: '🔓', color: 'from-green-50 to-emerald-50 dark:from-green-900/20 dark:to-emerald-900/10',
+                                icon: '🔓', color: 'from-earth-raised to-earth',
                             },
                             {
                                 step: '04', title: 'Public Verification',
                                 desc: 'Any citizen verifies transactions on Solana Explorer. Complete transparency, zero trust needed.',
-                                icon: '✅', color: 'from-purple-50 to-violet-50 dark:from-purple-900/20 dark:to-violet-900/10',
+                                icon: '✅', color: 'from-earth to-earth-light',
                             },
                         ].map((item, i) => (
                             <motion.div
@@ -424,7 +439,7 @@ export default function Landing() {
                                 custom={i}
                                 whileHover={{ y: -12, transition: { duration: 0.3 } }}
                             >
-                                <div className={`card p-8 text-center h-full bg-gradient-to-b ${item.color} border border-gray-100 dark:border-gray-700/50`}>
+                                <div className={`card p-8 text-center h-full bg-gradient-to-b ${item.color}`}>
                                     <motion.div
                                         className="text-5xl mb-5"
                                         whileHover={{ scale: 1.2, rotate: [0, -5, 5, 0] }}
@@ -433,15 +448,15 @@ export default function Landing() {
                                         {item.icon}
                                     </motion.div>
 
-                                    <div className="inline-flex items-center justify-center w-8 h-8 rounded-full bg-nepal-red/10 text-nepal-red text-xs font-bold mb-3">
+                                    <div className="inline-flex items-center justify-center w-8 h-8 rounded-full bg-golden/10 text-golden text-xs font-bold mb-3">
                                         {item.step}
                                     </div>
 
-                                    <h3 className="font-heading font-bold text-lg mb-3 text-nepal-navy dark:text-white">
+                                    <h3 className="font-heading font-bold text-lg mb-3 text-parchment">
                                         {item.title}
                                     </h3>
 
-                                    <p className="text-sm text-gray-500 dark:text-gray-400 leading-relaxed">
+                                    <p className="text-sm text-parchment-muted leading-relaxed">
                                         {item.desc}
                                     </p>
                                 </div>
@@ -455,20 +470,20 @@ export default function Landing() {
                 WHY BLOCKCHAIN — Split layout with animations
                ══════════════════════════════════════════ */}
             <motion.section
-                className="py-24 bg-white dark:bg-nepal-charcoal-light"
+                className="py-24 bg-earth"
                 initial="hidden"
                 whileInView="visible"
                 viewport={{ once: true, amount: 0.3 }}
             >
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
                     <motion.div variants={slideInLeft}>
-                        <span className="text-sm font-semibold text-nepal-red uppercase tracking-wider mb-3 block">
+                        <span className="text-sm font-semibold text-golden uppercase tracking-wider mb-3 block">
                             Why Blockchain?
                         </span>
-                        <h2 className="text-3xl md:text-4xl font-heading font-bold text-nepal-navy dark:text-white mb-6">
+                        <h2 className="text-3xl md:text-4xl font-heading font-bold text-parchment mb-6">
                             Corruption Cannot Survive On-Chain
                         </h2>
-                        <p className="text-gray-600 dark:text-gray-300 mb-8 leading-relaxed text-lg">
+                        <p className="text-parchment-dim mb-8 leading-relaxed text-lg">
                             Traditional government budget tracking relies on centralized databases that can be
                             manipulated. Our system stores every financial transaction on the Solana blockchain —
                             immutable, transparent, and verifiable by any citizen.
@@ -482,20 +497,20 @@ export default function Landing() {
                             ].map((item, i) => (
                                 <motion.div
                                     key={i}
-                                    className="flex items-start gap-4 p-4 rounded-xl hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors"
+                                    className="flex items-start gap-4 p-4 rounded-xl hover:bg-earth-light transition-colors"
                                     initial={{ opacity: 0, x: -30 }}
                                     whileInView={{ opacity: 1, x: 0 }}
                                     viewport={{ once: true }}
                                     transition={{ delay: i * 0.15, duration: 0.5 }}
                                 >
-                                    <div className="w-10 h-10 rounded-lg bg-nepal-red/10 flex items-center justify-center flex-shrink-0">
-                                        <svg className="w-5 h-5 text-nepal-red" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <div className="w-10 h-10 rounded-lg bg-golden/10 flex items-center justify-center flex-shrink-0">
+                                        <svg className="w-5 h-5 text-golden" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
                                         </svg>
                                     </div>
                                     <div>
-                                        <h4 className="font-semibold text-nepal-navy dark:text-white">{item.title}</h4>
-                                        <p className="text-sm text-gray-500 dark:text-gray-400">{item.desc}</p>
+                                        <h4 className="font-semibold text-parchment">{item.title}</h4>
+                                        <p className="text-sm text-parchment-muted">{item.desc}</p>
                                     </div>
                                 </motion.div>
                             ))}
@@ -506,7 +521,7 @@ export default function Landing() {
                         <div className="relative">
                             {/* Terminal-style visual */}
                             <motion.div
-                                className="bg-nepal-charcoal rounded-2xl p-6 shadow-2xl border border-gray-700"
+                                className="bg-basalt rounded-2xl p-6 shadow-basalt-xl border border-earth-border"
                                 whileHover={{ scale: 1.02 }}
                                 transition={{ duration: 0.3 }}
                             >
@@ -514,9 +529,9 @@ export default function Landing() {
                                     <div className="w-3 h-3 rounded-full bg-red-500" />
                                     <div className="w-3 h-3 rounded-full bg-yellow-500" />
                                     <div className="w-3 h-3 rounded-full bg-green-500" />
-                                    <span className="text-xs text-gray-500 ml-2">solana-explorer</span>
+                                    <span className="text-xs text-parchment-ghost ml-2">solana-explorer</span>
                                 </div>
-                                <div className="font-mono text-sm space-y-2 text-gray-300">
+                                    <div className="font-mono text-sm space-y-2 text-parchment-dim">
                                     <motion.div
                                         initial={{ opacity: 0 }}
                                         whileInView={{ opacity: 1 }}
@@ -540,7 +555,7 @@ export default function Landing() {
                                         viewport={{ once: true }}
                                         transition={{ delay: 1.5 }}
                                     >
-                                        <span className="text-gray-500">Block:</span> 284,931,847
+                                        <span className="text-parchment-ghost">Block:</span> 284,931,847
                                     </motion.div>
                                     <motion.div
                                         initial={{ opacity: 0 }}
@@ -548,7 +563,7 @@ export default function Landing() {
                                         viewport={{ once: true }}
                                         transition={{ delay: 2.0 }}
                                     >
-                                        <span className="text-gray-500">Program:</span> <span className="text-nepal-red">GovFNep...XXX</span>
+                                        <span className="text-parchment-ghost">Program:</span> <span className="text-golden">GovFNep...XXX</span>
                                     </motion.div>
                                     <motion.div
                                         initial={{ opacity: 0 }}
@@ -556,7 +571,7 @@ export default function Landing() {
                                         viewport={{ once: true }}
                                         transition={{ delay: 2.5 }}
                                     >
-                                        <span className="text-gray-500">Instruction:</span> allocateBudget
+                                        <span className="text-parchment-ghost">Instruction:</span> allocateBudget
                                     </motion.div>
                                     <motion.div
                                         initial={{ opacity: 0 }}
@@ -564,14 +579,14 @@ export default function Landing() {
                                         viewport={{ once: true }}
                                         transition={{ delay: 3.0 }}
                                     >
-                                        <span className="text-gray-500">Amount:</span> <span className="text-blue-400">NPR 50,000,000</span>
+                                        <span className="text-parchment-ghost">Amount:</span> <span className="text-amber-glow">NPR 50,000,000</span>
                                     </motion.div>
                                     <motion.div
                                         initial={{ opacity: 0 }}
                                         whileInView={{ opacity: 1 }}
                                         viewport={{ once: true }}
                                         transition={{ delay: 3.5 }}
-                                        className="text-nepal-red mt-2"
+                                        className="text-golden mt-2"
                                     >
                                         ⛓ Immutable. Transparent. Verified.
                                     </motion.div>
@@ -592,13 +607,13 @@ export default function Landing() {
                 viewport={{ once: true, amount: 0.4 }}
             >
                 {/* Gradient bg */}
-                <div className="absolute inset-0 bg-gradient-to-r from-nepal-navy via-nepal-charcoal-light to-nepal-navy" />
+                <div className="absolute inset-0 bg-gradient-to-r from-basalt via-earth to-basalt" />
 
                 {/* Animated bg pattern */}
                 <motion.div
                     className="absolute inset-0 opacity-10"
                     style={{
-                        backgroundImage: 'radial-gradient(circle, #DC143C 1px, transparent 1px)',
+                        backgroundImage: 'radial-gradient(circle, rgba(255,184,28,0.20) 1px, transparent 1px)',
                         backgroundSize: '30px 30px',
                     }}
                     animate={{ backgroundPosition: ['0px 0px', '30px 30px'] }}
@@ -609,11 +624,11 @@ export default function Landing() {
                     <motion.h2
                         variants={fadeUp}
                         custom={0}
-                        className="text-3xl md:text-5xl font-heading font-bold text-white mb-6"
+                        className="text-3xl md:text-5xl font-heading font-bold text-parchment mb-6"
                     >
                         Ready to explore
                         <br />
-                        <span className="bg-gradient-to-r from-nepal-red to-red-400 bg-clip-text text-transparent">
+                        <span className="bg-gradient-to-r from-golden to-amber-glow bg-clip-text text-transparent">
                             transparent governance?
                         </span>
                     </motion.h2>
@@ -621,7 +636,7 @@ export default function Landing() {
                     <motion.p
                         variants={fadeUp}
                         custom={1}
-                        className="text-gray-300 text-lg mb-10 max-w-2xl mx-auto"
+                        className="text-parchment-dim text-lg mb-10 max-w-2xl mx-auto"
                     >
                         Connect your Solana wallet and start verifying government spending in real-time.
                         Every transaction is on-chain and publicly auditable.
@@ -630,7 +645,7 @@ export default function Landing() {
                     <motion.div variants={fadeUp} custom={2}>
                         <Link to="/projects">
                             <motion.button
-                                whileHover={{ scale: 1.05, boxShadow: '0 25px 50px rgba(220,20,60,0.3)' }}
+                                whileHover={{ scale: 1.05, boxShadow: '0 25px 50px rgba(255,184,28,0.45)' }}
                                 whileTap={{ scale: 0.97 }}
                                 className="btn-primary text-lg px-10 py-4"
                             >

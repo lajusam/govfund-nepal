@@ -17,9 +17,9 @@ function LoadingSpinner() {
     return (
         <div className="flex items-center justify-center min-h-[60vh]">
             <div className="relative">
-                <div className="w-16 h-16 border-4 border-nepal-red/30 rounded-full animate-spin border-t-nepal-red"></div>
+                <div className="w-16 h-16 border-4 border-golden/25 rounded-full animate-spin border-t-golden"></div>
                 <div className="absolute inset-0 flex items-center justify-center">
-                    <div className="w-8 h-8 border-4 border-nepal-navy/30 rounded-full animate-spin border-b-nepal-navy" style={{ animationDirection: 'reverse' }}></div>
+                    <div className="w-8 h-8 border-4 border-bronze/25 rounded-full animate-spin border-b-bronze" style={{ animationDirection: 'reverse' }}></div>
                 </div>
             </div>
         </div>

@@ -285,7 +285,7 @@ function AnimatedCard({ children, className = '' }) {
       variants={cardVariants}
       initial="hidden"
       animate="visible"
-      className={`bg-white dark:bg-nepal-charcoal-light rounded-2xl shadow-lg border border-gray-200/50 dark:border-gray-700/50 ${className}`}
+      className={`bg-earth rounded-2xl shadow-card border border-earth-border ${className}`}
     >
       {children}
     </motion.div>
@@ -297,7 +297,7 @@ function BudgetSummaryPanel({ totalBudget, t }) {
   const budgetNum = parseFloat(totalBudget) || 0;
 
   const items = [
-    { label: t('totalBudget'), value: formatNPR(budgetNum), color: 'text-nepal-navy dark:text-blue-300', icon: '💰' },
+    { label: t('totalBudget'), value: formatNPR(budgetNum), color: 'text-amber-glow', icon: '💰' },
     { label: t('allocatedBudget'), value: formatNPR(0), color: 'text-amber-600 dark:text-amber-400', icon: '📊' },
     { label: t('releasedAmount'), value: formatNPR(0), color: 'text-green-600 dark:text-green-400', icon: '💵' },
     { label: t('milestonesCompleted'), value: '0 / 0', color: 'text-purple-600 dark:text-purple-400', icon: '🎯' },
@@ -305,7 +305,7 @@ function BudgetSummaryPanel({ totalBudget, t }) {
 
   return (
     <AnimatedCard className="p-6 sticky top-24">
-      <h3 className="font-heading font-bold text-lg text-nepal-navy dark:text-white mb-6 flex items-center gap-2">
+      <h3 className="font-heading font-bold text-lg text-parchment mb-6 flex items-center gap-2">
         📈 {t('budgetSummary')}
       </h3>
       <motion.div variants={stagger} initial="hidden" animate="visible" className="space-y-4">
@@ -313,9 +313,9 @@ function BudgetSummaryPanel({ totalBudget, t }) {
           <motion.div
             key={i}
             variants={cardVariants}
-            className="flex items-center justify-between p-3 rounded-xl bg-gray-50 dark:bg-gray-800/50"
+            className="flex items-center justify-between p-3 rounded-xl bg-earth-light"
           >
-            <span className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400">
+            <span className="flex items-center gap-2 text-sm text-parchment-muted">
               <span className="text-lg">{item.icon}</span>
               {item.label}
             </span>
@@ -327,18 +327,18 @@ function BudgetSummaryPanel({ totalBudget, t }) {
         <motion.div
           initial={{ opacity: 0, height: 0 }}
           animate={{ opacity: 1, height: 'auto' }}
-          className="mt-5 pt-4 border-t border-gray-200 dark:border-gray-700"
+          className="mt-5 pt-4 border-t border-earth-border"
         >
           <div className="flex justify-between text-sm mb-2">
-            <span className="text-gray-500">{t('utilizationRate')}</span>
-            <span className="font-bold text-nepal-red">0%</span>
+            <span className="text-parchment-ghost">{t('utilizationRate')}</span>
+            <span className="font-bold text-golden">0%</span>
           </div>
-          <div className="w-full h-3 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
+          <div className="w-full h-3 bg-earth-light rounded-full overflow-hidden">
             <motion.div
               initial={{ width: 0 }}
               animate={{ width: '0%' }}
               transition={{ duration: 1, ease: 'easeOut' }}
-              className="h-full bg-gradient-to-r from-nepal-red to-nepal-navy rounded-full"
+              className="h-full bg-gradient-to-r from-golden to-amber-glow rounded-full"
             />
           </div>
         </motion.div>
@@ -357,8 +357,8 @@ function StatusMessage({ message, lastTx }) {
       exit={{ opacity: 0, y: -10, scale: 0.95 }}
       className={`mb-6 p-4 rounded-xl text-sm font-medium flex items-center gap-3 ${
         message.type === 'success'
-          ? 'bg-green-50 text-green-700 dark:bg-green-900/30 dark:text-green-400 border border-green-200 dark:border-green-800'
-          : 'bg-red-50 text-red-700 dark:bg-red-900/30 dark:text-red-400 border border-red-200 dark:border-red-800'
+          ? 'bg-earth text-amber-glow border border-golden/20'
+          : 'bg-earth border border-red-500/30 text-red-400'
       }`}
     >
       <span className="text-lg">{message.type === 'success' ? '✅' : '❌'}</span>
@@ -395,17 +395,17 @@ function ConfirmModal({ open, title, message, onConfirm, onCancel, t }) {
             initial="hidden"
             animate="visible"
             exit="exit"
-            className="bg-white dark:bg-gray-900 rounded-2xl shadow-2xl p-6 max-w-md w-full border border-gray-200 dark:border-gray-700"
+            className="bg-earth rounded-2xl shadow-basalt-xl p-6 max-w-md w-full border border-earth-border"
             onClick={(e) => e.stopPropagation()}
           >
-            <h3 className="text-lg font-bold text-nepal-navy dark:text-white mb-3">{title}</h3>
-            <p className="text-sm text-gray-600 dark:text-gray-400 mb-6">{message}</p>
+            <h3 className="text-lg font-bold text-parchment mb-3">{title}</h3>
+            <p className="text-sm text-parchment-muted mb-6">{message}</p>
             <div className="flex gap-3 justify-end">
               <motion.button
                 whileHover={{ scale: 1.03 }}
                 whileTap={{ scale: 0.97 }}
                 onClick={onCancel}
-                className="px-4 py-2 text-sm rounded-xl border border-gray-300 dark:border-gray-600 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800"
+                className="px-4 py-2 text-sm rounded-xl border border-earth-border text-parchment-muted hover:bg-earth-light hover:text-amber-glow transition-colors"
               >
                 {t('cancel')}
               </motion.button>
@@ -413,7 +413,7 @@ function ConfirmModal({ open, title, message, onConfirm, onCancel, t }) {
                 whileHover={{ scale: 1.03 }}
                 whileTap={{ scale: 0.97 }}
                 onClick={onConfirm}
-                className="px-4 py-2 text-sm rounded-xl bg-nepal-red text-white hover:bg-nepal-red/90 shadow-lg"
+                className="px-4 py-2 text-sm rounded-xl bg-gradient-to-r from-golden to-golden-600 text-basalt font-bold hover:shadow-golden-sm transition-all"
               >
                 {t('confirm')}
               </motion.button>
@@ -429,7 +429,7 @@ function ConfirmModal({ open, title, message, onConfirm, onCancel, t }) {
 function InputField({ label, type = 'text', value, onChange, placeholder, required, disabled, min, max, className = '' }) {
   return (
     <div className={className}>
-      {label && <label className="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">{label}</label>}
+      {label && <label className="block text-xs font-medium text-parchment-muted mb-1">{label}</label>}
       <input
         type={type}
         className="input-field"
@@ -449,7 +449,7 @@ function InputField({ label, type = 'text', value, onChange, placeholder, requir
 function SelectField({ label, value, onChange, required, disabled, children, className = '' }) {
   return (
     <div className={className}>
-      {label && <label className="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">{label}</label>}
+      {label && <label className="block text-xs font-medium text-parchment-muted mb-1">{label}</label>}
       <select
         className="input-field"
         value={value}
@@ -969,12 +969,12 @@ export default function Admin() {
           >
             🔐
           </motion.div>
-          <h2 className="text-2xl font-heading font-bold text-nepal-navy dark:text-white mb-4">
+          <h2 className="text-2xl font-heading font-bold text-parchment mb-4">
             {t('accessRequired')}
           </h2>
-          <p className="text-gray-500 dark:text-gray-400 mb-8">{t('accessDesc')}</p>
-          <WalletMultiButton className="!bg-gradient-to-r !from-nepal-red !to-nepal-navy !rounded-xl !h-12 !text-base !font-medium !mx-auto" />
-          <p className="text-xs text-gray-400 mt-4">{t('walletNotConnected')}</p>
+          <p className="text-parchment-muted mb-8">{t('accessDesc')}</p>
+          <WalletMultiButton className="!bg-gradient-to-r !from-golden !to-bronze !text-basalt !font-bold !rounded-xl !h-12 !text-base !mx-auto" />
+          <p className="text-xs text-parchment-ghost mt-4">{t('walletNotConnected')}</p>
         </AnimatedCard>
       </motion.div>
     );
@@ -994,14 +994,14 @@ export default function Admin() {
       >
         <AnimatedCard className="p-12">
           <motion.div animate={{ rotate: [0, 10, -10, 0] }} transition={{ repeat: Infinity, duration: 1.5 }} className="text-6xl mb-6">⛔</motion.div>
-          <h2 className="text-2xl font-heading font-bold text-nepal-navy dark:text-white mb-4">
+          <h2 className="text-2xl font-heading font-bold text-parchment mb-4">
             {t('unauthorizedTitle')}
           </h2>
-          <p className="text-gray-500 dark:text-gray-400 mb-4">
+          <p className="text-parchment-muted mb-4">
             {t('connectedWallet')}: <span className="font-mono text-xs break-all">{publicKey?.toBase58()}</span>
           </p>
-          <p className="text-gray-500 dark:text-gray-400 mb-8">{t('unauthorizedDesc')}</p>
-          <WalletMultiButton className="!bg-gray-500 !rounded-xl !h-12 !text-base !font-medium !mx-auto" />
+          <p className="text-parchment-muted mb-8">{t('unauthorizedDesc')}</p>
+          <WalletMultiButton className="!bg-earth-light !text-parchment-muted !rounded-xl !h-12 !text-base !font-medium !mx-auto" />
         </AnimatedCard>
       </motion.div>
     );
@@ -1021,7 +1021,7 @@ export default function Admin() {
       {/* ── Header ── */}
       <motion.div variants={cardVariants} className="mb-10">
         <div className="flex flex-wrap items-center justify-between gap-4 mb-2">
-          <h1 className="section-title text-nepal-navy dark:text-white">{t('adminDashboard')}</h1>
+          <h1 className="section-title text-parchment">{t('adminDashboard')}</h1>
           <LanguageToggle />
         </div>
         <p className="section-subtitle">{t('adminSubtitle')}</p>
@@ -1031,36 +1031,36 @@ export default function Admin() {
             transition={{ repeat: Infinity, duration: 1.5 }}
             className="w-2 h-2 rounded-full bg-green-500"
           />
-          <span className="text-gray-500">{t('connected')}: </span>
-          <span className="font-mono text-xs text-nepal-navy dark:text-gray-300">
+          <span className="text-parchment-ghost">{t('connected')}: </span>
+          <span className="font-mono text-xs text-parchment-dim">
             {publicKey?.toBase58().slice(0, 8)}...{publicKey?.toBase58().slice(-6)}
           </span>
-          <span className="ml-2 px-2 py-0.5 rounded-full text-xs font-semibold bg-nepal-red/10 text-nepal-red">
+          <span className="ml-2 px-2 py-0.5 rounded-full text-xs font-semibold bg-golden/10 text-golden border border-golden/25">
             {t('adminBadge')}
           </span>
           {programReady && (
-            <span className="ml-2 px-2 py-0.5 rounded-full text-xs font-semibold bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400">
+            <span className="ml-2 px-2 py-0.5 rounded-full text-xs font-semibold bg-golden/10 text-golden">
               Program Ready
             </span>
           )}
           {programStatus === 'initializing' && (
-            <span className="ml-2 px-2 py-0.5 rounded-full text-xs font-semibold bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400 animate-pulse">
+            <span className="ml-2 px-2 py-0.5 rounded-full text-xs font-semibold bg-bronze/10 text-bronze-light animate-pulse">
               Initializing...
             </span>
           )}
           {programStatus === 'verifying' && (
-            <span className="ml-2 px-2 py-0.5 rounded-full text-xs font-semibold bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400 animate-pulse">
+            <span className="ml-2 px-2 py-0.5 rounded-full text-xs font-semibold bg-amber-glow/10 text-amber-glow animate-pulse">
               Verifying on-chain...
             </span>
           )}
           {programError && (
             <span className="ml-2 inline-flex items-center gap-1">
-              <span className="px-2 py-0.5 rounded-full text-xs font-semibold bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400">
+              <span className="px-2 py-0.5 rounded-full text-xs font-semibold bg-earth border border-red-500/30 text-red-400">
                 {t('invalidProgramId')}
               </span>
               <button
                 onClick={reinitialize}
-                className="px-2 py-0.5 rounded-full text-xs font-semibold bg-nepal-red/10 text-nepal-red hover:bg-nepal-red/20 transition-colors"
+                className="px-2 py-0.5 rounded-full text-xs font-semibold bg-golden/10 text-golden hover:bg-golden/20 transition-colors"
               >
                 Retry
               </button>
@@ -1081,7 +1081,7 @@ export default function Admin() {
             initial={{ opacity: 0, height: 0 }}
             animate={{ opacity: 1, height: 'auto' }}
             exit={{ opacity: 0, height: 0 }}
-            className="mb-4 p-3 rounded-xl bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 text-sm text-amber-700 dark:text-amber-400 flex items-center gap-2"
+            className="mb-4 p-3 rounded-xl bg-earth border border-golden/20 text-sm text-amber-glow flex items-center gap-2"
           >
             <motion.span
               animate={{ rotate: 360 }}
@@ -1105,15 +1105,15 @@ export default function Admin() {
             disabled={!programReady && tab.id !== 'create'}
             className={`px-4 py-2.5 rounded-xl text-sm font-medium transition-all relative ${
               activeTab === tab.id
-                ? 'bg-nepal-red text-white shadow-lg shadow-nepal-red/30'
-                : 'bg-white dark:bg-nepal-charcoal-light text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 border border-gray-200 dark:border-gray-700'
+                ? 'bg-gradient-to-r from-golden to-golden-600 text-basalt font-bold shadow-golden-sm'
+                : 'bg-earth text-parchment-muted hover:bg-earth-light hover:text-amber-glow border border-earth-border'
             } ${!programReady && tab.id !== 'create' ? 'opacity-50 cursor-not-allowed' : ''}`}
           >
             {tab.label}
             {activeTab === tab.id && (
               <motion.div
                 layoutId="activeTabIndicator"
-                className="absolute inset-0 bg-nepal-red rounded-xl -z-10"
+                className="absolute inset-0 bg-gradient-to-r from-golden to-golden-600 rounded-xl -z-10"
                 transition={{ type: 'spring', stiffness: 300, damping: 30 }}
               />
             )}
@@ -1136,7 +1136,7 @@ export default function Admin() {
               {/* Form (left 2 cols) */}
               <div className="lg:col-span-2">
                 <AnimatedCard className="p-6">
-                  <h3 className="font-heading font-bold text-lg text-nepal-navy dark:text-white mb-6 flex items-center gap-2">
+                  <h3 className="font-heading font-bold text-lg text-parchment mb-6 flex items-center gap-2">
                     📋 {t('createTitle')}
                   </h3>
                   <form onSubmit={handleCreate} className="space-y-4">
@@ -1250,7 +1250,7 @@ export default function Admin() {
 
                     {/* Row 6: Description (off-chain) */}
                     <div>
-                      <label className="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">{t('description')}</label>
+                      <label className="block text-xs font-medium text-parchment-muted mb-1">{t('description')}</label>
                       <textarea
                         className="input-field"
                         rows={3}
@@ -1260,7 +1260,7 @@ export default function Admin() {
                       />
                     </div>
 
-                    <p className="text-xs text-gray-400">{t('budgetNote')}</p>
+                    <p className="text-xs text-parchment-ghost">{t('budgetNote')}</p>
 
                     {/* Submit button */}
                     <motion.button
@@ -1270,8 +1270,8 @@ export default function Admin() {
                       whileTap={programReady ? { scale: 0.98 } : {}}
                       className={`w-full py-3 rounded-xl text-white font-medium text-sm transition-all ${
                         programReady
-                          ? 'bg-gradient-to-r from-nepal-red to-nepal-navy hover:shadow-lg cursor-pointer'
-                          : 'bg-gray-400 cursor-not-allowed'
+                          ? 'bg-gradient-to-r from-golden to-golden-600 text-basalt hover:shadow-golden-sm cursor-pointer'
+                          : 'bg-earth-light text-parchment-ghost cursor-not-allowed'
                       }`}
                     >
                       {loading ? (
@@ -1302,7 +1302,7 @@ export default function Admin() {
           {activeTab === 'allocate' && (
             <div className="max-w-2xl">
               <AnimatedCard className="p-6">
-                <h3 className="font-heading font-bold text-lg text-nepal-navy dark:text-white mb-6 flex items-center gap-2">
+                <h3 className="font-heading font-bold text-lg text-parchment mb-6 flex items-center gap-2">
                   💵 {t('allocateTitle')}
                 </h3>
                 <form onSubmit={handleAllocate} className="space-y-4">
@@ -1316,7 +1316,7 @@ export default function Admin() {
                   </SelectField>
                   <InputField label={t('amount')} type="number" placeholder={t('amountPlaceholder')} value={allocateForm.amount} onChange={(e) => setAllocateForm((f) => ({ ...f, amount: e.target.value }))} required min={1} />
                   <InputField label={t('noteOffchain')} placeholder={t('noteOffchain')} value={allocateForm.description} onChange={(e) => setAllocateForm((f) => ({ ...f, description: e.target.value }))} />
-                  <motion.button type="submit" disabled={loading || !programReady} whileHover={programReady ? { scale: 1.02 } : {}} whileTap={programReady ? { scale: 0.98 } : {}} className={`w-full py-3 rounded-xl text-white font-medium text-sm ${programReady ? 'bg-gradient-to-r from-nepal-red to-nepal-navy hover:shadow-lg' : 'bg-gray-400 cursor-not-allowed'}`}>
+                  <motion.button type="submit" disabled={loading || !programReady} whileHover={programReady ? { scale: 1.02 } : {}} whileTap={programReady ? { scale: 0.98 } : {}} className={`w-full py-3 rounded-xl text-white font-medium text-sm ${programReady ? 'bg-gradient-to-r from-golden to-golden-600 text-basalt hover:shadow-golden-sm' : 'bg-earth-light text-parchment-ghost cursor-not-allowed'}`}>
                     {loading ? (retryCount > 0 ? `Retrying (${retryCount})...` : t('submitting')) : t('submit')}
                   </motion.button>
                 </form>
@@ -1328,7 +1328,7 @@ export default function Admin() {
           {activeTab === 'release' && (
             <div className="max-w-2xl">
               <AnimatedCard className="p-6">
-                <h3 className="font-heading font-bold text-lg text-nepal-navy dark:text-white mb-6 flex items-center gap-2">
+                <h3 className="font-heading font-bold text-lg text-parchment mb-6 flex items-center gap-2">
                   📤 {t('releaseTitle')}
                 </h3>
                 <form onSubmit={handleRelease} className="space-y-4">
@@ -1342,7 +1342,7 @@ export default function Admin() {
                   </SelectField>
                   <InputField label={t('amount')} type="number" placeholder={t('amountPlaceholder')} value={releaseForm.amount} onChange={(e) => setReleaseForm((f) => ({ ...f, amount: e.target.value }))} required min={1} />
                   <InputField label={t('noteOffchain')} placeholder={t('noteOffchain')} value={releaseForm.description} onChange={(e) => setReleaseForm((f) => ({ ...f, description: e.target.value }))} />
-                  <motion.button type="submit" disabled={loading || !programReady} whileHover={programReady ? { scale: 1.02 } : {}} whileTap={programReady ? { scale: 0.98 } : {}} className={`w-full py-3 rounded-xl text-white font-medium text-sm ${programReady ? 'bg-gradient-to-r from-nepal-red to-nepal-navy hover:shadow-lg' : 'bg-gray-400 cursor-not-allowed'}`}>
+                  <motion.button type="submit" disabled={loading || !programReady} whileHover={programReady ? { scale: 1.02 } : {}} whileTap={programReady ? { scale: 0.98 } : {}} className={`w-full py-3 rounded-xl text-white font-medium text-sm ${programReady ? 'bg-gradient-to-r from-golden to-golden-600 text-basalt hover:shadow-golden-sm' : 'bg-earth-light text-parchment-ghost cursor-not-allowed'}`}>
                     {loading ? (retryCount > 0 ? `Retrying (${retryCount})...` : t('submitting')) : t('submit')}
                   </motion.button>
                 </form>
@@ -1354,7 +1354,7 @@ export default function Admin() {
           {activeTab === 'milestone' && (
             <div className="max-w-2xl">
               <AnimatedCard className="p-6">
-                <h3 className="font-heading font-bold text-lg text-nepal-navy dark:text-white mb-6 flex items-center gap-2">
+                <h3 className="font-heading font-bold text-lg text-parchment mb-6 flex items-center gap-2">
                   🎯 {t('milestoneTitle')}
                 </h3>
                 <form onSubmit={handleMilestone} className="space-y-4">
@@ -1368,7 +1368,7 @@ export default function Admin() {
                   </SelectField>
                   <InputField label={t('milestoneIndex')} type="number" value={milestoneForm.index} onChange={(e) => setMilestoneForm((f) => ({ ...f, index: parseInt(e.target.value) || 0 }))} min={0} required />
                   <div>
-                    <label className="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">{t('milestoneDesc')}</label>
+                    <label className="block text-xs font-medium text-parchment-muted mb-1">{t('milestoneDesc')}</label>
                     <textarea
                       className="input-field"
                       rows={3}
@@ -1384,7 +1384,7 @@ export default function Admin() {
                     <option value="Completed">{t('completed')}</option>
                     <option value="Delayed">{t('delayed')}</option>
                   </SelectField>
-                  <motion.button type="submit" disabled={loading || !programReady} whileHover={programReady ? { scale: 1.02 } : {}} whileTap={programReady ? { scale: 0.98 } : {}} className={`w-full py-3 rounded-xl text-white font-medium text-sm ${programReady ? 'bg-gradient-to-r from-nepal-red to-nepal-navy hover:shadow-lg' : 'bg-gray-400 cursor-not-allowed'}`}>
+                  <motion.button type="submit" disabled={loading || !programReady} whileHover={programReady ? { scale: 1.02 } : {}} whileTap={programReady ? { scale: 0.98 } : {}} className={`w-full py-3 rounded-xl text-white font-medium text-sm ${programReady ? 'bg-gradient-to-r from-golden to-golden-600 text-basalt hover:shadow-golden-sm' : 'bg-earth-light text-parchment-ghost cursor-not-allowed'}`}>
                     {loading ? (retryCount > 0 ? `Retrying (${retryCount})...` : t('submitting')) : t('submit')}
                   </motion.button>
                 </form>
@@ -1396,7 +1396,7 @@ export default function Admin() {
           {activeTab === 'document' && (
             <div className="max-w-2xl">
               <AnimatedCard className="p-6">
-                <h3 className="font-heading font-bold text-lg text-nepal-navy dark:text-white mb-6 flex items-center gap-2">
+                <h3 className="font-heading font-bold text-lg text-parchment mb-6 flex items-center gap-2">
                   📄 {t('documentTitle')}
                 </h3>
                 <form onSubmit={handleDoc} className="space-y-4">
@@ -1408,7 +1408,7 @@ export default function Admin() {
                   </SelectField>
                   <InputField label={t('ipfsHash')} placeholder={t('ipfsHashPlaceholder')} value={docForm.ipfsHash} onChange={(e) => setDocForm((f) => ({ ...f, ipfsHash: e.target.value }))} required />
                   <InputField label={t('documentName')} placeholder={t('documentNamePlaceholder')} value={docForm.documentName} onChange={(e) => setDocForm((f) => ({ ...f, documentName: e.target.value }))} required />
-                  <motion.button type="submit" disabled={loading || !programReady} whileHover={programReady ? { scale: 1.02 } : {}} whileTap={programReady ? { scale: 0.98 } : {}} className={`w-full py-3 rounded-xl text-white font-medium text-sm ${programReady ? 'bg-gradient-to-r from-nepal-red to-nepal-navy hover:shadow-lg' : 'bg-gray-400 cursor-not-allowed'}`}>
+                  <motion.button type="submit" disabled={loading || !programReady} whileHover={programReady ? { scale: 1.02 } : {}} whileTap={programReady ? { scale: 0.98 } : {}} className={`w-full py-3 rounded-xl text-white font-medium text-sm ${programReady ? 'bg-gradient-to-r from-golden to-golden-600 text-basalt hover:shadow-golden-sm' : 'bg-earth-light text-parchment-ghost cursor-not-allowed'}`}>
                     {loading ? (retryCount > 0 ? `Retrying (${retryCount})...` : t('submitting')) : t('submit')}
                   </motion.button>
                 </form>
@@ -1420,7 +1420,7 @@ export default function Admin() {
           {activeTab === 'close' && (
             <div className="max-w-2xl">
               <AnimatedCard className="p-6">
-                <h3 className="font-heading font-bold text-lg text-nepal-navy dark:text-white mb-6 flex items-center gap-2">
+                <h3 className="font-heading font-bold text-lg text-parchment mb-6 flex items-center gap-2">
                   🔒 {t('closeTitle')}
                 </h3>
                 <form onSubmit={handleClose} className="space-y-4">
@@ -1433,11 +1433,11 @@ export default function Admin() {
                   <motion.div
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
-                    className="p-4 bg-red-50 dark:bg-red-900/20 rounded-xl text-sm text-red-600 dark:text-red-400 border border-red-200 dark:border-red-800"
+                    className="p-4 bg-earth rounded-xl text-sm text-red-400 border border-red-500/30"
                   >
                     {t('closeWarning')}
                   </motion.div>
-                  <motion.button type="submit" disabled={loading || !programReady || !closeForm.projectId} whileHover={programReady && closeForm.projectId ? { scale: 1.02 } : {}} whileTap={programReady && closeForm.projectId ? { scale: 0.98 } : {}} className={`w-full py-3 rounded-xl text-white font-medium text-sm ${programReady && closeForm.projectId ? 'bg-gradient-to-r from-red-600 to-red-800 hover:shadow-lg' : 'bg-gray-400 cursor-not-allowed'}`}>
+                  <motion.button type="submit" disabled={loading || !programReady || !closeForm.projectId} whileHover={programReady && closeForm.projectId ? { scale: 1.02 } : {}} whileTap={programReady && closeForm.projectId ? { scale: 0.98 } : {}} className={`w-full py-3 rounded-xl text-white font-medium text-sm ${programReady && closeForm.projectId ? 'bg-gradient-to-r from-red-700 to-red-900 hover:shadow-lg shadow-red-900/40' : 'bg-earth-light text-parchment-ghost cursor-not-allowed'}`}>
                     {loading ? (retryCount > 0 ? `Retrying (${retryCount})...` : t('submitting')) : t('submit')}
                   </motion.button>
                 </form>

@@ -247,10 +247,10 @@ export function getStatusColor(status) {
         case 'Completed':  return 'text-green-500';
         case 'InProgress': return 'text-blue-500';
         case 'Delayed':    return 'text-orange-500';
-        case 'Pending':    return 'text-gray-400';
+        case 'Pending':    return 'text-parchment-ghost';
         case 'Active':     return 'text-blue-500';
-        case 'Closed':     return 'text-gray-500';
-        default:           return 'text-gray-400';
+        case 'Closed':     return 'text-parchment-ghost';
+        default:           return 'text-parchment-ghost';
     }
 }
 
@@ -259,10 +259,10 @@ export function getStatusBg(status) {
         case 'Completed':  return 'bg-green-500';
         case 'InProgress': return 'bg-blue-500';
         case 'Delayed':    return 'bg-orange-500';
-        case 'Pending':    return 'bg-gray-300 dark:bg-gray-600';
+        case 'Pending':    return 'bg-earth-light text-parchment-muted';
         case 'Active':     return 'bg-blue-500';
-        case 'Closed':     return 'bg-gray-500';
-        default:           return 'bg-gray-300';
+        case 'Closed':     return 'bg-earth text-parchment-ghost';
+        default:           return 'bg-earth-light text-parchment-ghost';
     }
 }
 

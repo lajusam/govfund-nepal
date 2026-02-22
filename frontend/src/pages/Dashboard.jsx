@@ -19,7 +19,7 @@ export default function Dashboard() {
 
     const provinceChartData = useMemo(() => {
         if (!analytics) return null;
-        const colors = ['#DC143C', '#1B1F3B', '#3498db', '#D4A843', '#2ecc71', '#e74c3c', '#9b59b6'];
+        const colors = ['#FFB81C', '#8E6F3E', '#FAD980', '#E09500', '#B07400', '#F5F1E6', '#2D2518'];
         return {
             labels: analytics.provinceStats.map(s => s.province),
             datasets: [
@@ -45,7 +45,7 @@ export default function Dashboard() {
 
     const sectorChartData = useMemo(() => {
         if (!analytics) return null;
-        const bgColors = ['#DC143C', '#1B1F3B', '#3498db', '#D4A843', '#2ecc71', '#e67e22'];
+        const bgColors = ['#FFB81C', '#8E6F3E', '#FAD980', '#E09500', '#B07400', '#F5F1E6'];
         return {
             labels: analytics.sectorStats.map(s => s.sector),
             datasets: [{
@@ -60,7 +60,7 @@ export default function Dashboard() {
     if (loading) {
         return (
             <div className="flex items-center justify-center min-h-[60vh]">
-                <div className="w-12 h-12 border-4 border-nepal-red/30 border-t-nepal-red rounded-full animate-spin"></div>
+                <div className="w-12 h-12 border-4 border-golden/25 border-t-golden rounded-full animate-spin"></div>
             </div>
         );
     }
@@ -70,24 +70,24 @@ export default function Dashboard() {
     return (
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
             <div className="mb-10">
-                <h1 className="section-title text-nepal-navy dark:text-white">Public Dashboard</h1>
+                <h1 className="section-title">Public Dashboard</h1>
                 <p className="section-subtitle">Real-time government spending transparency</p>
             </div>
 
             {/* Overview Cards */}
             <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4 mb-12">
                 {[
-                    { label: 'Total Budget', value: formatNPR(overview.totalBudget), color: 'from-nepal-red to-nepal-red-dark' },
-                    { label: 'Allocated', value: formatNPR(overview.totalAllocated), color: 'from-nepal-navy to-nepal-navy-light' },
-                    { label: 'Released', value: formatNPR(overview.totalReleased), color: 'from-nepal-blue to-nepal-blue-soft' },
-                    { label: 'Projects', value: overview.totalProjects, color: 'from-nepal-gold to-yellow-600' },
+                    { label: 'Total Budget', value: formatNPR(overview.totalBudget), color: 'from-golden to-golden-600' },
+                    { label: 'Allocated', value: formatNPR(overview.totalAllocated), color: 'from-bronze to-bronze-light' },
+                    { label: 'Released', value: formatNPR(overview.totalReleased), color: 'from-amber-glow to-golden' },
+                    { label: 'Projects', value: overview.totalProjects, color: 'from-golden to-amber-glow' },
                     { label: 'Active', value: overview.activeProjects, color: 'from-green-500 to-emerald-600' },
                     { label: 'Utilization', value: `${overview.utilizationRate}%`, color: 'from-purple-500 to-purple-700' },
                 ].map((stat, i) => (
                     <div key={i} className="card p-4 relative overflow-hidden group hover:-translate-y-1 transition-all">
                         <div className={`absolute top-0 left-0 w-full h-1 bg-gradient-to-r ${stat.color}`}></div>
-                        <p className="text-xs text-gray-500 dark:text-gray-400 mb-1">{stat.label}</p>
-                        <p className="text-lg md:text-xl font-heading font-bold text-nepal-navy dark:text-white">{stat.value}</p>
+                        <p className="text-xs text-parchment-ghost mb-1">{stat.label}</p>
+                        <p className="text-lg md:text-xl font-heading font-bold text-parchment">{stat.value}</p>
                     </div>
                 ))}
             </div>
@@ -96,7 +96,7 @@ export default function Dashboard() {
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-12">
                 {/* Province Spending */}
                 <div className="lg:col-span-2 card p-6">
-                    <h3 className="font-heading font-bold text-lg mb-4 text-nepal-navy dark:text-white">
+                    <h3 className="font-heading font-bold text-lg mb-4 text-parchment">
                         Province-wise Spending
                     </h3>
                     {provinceChartData && (
@@ -117,7 +117,7 @@ export default function Dashboard() {
                                         ticks: {
                                             callback: (v) => formatNPR(v),
                                         },
-                                        grid: { color: 'rgba(0,0,0,0.05)' },
+                                        grid: { color: 'rgba(255,184,28,0.08)' },
                                     },
                                     x: { grid: { display: false } },
                                 },
@@ -128,7 +128,7 @@ export default function Dashboard() {
 
                 {/* Sector Distribution */}
                 <div className="card p-6">
-                    <h3 className="font-heading font-bold text-lg mb-4 text-nepal-navy dark:text-white">
+                    <h3 className="font-heading font-bold text-lg mb-4 text-parchment">
                         Sector Distribution
                     </h3>
                     {sectorChartData && (
@@ -153,34 +153,34 @@ export default function Dashboard() {
 
             {/* Budget Utilization Bar */}
             <div className="card p-6 mb-12">
-                <h3 className="font-heading font-bold text-lg mb-4 text-nepal-navy dark:text-white">
+                <h3 className="font-heading font-bold text-lg mb-4 text-parchment">
                     Overall Budget Utilization
                 </h3>
                 <div className="space-y-4">
                     <div>
                         <div className="flex justify-between text-sm mb-1">
-                            <span className="text-gray-600 dark:text-gray-300">Allocated / Total Budget</span>
-                            <span className="font-semibold text-nepal-navy dark:text-white">
+                            <span className="text-parchment-muted">Allocated / Total Budget</span>
+                            <span className="font-semibold text-parchment">
                                 {((overview.totalAllocated / overview.totalBudget) * 100).toFixed(1)}%
                             </span>
                         </div>
                         <div className="progress-bar">
                             <div
-                                className="progress-fill bg-gradient-to-r from-nepal-navy to-nepal-blue"
+                                className="progress-fill bg-gradient-to-r from-bronze to-golden"
                                 style={{ width: `${(overview.totalAllocated / overview.totalBudget) * 100}%` }}
                             ></div>
                         </div>
                     </div>
                     <div>
                         <div className="flex justify-between text-sm mb-1">
-                            <span className="text-gray-600 dark:text-gray-300">Released / Allocated</span>
-                            <span className="font-semibold text-nepal-navy dark:text-white">
+                            <span className="text-parchment-muted">Released / Allocated</span>
+                            <span className="font-semibold text-parchment">
                                 {overview.utilizationRate}%
                             </span>
                         </div>
                         <div className="progress-bar">
                             <div
-                                className="progress-fill bg-gradient-to-r from-nepal-red to-nepal-gold"
+                                className="progress-fill bg-gradient-to-r from-golden to-amber-glow"
                                 style={{ width: `${overview.utilizationRate}%` }}
                             ></div>
                         </div>
