@@ -19,6 +19,25 @@ import { TransactionExpiredBlockheightExceededError } from '@solana/web3.js';
  * @param {Function} [opts.onRetry]        - callback(attempt, error) on retry
  * @returns {Promise<string>} confirmed signature
  */
+/**
+ * Send a Solana transaction with automatic retry + exponential back-off.
+ *
+ * Flow:
+ *   1. Get a fresh blockhash
+ *   2. sendTransaction ONCE (wallet signs — Phantom popup appears exactly once)
+ *   3. Retry confirmation polling up to maxRetries times (no more wallet prompts)
+ *   4. On blockhash expiry → throw immediately (caller should warn user to retry)
+ *
+ * @param {object}   opts
+ * @param {object}   opts.transaction      - An unsigned Transaction object
+ * @param {object}   opts.connection       - @solana/web3.js Connection
+ * @param {Function} opts.sendTransaction  - wallet-adapter sendTransaction
+ * @param {string}   [opts.commitment]     - 'confirmed' | 'finalized'
+ * @param {number}   [opts.maxRetries]     - confirmation poll retries (default 3)
+ * @param {number}   [opts.baseDelayMs]    - initial back-off delay (default 1500)
+ * @param {Function} [opts.onRetry]        - callback(attempt, error) on retry
+ * @returns {Promise<string>} confirmed signature
+ */
 export async function sendTransactionWithRetry({
   transaction,
   connection,
@@ -28,27 +47,29 @@ export async function sendTransactionWithRetry({
   baseDelayMs = 1500,
   onRetry,
 }) {
+  // ── Step 1: Get a fresh blockhash (done ONCE before signing) ──────────────
+  const { blockhash, lastValidBlockHeight } =
+    await connection.getLatestBlockhash(commitment);
+  transaction.recentBlockhash = blockhash;
+  transaction.lastValidBlockHeight = lastValidBlockHeight;
+
+  // ── Step 2: Sign + send via wallet adapter — triggers Phantom popup ONCE ──
+  // We intentionally do NOT retry this step. Re-calling sendTransaction would
+  // show the "trust this domain" / signing popup again on every attempt.
+  const signature = await sendTransaction(transaction, connection, {
+    skipPreflight: false,
+    preflightCommitment: commitment,
+    maxRetries: 0, // we handle confirmation retries ourselves below
+  });
+
+  // ── Step 3: Poll for confirmation — no wallet interaction from here on ─────
   let lastError;
 
   for (let attempt = 0; attempt <= maxRetries; attempt++) {
     try {
-      // Refresh blockhash on every attempt so we don't hit expired-blockhash
-      const { blockhash, lastValidBlockHeight } =
-        await connection.getLatestBlockhash(commitment);
-      transaction.recentBlockhash = blockhash;
-      transaction.lastValidBlockHeight = lastValidBlockHeight;
-
-      // Send via wallet adapter (handles signing)
-      const signature = await sendTransaction(transaction, connection, {
-        skipPreflight: false,
-        preflightCommitment: commitment,
-        maxRetries: 0, // we handle retries ourselves
-      });
-
-      // Wait for on-chain confirmation
       const result = await connection.confirmTransaction(
         { signature, blockhash, lastValidBlockHeight },
-        commitment
+        commitment,
       );
 
       if (result.value.err) {
@@ -61,24 +82,34 @@ export async function sendTransactionWithRetry({
     } catch (err) {
       lastError = err;
 
-      // Non-retryable errors — bail immediately
+      // Blockhash expired → transaction is permanently gone from mempool.
+      // There is nothing more to confirm; surface a clean message immediately.
+      if (
+        err instanceof TransactionExpiredBlockheightExceededError ||
+        (err?.message || '').includes('block height exceeded') ||
+        (err?.message || '').includes('BlockheightExceeded')
+      ) {
+        throw new Error('Transaction expired — the network was congested. Please try submitting again.');
+      }
+
+      // Non-retryable on-chain errors (simulation, program errors, etc.)
       if (isNonRetryableError(err)) {
         throw err;
       }
 
-      // If we have retries left, wait and retry
+      // Still have retries left → wait and re-poll confirmation
       if (attempt < maxRetries) {
-        const delay = baseDelayMs * Math.pow(2, attempt); // exponential back-off
+        const delay = baseDelayMs * Math.pow(2, attempt);
         if (onRetry) onRetry(attempt + 1, err);
         console.warn(
-          `[sendTransactionWithRetry] Attempt ${attempt + 1}/${maxRetries} failed: ${err.message}. Retrying in ${delay}ms...`
+          `[confirmTransaction] Attempt ${attempt + 1}/${maxRetries} failed: ${err.message}. Re-polling in ${delay}ms...`
         );
         await sleep(delay);
       }
     }
   }
 
-  throw lastError || new Error('Transaction failed after all retries');
+  throw lastError || new Error('Transaction confirmation failed after all retries');
 }
 
 /**
