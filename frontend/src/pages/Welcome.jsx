@@ -261,64 +261,22 @@ export default function Welcome() {
                                 transition={{ duration: 3.2, repeat: Infinity, ease: 'easeInOut' }}
                             />
 
-                            {/* ── Circular logo — SVG clipPath = perfect circle at any scale ── */}
-                            <motion.svg
-                                viewBox="0 0 160 160"
-                                width="148"
-                                height="148"
-                                xmlns="http://www.w3.org/2000/svg"
-                                className="relative z-10"
-                                style={{ filter: 'drop-shadow(0 0 28px rgba(255,184,28,0.45))' }}
-                                whileHover={{ scale: 1.04 }}
+                            {/* Logo — already circular, display directly */}
+                            <motion.img
+                                src="/logo.png"
+                                alt="GovFund Nepal"
+                                className="relative z-10 rounded-full object-contain"
+                                style={{
+                                    width: 148,
+                                    height: 148,
+                                    filter: 'drop-shadow(0 0 28px rgba(255,184,28,0.48))',
+                                }}
+                                whileHover={{
+                                    scale: 1.06,
+                                    filter: 'drop-shadow(0 0 40px rgba(255,184,28,0.70))',
+                                }}
                                 transition={{ duration: 0.35 }}
-                                aria-label="GovFund Nepal"
-                                role="img"
-                            >
-                                <defs>
-                                    {/* Perfect circle clip — logo stays fully inside */}
-                                    <clipPath id="welcome-logo-clip">
-                                        <circle cx="80" cy="80" r="73" />
-                                    </clipPath>
-                                    {/* Golden gradient ring: Golden Sun → Amber Glow → Muted Bronze */}
-                                    <linearGradient id="welcome-ring-grad" x1="0%" y1="0%" x2="100%" y2="100%">
-                                        <stop offset="0%"    stopColor="#FFB81C" />
-                                        <stop offset="50%"   stopColor="#FAD980" />
-                                        <stop offset="100%"  stopColor="#8E6F3E" />
-                                    </linearGradient>
-                                    {/* Soft inner glow */}
-                                    <radialGradient id="welcome-inner-glow" cx="50%" cy="50%" r="50%">
-                                        <stop offset="60%" stopColor="#1A160F" stopOpacity="1" />
-                                        <stop offset="100%" stopColor="#1A160F" stopOpacity="0" />
-                                    </radialGradient>
-                                </defs>
-
-                                {/* Deep Basalt fill — correct background for transparent PNGs */}
-                                <circle cx="80" cy="80" r="73" fill="#1A160F" />
-
-                                {/* Logo image clipped to perfect circle, centered & proportional */}
-                                <image
-                                    href="/logo.png"
-                                    x="9" y="9"
-                                    width="142" height="142"
-                                    clipPath="url(#welcome-logo-clip)"
-                                    preserveAspectRatio="xMidYMid meet"
-                                />
-
-                                {/* Outer gradient ring border */}
-                                <circle
-                                    cx="80" cy="80" r="75"
-                                    fill="none"
-                                    stroke="url(#welcome-ring-grad)"
-                                    strokeWidth="4"
-                                />
-                                {/* Inner subtle rim light for depth */}
-                                <circle
-                                    cx="80" cy="80" r="70"
-                                    fill="none"
-                                    stroke="rgba(255,184,28,0.12)"
-                                    strokeWidth="1"
-                                />
-                            </motion.svg>
+                            />
                         </motion.div>
 
                         {/* Brand name */}
