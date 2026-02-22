@@ -30,11 +30,60 @@ export default function Navbar() {
                 <div className="flex items-center justify-between h-16">
                     {/* Logo */}
                     <Link to="/home" className="flex items-center gap-3 group">
-                        <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-golden to-bronze flex items-center justify-center shadow-golden-sm group-hover:shadow-golden-md transition-shadow">
-                            <svg className="w-6 h-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 6l3 1m0 0l-3 9a5.002 5.002 0 006.001 0M6 7l3 9M6 7l6-2m6 2l3-1m-3 1l-3 9a5.002 5.002 0 006.001 0M18 7l3 9m-3-9l-6-2m0-2v2m0 16V5m0 16H9m3 0h3" />
-                            </svg>
-                        </div>
+                        {/* Circular logo frame — golden-gradient ring + clipped logo image */}
+                        <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            viewBox="0 0 40 40"
+                            width="40"
+                            height="40"
+                            role="img"
+                            aria-label="GovFund Nepal logo"
+                            className="flex-shrink-0 transition-all duration-300 group-hover:drop-shadow-[0_0_8px_rgba(255,184,28,0.70)]"
+                            style={{ width: 'clamp(32px,5vw,40px)', height: 'clamp(32px,5vw,40px)' }}
+                        >
+                            <defs>
+                                {/* Clip path — perfect circle */}
+                                <clipPath id="nav-logo-clip">
+                                    <circle cx="20" cy="20" r="17.5" />
+                                </clipPath>
+                                {/* Golden gradient ring */}
+                                <linearGradient id="nav-ring-grad" x1="0%" y1="0%" x2="100%" y2="100%">
+                                    <stop offset="0%"   stopColor="#FFB81C" />
+                                    <stop offset="55%"  stopColor="#FAD980" />
+                                    <stop offset="100%" stopColor="#8E6F3E" />
+                                </linearGradient>
+                                {/* Subtle inner glow on hover (filter) */}
+                                <filter id="nav-logo-glow" x="-20%" y="-20%" width="140%" height="140%">
+                                    <feGaussianBlur stdDeviation="1.5" result="blur" />
+                                    <feMerge>
+                                        <feMergeNode in="blur" />
+                                        <feMergeNode in="SourceGraphic" />
+                                    </feMerge>
+                                </filter>
+                            </defs>
+
+                            {/* Ring border — gradient stroke circle */}
+                            <circle
+                                cx="20" cy="20" r="19"
+                                fill="none"
+                                stroke="url(#nav-ring-grad)"
+                                strokeWidth="2"
+                                opacity="0.90"
+                            />
+
+                            {/* Deep basalt fill behind logo so transparent PNGs look correct */}
+                            <circle cx="20" cy="20" r="17.5" fill="#1A160F" />
+
+                            {/* Logo image — clipped to circle, centered, 14 px inner padding (3px each side) */}
+                            <image
+                                href="/logo.png"
+                                x="3" y="3"
+                                width="34" height="34"
+                                clipPath="url(#nav-logo-clip)"
+                                preserveAspectRatio="xMidYMid meet"
+                            />
+                        </svg>
+
                         <div>
                             <span className="font-heading font-bold text-lg bg-gradient-to-r from-golden to-amber-glow bg-clip-text text-transparent">
                                 GovFund
