@@ -105,21 +105,33 @@ export default function Dashboard() {
                             options={{
                                 responsive: true,
                                 plugins: {
-                                    legend: { position: 'top' },
+                                    legend: {
+                                        position: 'top',
+                                        labels: { color: '#C4A96E', padding: 12, usePointStyle: true },
+                                    },
                                     tooltip: {
+                                        backgroundColor: 'rgba(45,37,24,0.95)',
+                                        borderColor: 'rgba(255,184,28,0.30)',
+                                        borderWidth: 1,
+                                        titleColor: '#F5F1E6',
+                                        bodyColor: '#C4A96E',
+                                        padding: 10,
                                         callbacks: {
-                                            label: (ctx) => `${ctx.dataset.label}: ${formatNPR(ctx.raw)}`,
+                                            label: (ctx) => ` ${ctx.dataset.label}: ${formatNPR(ctx.raw)}`,
                                         },
                                     },
                                 },
                                 scales: {
                                     y: {
-                                        ticks: {
-                                            callback: (v) => formatNPR(v),
-                                        },
+                                        ticks: { callback: (v) => formatNPR(v), color: '#8E7550' },
                                         grid: { color: 'rgba(255,184,28,0.08)' },
+                                        border: { color: 'rgba(142,111,62,0.25)' },
                                     },
-                                    x: { grid: { display: false } },
+                                    x: {
+                                        grid: { display: false },
+                                        ticks: { color: '#8E7550' },
+                                        border: { color: 'rgba(142,111,62,0.25)' },
+                                    },
                                 },
                             }}
                         />
@@ -137,10 +149,22 @@ export default function Dashboard() {
                             options={{
                                 responsive: true,
                                 plugins: {
-                                    legend: { position: 'bottom', labels: { padding: 12, usePointStyle: true } },
+                                    legend: {
+                                        position: 'bottom',
+                                        labels: {
+                                            padding: 12, usePointStyle: true,
+                                            color: '#C4A96E', font: { size: 11 },
+                                        },
+                                    },
                                     tooltip: {
+                                        backgroundColor: 'rgba(45,37,24,0.95)',
+                                        borderColor: 'rgba(255,184,28,0.30)',
+                                        borderWidth: 1,
+                                        titleColor: '#F5F1E6',
+                                        bodyColor: '#C4A96E',
+                                        padding: 10,
                                         callbacks: {
-                                            label: (ctx) => `${ctx.label}: ${formatNPR(ctx.raw)}`,
+                                            label: (ctx) => ` ${ctx.label}: ${formatNPR(ctx.raw)}`,
                                         },
                                     },
                                 },

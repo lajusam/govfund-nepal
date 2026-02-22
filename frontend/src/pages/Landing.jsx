@@ -68,7 +68,7 @@ function AnimatedCounter({ value, label, icon, suffix = '' }) {
             variants={scaleIn}
             className="relative group"
         >
-            <div className="card p-6 text-center hover:-translate-y-2 transition-all duration-500 border border-transparent hover:border-nepal-red/20 hover:shadow-xl hover:shadow-nepal-red/5">
+            <div className="card p-6 text-center hover:-translate-y-2 transition-all duration-500 hover:border-golden/30 hover:shadow-golden-md">
                 <motion.div
                     className="text-3xl mb-3"
                     whileHover={{ scale: 1.3, rotate: [0, -10, 10, 0] }}
@@ -89,7 +89,7 @@ function AnimatedCounter({ value, label, icon, suffix = '' }) {
 function FloatingOrb({ className, delay = 0 }) {
     return (
         <motion.div
-            className={`absolute rounded-full blur-3xl ${className}`}
+            className={`absolute rounded-full blur-3xl pointer-events-none ${className}`}
             animate={{
                 y: [0, -30, 0, 20, 0],
                 x: [0, 15, -10, 5, 0],
@@ -110,7 +110,7 @@ function NepalFlagDecor() {
     return (
         <motion.svg
             viewBox="0 0 100 120"
-            className="w-24 h-28 opacity-10 dark:opacity-5"
+            className="w-24 h-28 opacity-10"
             initial={{ rotate: -5, scale: 0.9 }}
             animate={{ rotate: 5, scale: 1 }}
             transition={{ duration: 4, repeat: Infinity, repeatType: 'reverse', ease: 'easeInOut' }}
@@ -138,41 +138,47 @@ export default function Landing() {
             {/* ══════════════════════════════════════════
                 HERO SECTION — Kinetic Typography + Parallax
                ══════════════════════════════════════════ */}
-            <section className="relative min-h-[100vh] flex items-center overflow-hidden">
-                {/* Hero background image — place file at frontend/public/hero-bg.jpg */}
+            <section className="relative min-h-screen flex items-center overflow-hidden" style={{ minHeight: '100svh' }}>
+                {/* ── Hero background image ── place file at frontend/public/hero-bg.jpg */}
                 <div className="absolute inset-0 z-0">
                     <div
-                        className="absolute inset-0"
+                        className="absolute inset-0 bg-basalt"
                         style={{
                             backgroundImage: `url('/hero-bg.jpg')`,
                             backgroundSize: 'cover',
-                            backgroundPosition: 'center bottom',
+                            backgroundPosition: 'center center',
                             backgroundRepeat: 'no-repeat',
+                            /* Avoid iOS fixed-attachment scroll jank */
+                            backgroundAttachment: 'local',
+                            willChange: 'transform',
                         }}
                     />
-                    {/* Cinematic gradient overlays */}
-                    <div className="absolute inset-0 bg-gradient-to-b from-basalt/92 via-basalt/60 to-basalt" />
-                    <div className="absolute inset-0 bg-gradient-to-r from-basalt/75 via-transparent to-basalt/45" />
+                    {/* Cinematic gradient overlays — slightly lighter to let bg image show */}
+                    <div className="absolute inset-0 bg-gradient-to-b from-basalt/88 via-basalt/55 to-basalt" />
+                    <div className="absolute inset-0 bg-gradient-to-r from-basalt/70 via-transparent to-basalt/40" />
                     {/* Dhaka pattern grain */}
-                    <div className="absolute inset-0 bg-dhaka-pattern opacity-[0.04]" />
+                    <div className="absolute inset-0 bg-dhaka-pattern opacity-[0.05]" />
                 </div>
 
-                {/* Floating orbs */}
-                <FloatingOrb className="top-20 left-10 w-48 h-48 bg-golden/10" delay={0} />
-                <FloatingOrb className="bottom-32 right-16 w-64 h-64 bg-bronze/8" delay={2} />
-                <FloatingOrb className="top-1/2 left-1/3 w-36 h-36 bg-bronze/5" delay={4} />
+                {/* Floating orbs — increased opacity for clarity; z-[2] sits above bg overlays */}
+                <FloatingOrb className="top-16 left-8 w-56 h-56 bg-golden/25 z-[2]" delay={0} />
+                <FloatingOrb className="bottom-28 right-12 w-72 h-72 bg-bronze/18 z-[2]" delay={2.5} />
+                <FloatingOrb className="top-1/2 left-1/3 w-40 h-40 bg-amber-glow/10 z-[2]" delay={4.5} />
+                <FloatingOrb className="top-1/3 right-1/4 w-32 h-32 bg-golden/12 z-[2]" delay={1.5} />
 
-                {/* Grid pattern overlay */}
-                <div className="absolute inset-0 opacity-[0.03] dark:opacity-[0.06]"
+                {/* Dot-grid overlay — subtle depth */}
+                <div
+                    className="absolute inset-0 z-[3] pointer-events-none"
                     style={{
-                        backgroundImage: 'radial-gradient(circle, rgba(255,184,28,0.18) 1px, transparent 1px)',
-                        backgroundSize: '40px 40px',
+                        backgroundImage: 'radial-gradient(circle, rgba(255,184,28,0.15) 1px, transparent 1px)',
+                        backgroundSize: '36px 36px',
+                        opacity: 0.04,
                     }}
                 />
 
                 <motion.div
                     style={{ y: heroY, opacity: heroOpacity }}
-                    className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 grid grid-cols-1 lg:grid-cols-2 gap-16 items-center"
+                    className="relative z-[5] max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24 sm:py-28 grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-16 items-center"
                 >
                     {/* Left: Text content */}
                     <motion.div
@@ -259,7 +265,7 @@ export default function Landing() {
                                     whileHover={{ x: 4 }}
                                     transition={{ type: 'spring', stiffness: 300 }}
                                 >
-                                    <svg className="w-4 h-4 text-green-500" fill="currentColor" viewBox="0 0 20 20">
+                                    <svg className="w-4 h-4 text-golden" fill="currentColor" viewBox="0 0 20 20">
                                         <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
                                     </svg>
                                     {text}
@@ -276,10 +282,10 @@ export default function Landing() {
                         className="hidden lg:flex justify-center items-center"
                     >
                         <div className="relative">
-                            {/* Glow ring */}
+                            {/* Glow ring — more visible for dark bg */}
                             <motion.div
-                                className="absolute inset-0 rounded-full bg-gradient-to-br from-golden/20 to-bronze/20 blur-3xl"
-                                animate={{ scale: [1, 1.15, 1], rotate: [0, 180, 360] }}
+                                className="absolute inset-0 scale-150 rounded-full bg-gradient-to-br from-golden/35 to-bronze/25 blur-3xl"
+                                animate={{ scale: [1.4, 1.65, 1.4], rotate: [0, 180, 360] }}
                                 transition={{ duration: 20, repeat: Infinity, ease: 'linear' }}
                             />
 
@@ -335,7 +341,7 @@ export default function Landing() {
 
                 {/* Scroll indicator */}
                 <motion.div
-                    className="absolute bottom-8 left-1/2 -translate-x-1/2"
+                    className="absolute bottom-8 left-1/2 -translate-x-1/2 z-[5]"
                     animate={{ y: [0, 10, 0] }}
                     transition={{ duration: 2, repeat: Infinity }}
                 >

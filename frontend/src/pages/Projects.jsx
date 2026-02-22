@@ -80,13 +80,16 @@ function ProjectCard({ project }) {
                 <span className="text-parchment-ghost">
                     Milestones: {p.milestonesCompleted}/{p.milestoneCount}
                 </span>
-                <div className="flex gap-1">
-                    {Array.from({ length: p.milestoneCount }).map((_, i) => (
+                <div className="flex flex-wrap gap-1">
+                    {Array.from({ length: Math.min(p.milestoneCount, 8) }).map((_, i) => (
                         <div
                             key={i}
-                            className={`w-3 h-3 rounded-full ${i < p.milestonesCompleted ? 'bg-golden' : 'bg-earth-light'}`}
+                            className={`w-2.5 h-2.5 rounded-full ${i < p.milestonesCompleted ? 'bg-golden' : 'bg-earth-light'}`}
                         ></div>
                     ))}
+                    {p.milestoneCount > 8 && (
+                        <span className="text-[10px] text-parchment-ghost leading-tight">+{p.milestoneCount - 8}</span>
+                    )}
                 </div>
             </div>
 

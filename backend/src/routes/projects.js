@@ -60,6 +60,7 @@ router.get('/', async (req, res) => {
                 budgetAllocations: mp.budgetAllocations || [],
                 solanaExplorerUrl: mp.solanaExplorerUrl || '',
                 onChainAddress: mp.onChainAddress || '',
+                pda: mp.onChainAddress || '',
                 onChain: false,
             });
         }
@@ -69,6 +70,7 @@ router.get('/', async (req, res) => {
             const existing = mergedMap.get(cp.projectId);
             mergedMap.set(cp.projectId, {
                 ...cp,
+                pda: cp.publicKey,
                 description: existing?.description || '',
                 milestones: existing?.milestones || [],
                 documents: existing?.documents || [],
@@ -142,6 +144,7 @@ router.get('/:projectId', async (req, res) => {
             // Merge blockchain data (source of truth) with off-chain metadata
             return res.json({
                 ...chainProject,
+                pda: chainProject.publicKey,
                 description: cached?.description || '',
                 milestones: cached?.milestones || [],
                 documents: cached?.documents || [],
@@ -152,7 +155,7 @@ router.get('/:projectId', async (req, res) => {
         }
 
         // Fallback to cached data
-        if (cached) return res.json(cached);
+        if (cached) return res.json({ ...cached, pda: cached.onChainAddress || '' });
 
         res.status(404).json({ error: 'Project not found on-chain or in cache' });
     } catch (err) {

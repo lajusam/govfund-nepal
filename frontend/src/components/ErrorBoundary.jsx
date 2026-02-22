@@ -47,15 +47,15 @@ export default class ErrorBoundary extends React.Component {
 
             {/* Error details (collapsible) */}
             <details className="mb-6 text-left">
-              <summary className="cursor-pointer text-sm font-medium text-red-600 dark:text-red-400 hover:underline">
+              <summary className="cursor-pointer text-sm font-medium text-red-400 hover:underline">
                 Show error details
               </summary>
-              <div className="mt-2 p-3 bg-red-50 dark:bg-red-900/20 rounded-xl border border-red-200 dark:border-red-800 overflow-auto max-h-40">
-                <p className="text-xs font-mono text-red-700 dark:text-red-300 break-all">
+              <div className="mt-2 p-3 bg-earth rounded-xl border border-red-500/30 overflow-auto max-h-40">
+                <p className="text-xs font-mono text-red-400 break-all">
                   {this.state.error?.message || 'Unknown error'}
                 </p>
                 {this.state.errorInfo?.componentStack && (
-                  <pre className="text-xs font-mono text-red-500 dark:text-red-400 mt-2 whitespace-pre-wrap">
+                  <pre className="text-xs font-mono text-red-400 mt-2 whitespace-pre-wrap">
                     {this.state.errorInfo.componentStack.slice(0, 500)}
                   </pre>
                 )}

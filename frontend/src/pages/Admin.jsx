@@ -298,9 +298,9 @@ function BudgetSummaryPanel({ totalBudget, t }) {
 
   const items = [
     { label: t('totalBudget'), value: formatNPR(budgetNum), color: 'text-amber-glow', icon: '💰' },
-    { label: t('allocatedBudget'), value: formatNPR(0), color: 'text-amber-600 dark:text-amber-400', icon: '📊' },
-    { label: t('releasedAmount'), value: formatNPR(0), color: 'text-green-600 dark:text-green-400', icon: '💵' },
-    { label: t('milestonesCompleted'), value: '0 / 0', color: 'text-purple-600 dark:text-purple-400', icon: '🎯' },
+    { label: t('allocatedBudget'), value: formatNPR(0), color: 'text-amber-glow', icon: '📊' },
+    { label: t('releasedAmount'), value: formatNPR(0), color: 'text-golden', icon: '💵' },
+    { label: t('milestonesCompleted'), value: '0 / 0', color: 'text-bronze-light', icon: '🎯' },
   ];
 
   return (
@@ -622,16 +622,50 @@ export default function Admin() {
     return true;
   };
 
-  const syncProject = async (projectId, txSignature = null, extraData = {}) => {
+  // Base helper: delay then call any admin sync endpoint
+  const syncAction = async (endpoint, payload) => {
     try {
-      // Small delay to let the RPC node reflect the new on-chain state
       await new Promise(resolve => setTimeout(resolve, 2000));
-      await api.post('/admin/projects/sync', { projectId, txSignature, ...extraData }, {
+      await api.post(endpoint, payload, {
         headers: { 'x-wallet-address': publicKey.toBase58() },
       });
     } catch (err) {
       console.warn('Backend sync failed (non-fatal):', err.message);
     }
+  };
+
+  // Creation sync — upserts the base project record in MongoDB
+  const syncProject = async (projectId, txSignature = null, extraData = {}) => {
+    await syncAction('/admin/projects/sync', { projectId, txSignature, ...extraData });
+  };
+
+  // Operation-specific syncs — push txSignature into the correct sub-array
+  const syncAllocate = async (projectId, sig, amount, description) => {
+    await syncAction(`/admin/projects/${projectId}/sync-allocate`, {
+      txSignature: sig, amount: Number(amount), description: description || '',
+    });
+  };
+
+  const syncRelease = async (projectId, sig, amount, description) => {
+    await syncAction(`/admin/projects/${projectId}/sync-release`, {
+      txSignature: sig, amount: Number(amount), description: description || '',
+    });
+  };
+
+  const syncMilestone = async (projectId, sig, index, description, status) => {
+    await syncAction(`/admin/projects/${projectId}/sync-milestone`, {
+      txSignature: sig, index, title: `Milestone ${Number(index) + 1}`, description, status,
+    });
+  };
+
+  const syncDocument = async (projectId, sig, ipfsHash, documentName) => {
+    await syncAction(`/admin/projects/${projectId}/sync-document`, {
+      txSignature: sig, ipfsHash, name: documentName,
+    });
+  };
+
+  const syncClose = async (projectId, sig) => {
+    await syncAction(`/admin/projects/${projectId}/sync-close`, { txSignature: sig });
   };
 
   // ═══════════════════════════════════════════════════════════
@@ -733,7 +767,7 @@ export default function Admin() {
       });
 
       showMsg(`${t('budgetAllocated')} ${t('txLabel')}: ${sig.slice(0, 16)}...`, 'success', sig);
-      await syncProject(allocateForm.projectId, sig);
+      await syncAllocate(allocateForm.projectId, sig, allocateForm.amount, allocateForm.description);
       await refreshProjects();
       setAllocateForm({ projectId: '', amount: '', description: '' });
       try { sessionStorage.removeItem('govfund-allocateForm'); } catch {}
@@ -774,7 +808,7 @@ export default function Admin() {
       });
 
       showMsg(`${t('fundsReleased')} ${t('txLabel')}: ${sig.slice(0, 16)}...`, 'success', sig);
-      await syncProject(releaseForm.projectId, sig);
+      await syncRelease(releaseForm.projectId, sig, releaseForm.amount, releaseForm.description);
       await refreshProjects();
       setReleaseForm({ projectId: '', amount: '', description: '' });
       try { sessionStorage.removeItem('govfund-releaseForm'); } catch {}
@@ -822,7 +856,7 @@ export default function Admin() {
       });
 
       showMsg(`${t('milestoneUpdated')} ${t('txLabel')}: ${sig.slice(0, 16)}...`, 'success', sig);
-      await syncProject(milestoneForm.projectId, sig);
+      await syncMilestone(milestoneForm.projectId, sig, milestoneForm.index, milestoneForm.description, milestoneForm.status);
       await refreshProjects();
       setMilestoneForm({ projectId: '', index: 0, description: '', status: 'Pending' });
       try { sessionStorage.removeItem('govfund-milestoneForm'); } catch {}
@@ -874,7 +908,7 @@ export default function Admin() {
       });
 
       showMsg(`${t('documentRecorded')} ${t('txLabel')}: ${sig.slice(0, 16)}...`, 'success', sig);
-      await syncProject(docForm.projectId, sig);
+      await syncDocument(docForm.projectId, sig, docForm.ipfsHash, docForm.documentName);
       await refreshProjects();
       setDocForm({ projectId: '', ipfsHash: '', documentName: '' });
       try { sessionStorage.removeItem('govfund-docForm'); } catch {}
@@ -923,7 +957,7 @@ export default function Admin() {
           });
 
           showMsg(`${t('projectClosed')} ${t('txLabel')}: ${sig.slice(0, 16)}...`, 'success', sig);
-          await syncProject(projectId, sig);
+          await syncClose(projectId, sig);
           await refreshProjects();
           setCloseForm({ projectId: '' });
           try { sessionStorage.removeItem('govfund-closeForm'); } catch {}
@@ -1268,7 +1302,7 @@ export default function Admin() {
                       disabled={loading || !programReady}
                       whileHover={programReady ? { scale: 1.02, boxShadow: '0 8px 30px rgba(220,38,38,0.3)' } : {}}
                       whileTap={programReady ? { scale: 0.98 } : {}}
-                      className={`w-full py-3 rounded-xl text-white font-medium text-sm transition-all ${
+                      className={`w-full py-3 rounded-xl font-medium text-sm transition-all ${
                         programReady
                           ? 'bg-gradient-to-r from-golden to-golden-600 text-basalt hover:shadow-golden-sm cursor-pointer'
                           : 'bg-earth-light text-parchment-ghost cursor-not-allowed'
@@ -1279,7 +1313,7 @@ export default function Admin() {
                           <motion.span
                             animate={{ rotate: 360 }}
                             transition={{ repeat: Infinity, duration: 1, ease: 'linear' }}
-                            className="inline-block w-4 h-4 border-2 border-white/30 border-t-white rounded-full"
+                            className="inline-block w-4 h-4 border-2 border-basalt/30 border-t-basalt rounded-full"
                           />
                           {retryCount > 0 ? `Retrying (${retryCount})...` : t('submitting')}
                         </span>
@@ -1316,7 +1350,7 @@ export default function Admin() {
                   </SelectField>
                   <InputField label={t('amount')} type="number" placeholder={t('amountPlaceholder')} value={allocateForm.amount} onChange={(e) => setAllocateForm((f) => ({ ...f, amount: e.target.value }))} required min={1} />
                   <InputField label={t('noteOffchain')} placeholder={t('noteOffchain')} value={allocateForm.description} onChange={(e) => setAllocateForm((f) => ({ ...f, description: e.target.value }))} />
-                  <motion.button type="submit" disabled={loading || !programReady} whileHover={programReady ? { scale: 1.02 } : {}} whileTap={programReady ? { scale: 0.98 } : {}} className={`w-full py-3 rounded-xl text-white font-medium text-sm ${programReady ? 'bg-gradient-to-r from-golden to-golden-600 text-basalt hover:shadow-golden-sm' : 'bg-earth-light text-parchment-ghost cursor-not-allowed'}`}>
+                  <motion.button type="submit" disabled={loading || !programReady} whileHover={programReady ? { scale: 1.02 } : {}} whileTap={programReady ? { scale: 0.98 } : {}} className={`w-full py-3 rounded-xl font-medium text-sm ${programReady ? 'bg-gradient-to-r from-golden to-golden-600 text-basalt hover:shadow-golden-sm' : 'bg-earth-light text-parchment-ghost cursor-not-allowed'}`}>
                     {loading ? (retryCount > 0 ? `Retrying (${retryCount})...` : t('submitting')) : t('submit')}
                   </motion.button>
                 </form>
@@ -1342,7 +1376,7 @@ export default function Admin() {
                   </SelectField>
                   <InputField label={t('amount')} type="number" placeholder={t('amountPlaceholder')} value={releaseForm.amount} onChange={(e) => setReleaseForm((f) => ({ ...f, amount: e.target.value }))} required min={1} />
                   <InputField label={t('noteOffchain')} placeholder={t('noteOffchain')} value={releaseForm.description} onChange={(e) => setReleaseForm((f) => ({ ...f, description: e.target.value }))} />
-                  <motion.button type="submit" disabled={loading || !programReady} whileHover={programReady ? { scale: 1.02 } : {}} whileTap={programReady ? { scale: 0.98 } : {}} className={`w-full py-3 rounded-xl text-white font-medium text-sm ${programReady ? 'bg-gradient-to-r from-golden to-golden-600 text-basalt hover:shadow-golden-sm' : 'bg-earth-light text-parchment-ghost cursor-not-allowed'}`}>
+                  <motion.button type="submit" disabled={loading || !programReady} whileHover={programReady ? { scale: 1.02 } : {}} whileTap={programReady ? { scale: 0.98 } : {}} className={`w-full py-3 rounded-xl font-medium text-sm ${programReady ? 'bg-gradient-to-r from-golden to-golden-600 text-basalt hover:shadow-golden-sm' : 'bg-earth-light text-parchment-ghost cursor-not-allowed'}`}>
                     {loading ? (retryCount > 0 ? `Retrying (${retryCount})...` : t('submitting')) : t('submit')}
                   </motion.button>
                 </form>
@@ -1384,7 +1418,7 @@ export default function Admin() {
                     <option value="Completed">{t('completed')}</option>
                     <option value="Delayed">{t('delayed')}</option>
                   </SelectField>
-                  <motion.button type="submit" disabled={loading || !programReady} whileHover={programReady ? { scale: 1.02 } : {}} whileTap={programReady ? { scale: 0.98 } : {}} className={`w-full py-3 rounded-xl text-white font-medium text-sm ${programReady ? 'bg-gradient-to-r from-golden to-golden-600 text-basalt hover:shadow-golden-sm' : 'bg-earth-light text-parchment-ghost cursor-not-allowed'}`}>
+                  <motion.button type="submit" disabled={loading || !programReady} whileHover={programReady ? { scale: 1.02 } : {}} whileTap={programReady ? { scale: 0.98 } : {}} className={`w-full py-3 rounded-xl font-medium text-sm ${programReady ? 'bg-gradient-to-r from-golden to-golden-600 text-basalt hover:shadow-golden-sm' : 'bg-earth-light text-parchment-ghost cursor-not-allowed'}`}>
                     {loading ? (retryCount > 0 ? `Retrying (${retryCount})...` : t('submitting')) : t('submit')}
                   </motion.button>
                 </form>
@@ -1408,7 +1442,7 @@ export default function Admin() {
                   </SelectField>
                   <InputField label={t('ipfsHash')} placeholder={t('ipfsHashPlaceholder')} value={docForm.ipfsHash} onChange={(e) => setDocForm((f) => ({ ...f, ipfsHash: e.target.value }))} required />
                   <InputField label={t('documentName')} placeholder={t('documentNamePlaceholder')} value={docForm.documentName} onChange={(e) => setDocForm((f) => ({ ...f, documentName: e.target.value }))} required />
-                  <motion.button type="submit" disabled={loading || !programReady} whileHover={programReady ? { scale: 1.02 } : {}} whileTap={programReady ? { scale: 0.98 } : {}} className={`w-full py-3 rounded-xl text-white font-medium text-sm ${programReady ? 'bg-gradient-to-r from-golden to-golden-600 text-basalt hover:shadow-golden-sm' : 'bg-earth-light text-parchment-ghost cursor-not-allowed'}`}>
+                  <motion.button type="submit" disabled={loading || !programReady} whileHover={programReady ? { scale: 1.02 } : {}} whileTap={programReady ? { scale: 0.98 } : {}} className={`w-full py-3 rounded-xl font-medium text-sm ${programReady ? 'bg-gradient-to-r from-golden to-golden-600 text-basalt hover:shadow-golden-sm' : 'bg-earth-light text-parchment-ghost cursor-not-allowed'}`}>
                     {loading ? (retryCount > 0 ? `Retrying (${retryCount})...` : t('submitting')) : t('submit')}
                   </motion.button>
                 </form>
@@ -1437,7 +1471,7 @@ export default function Admin() {
                   >
                     {t('closeWarning')}
                   </motion.div>
-                  <motion.button type="submit" disabled={loading || !programReady || !closeForm.projectId} whileHover={programReady && closeForm.projectId ? { scale: 1.02 } : {}} whileTap={programReady && closeForm.projectId ? { scale: 0.98 } : {}} className={`w-full py-3 rounded-xl text-white font-medium text-sm ${programReady && closeForm.projectId ? 'bg-gradient-to-r from-red-700 to-red-900 hover:shadow-lg shadow-red-900/40' : 'bg-earth-light text-parchment-ghost cursor-not-allowed'}`}>
+                  <motion.button type="submit" disabled={loading || !programReady || !closeForm.projectId} whileHover={programReady && closeForm.projectId ? { scale: 1.02 } : {}} whileTap={programReady && closeForm.projectId ? { scale: 0.98 } : {}} className={`w-full py-3 rounded-xl font-medium text-sm ${programReady && closeForm.projectId ? 'bg-gradient-to-r from-red-700 to-red-900 hover:shadow-lg shadow-red-900/40 text-white' : 'bg-earth-light text-parchment-ghost cursor-not-allowed'}`}>
                     {loading ? (retryCount > 0 ? `Retrying (${retryCount})...` : t('submitting')) : t('submit')}
                   </motion.button>
                 </form>

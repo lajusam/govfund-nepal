@@ -1,31 +1,21 @@
-import React, { createContext, useContext, useEffect, useState } from 'react';
+import React, { createContext, useContext, useEffect } from 'react';
 
 const ThemeContext = createContext();
 
+/**
+ * GovFund Nepal uses a single, fixed dark theme.
+ * The ThemeProvider is kept for API compatibility but dark mode is always active.
+ */
 export function ThemeProvider({ children }) {
-    const [dark, setDark] = useState(() => {
-        if (typeof window !== 'undefined') {
-            const saved = localStorage.getItem('govfund-theme');
-            if (saved) return saved === 'dark';
-            return window.matchMedia('(prefers-color-scheme: dark)').matches;
-        }
-        return false;
-    });
-
     useEffect(() => {
-        const root = document.documentElement;
-        if (dark) {
-            root.classList.add('dark');
-        } else {
-            root.classList.remove('dark');
-        }
-        localStorage.setItem('govfund-theme', dark ? 'dark' : 'light');
-    }, [dark]);
-
-    const toggle = () => setDark(prev => !prev);
+        // Always enforce dark class — single locked theme
+        document.documentElement.classList.add('dark');
+        document.documentElement.style.colorScheme = 'dark';
+    }, []);
 
     return (
-        <ThemeContext.Provider value={{ dark, toggle }}>
+        // dark is always true; toggle is a no-op — theme is fixed
+        <ThemeContext.Provider value={{ dark: true, toggle: () => {} }}>
             {children}
         </ThemeContext.Provider>
     );

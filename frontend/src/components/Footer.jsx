@@ -57,8 +57,8 @@ export default function Footer() {
                                 </a>
                             </li>
                             <li>
-                                <span className="inline-flex items-center gap-2 text-green-400 text-xs mt-2">
-                                    <span className="w-2 h-2 rounded-full bg-green-400 animate-pulse"></span>
+                                <span className="inline-flex items-center gap-2 text-golden text-xs mt-2">
+                                    <span className="w-2 h-2 rounded-full bg-golden animate-pulse"></span>
                                     Devnet Connected
                                 </span>
                             </li>

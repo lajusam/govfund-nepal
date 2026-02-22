@@ -244,11 +244,11 @@ export function getAccountExplorerUrl(address) {
 
 export function getStatusColor(status) {
     switch (status) {
-        case 'Completed':  return 'text-green-500';
-        case 'InProgress': return 'text-blue-500';
-        case 'Delayed':    return 'text-orange-500';
+        case 'Completed':  return 'text-golden';
+        case 'InProgress': return 'text-bronze-light';
+        case 'Delayed':    return 'text-amber-glow';
         case 'Pending':    return 'text-parchment-ghost';
-        case 'Active':     return 'text-blue-500';
+        case 'Active':     return 'text-bronze-light';
         case 'Closed':     return 'text-parchment-ghost';
         default:           return 'text-parchment-ghost';
     }
@@ -256,11 +256,11 @@ export function getStatusColor(status) {
 
 export function getStatusBg(status) {
     switch (status) {
-        case 'Completed':  return 'bg-green-500';
-        case 'InProgress': return 'bg-blue-500';
-        case 'Delayed':    return 'bg-orange-500';
+        case 'Completed':  return 'bg-golden/20 text-golden';
+        case 'InProgress': return 'bg-bronze/20 text-bronze-light';
+        case 'Delayed':    return 'bg-amber-glow/15 text-amber-glow';
         case 'Pending':    return 'bg-earth-light text-parchment-muted';
-        case 'Active':     return 'bg-blue-500';
+        case 'Active':     return 'bg-bronze/20 text-bronze-light';
         case 'Closed':     return 'bg-earth text-parchment-ghost';
         default:           return 'bg-earth-light text-parchment-ghost';
     }
