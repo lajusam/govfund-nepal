@@ -261,19 +261,64 @@ export default function Welcome() {
                                 transition={{ duration: 3.2, repeat: Infinity, ease: 'easeInOut' }}
                             />
 
-                            {/* Logo image — place logo.png in /public/logo.png */}
-                            <motion.img
-                                src="/logo.png"
-                                alt="GovFund Nepal"
-                                className="relative z-10 drop-shadow-[0_0_28px_rgba(255,184,28,0.45)]"
-                                style={{ width: 148, height: 'auto', objectFit: 'contain' }}
-                                onError={e => { e.currentTarget.style.display = 'none'; }}
-                                whileHover={{ scale: 1.04, filter: 'drop-shadow(0 0 36px rgba(255,184,28,0.65))' }}
+                            {/* ── Circular logo — SVG clipPath = perfect circle at any scale ── */}
+                            <motion.svg
+                                viewBox="0 0 160 160"
+                                width="148"
+                                height="148"
+                                xmlns="http://www.w3.org/2000/svg"
+                                className="relative z-10"
+                                style={{ filter: 'drop-shadow(0 0 28px rgba(255,184,28,0.45))' }}
+                                whileHover={{ scale: 1.04 }}
                                 transition={{ duration: 0.35 }}
-                            />
+                                aria-label="GovFund Nepal"
+                                role="img"
+                            >
+                                <defs>
+                                    {/* Perfect circle clip — logo stays fully inside */}
+                                    <clipPath id="welcome-logo-clip">
+                                        <circle cx="80" cy="80" r="73" />
+                                    </clipPath>
+                                    {/* Golden gradient ring: Golden Sun → Amber Glow → Muted Bronze */}
+                                    <linearGradient id="welcome-ring-grad" x1="0%" y1="0%" x2="100%" y2="100%">
+                                        <stop offset="0%"    stopColor="#FFB81C" />
+                                        <stop offset="50%"   stopColor="#FAD980" />
+                                        <stop offset="100%"  stopColor="#8E6F3E" />
+                                    </linearGradient>
+                                    {/* Soft inner glow */}
+                                    <radialGradient id="welcome-inner-glow" cx="50%" cy="50%" r="50%">
+                                        <stop offset="60%" stopColor="#1A160F" stopOpacity="1" />
+                                        <stop offset="100%" stopColor="#1A160F" stopOpacity="0" />
+                                    </radialGradient>
+                                </defs>
 
-                            {/* Fallback SVG logo if image missing */}
-                            <FallbackLogo />
+                                {/* Deep Basalt fill — correct background for transparent PNGs */}
+                                <circle cx="80" cy="80" r="73" fill="#1A160F" />
+
+                                {/* Logo image clipped to perfect circle, centered & proportional */}
+                                <image
+                                    href="/logo.png"
+                                    x="9" y="9"
+                                    width="142" height="142"
+                                    clipPath="url(#welcome-logo-clip)"
+                                    preserveAspectRatio="xMidYMid meet"
+                                />
+
+                                {/* Outer gradient ring border */}
+                                <circle
+                                    cx="80" cy="80" r="75"
+                                    fill="none"
+                                    stroke="url(#welcome-ring-grad)"
+                                    strokeWidth="4"
+                                />
+                                {/* Inner subtle rim light for depth */}
+                                <circle
+                                    cx="80" cy="80" r="70"
+                                    fill="none"
+                                    stroke="rgba(255,184,28,0.12)"
+                                    strokeWidth="1"
+                                />
+                            </motion.svg>
                         </motion.div>
 
                         {/* Brand name */}
@@ -475,59 +520,4 @@ export default function Welcome() {
     );
 }
 
-// ─── Fallback SVG shown only if logo.png fails to load ───────────────────────
-function FallbackLogo() {
-    const [show, setShow] = useState(false);
 
-    useEffect(() => {
-        const img = new Image();
-        img.src = '/logo.png';
-        img.onerror = () => setShow(true);
-    }, []);
-
-    if (!show) return null;
-
-    return (
-        <div
-            className="absolute z-10 flex flex-col items-center justify-center"
-            style={{ width: 148, height: 148 }}
-        >
-            {/* Mountain + sun SVG approximation of GovFund Nepal logo */}
-            <svg viewBox="0 0 100 105" width="110" height="110" fill="none" xmlns="http://www.w3.org/2000/svg">
-                {/* Sun rays */}
-                {[0,40,80,120,160,200,240,280,320].map((deg, i) => (
-                    <line
-                        key={i}
-                        x1="50" y1="22"
-                        x2={50 + 14 * Math.sin(deg * Math.PI / 180)}
-                        y2={22 - 14 * Math.cos(deg * Math.PI / 180)}
-                        stroke="#FFB81C" strokeWidth="1.8" strokeLinecap="round"
-                        opacity="0.75"
-                    />
-                ))}
-                {/* Sun circle */}
-                <circle cx="50" cy="22" r="8" fill="#FFB81C" opacity="0.92" />
-                {/* Mountain left peak */}
-                <polygon points="14,72 40,36 56,60" fill="#F5F1E6" opacity="0.92" />
-                {/* Mountain right peak */}
-                <polygon points="44,72 68,32 86,72" fill="#FAD980" opacity="0.85" />
-                {/* Mountain middle overlap */}
-                <polygon points="34,72 52,44 70,72" fill="#FFB81C" opacity="0.70" />
-                {/* House/gate arch */}
-                <rect x="36" y="58" width="28" height="14" rx="4" fill="#2D2518" stroke="#FFB81C" strokeWidth="1.2" />
-                <path d="M36 62 Q50 50 64 62" fill="none" stroke="#FFB81C" strokeWidth="1.5" />
-                {/* Water wave lines */}
-                <path d="M12 82 Q22 78 32 82 Q42 86 52 82 Q62 78 72 82 Q82 86 90 82" stroke="#8E6F3E" strokeWidth="2" fill="none" strokeLinecap="round" />
-                <path d="M16 88 Q26 84 36 88 Q46 92 56 88 Q66 84 76 88 Q84 92 90 88" stroke="#8E6F3E" strokeWidth="1.5" fill="none" strokeLinecap="round" opacity="0.65" />
-                {/* Circuit dots — blockchain motif */}
-                {[[18,76],[82,76],[50,96]].map(([cx,cy],i) => (
-                    <circle key={i} cx={cx} cy={cy} r="2.2" fill="#FAD980" opacity="0.6" />
-                ))}
-            </svg>
-            <div className="mt-1 text-center leading-none">
-                <div style={{ fontFamily: 'Outfit, Inter, sans-serif', fontWeight: 800, fontSize: '1.05rem', color: '#FFB81C', letterSpacing: '-0.01em' }}>GovFund</div>
-                <div style={{ fontFamily: 'Outfit, Inter, sans-serif', fontWeight: 600, fontSize: '0.65rem', color: '#8E6F3E', letterSpacing: '0.22em', textTransform: 'uppercase' }}>Nepal</div>
-            </div>
-        </div>
-    );
-}

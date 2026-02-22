@@ -318,13 +318,49 @@ export default function Landing() {
                                     </motion.div>
                                 ))}
 
-                                {/* Center stupa icon */}
+                                {/* Center logo — circular SVG frame, counter-rotates to stay upright */}
                                 <motion.div
-                                    className="absolute z-10 w-24 h-24 rounded-2xl bg-gradient-to-br from-golden to-bronze flex items-center justify-center shadow-golden-lg"
+                                    className="absolute z-10"
                                     animate={{ rotate: -360 }}
                                     transition={{ duration: 60, repeat: Infinity, ease: 'linear' }}
                                 >
-                                    <span className="text-4xl">🏛️</span>
+                                    <svg
+                                        viewBox="0 0 96 96"
+                                        width="96"
+                                        height="96"
+                                        xmlns="http://www.w3.org/2000/svg"
+                                        aria-label="GovFund Nepal"
+                                        role="img"
+                                        style={{ filter: 'drop-shadow(0 0 14px rgba(255,184,28,0.55))' }}
+                                    >
+                                        <defs>
+                                            <clipPath id="landing-logo-clip">
+                                                <circle cx="48" cy="48" r="44" />
+                                            </clipPath>
+                                            <linearGradient id="landing-ring-grad" x1="0%" y1="0%" x2="100%" y2="100%">
+                                                <stop offset="0%"   stopColor="#FFB81C" />
+                                                <stop offset="55%"  stopColor="#FAD980" />
+                                                <stop offset="100%" stopColor="#8E6F3E" />
+                                            </linearGradient>
+                                        </defs>
+                                        {/* Basalt fill */}
+                                        <circle cx="48" cy="48" r="44" fill="#1A160F" />
+                                        {/* Logo clipped to perfect circle */}
+                                        <image
+                                            href="/logo.png"
+                                            x="5" y="5"
+                                            width="86" height="86"
+                                            clipPath="url(#landing-logo-clip)"
+                                            preserveAspectRatio="xMidYMid meet"
+                                        />
+                                        {/* Golden gradient ring */}
+                                        <circle
+                                            cx="48" cy="48" r="45.5"
+                                            fill="none"
+                                            stroke="url(#landing-ring-grad)"
+                                            strokeWidth="3"
+                                        />
+                                    </svg>
                                 </motion.div>
                             </motion.div>
 
