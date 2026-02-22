@@ -1063,7 +1063,7 @@ export default function Admin() {
           <motion.span
             animate={{ scale: [1, 1.3, 1] }}
             transition={{ repeat: Infinity, duration: 1.5 }}
-            className="w-2 h-2 rounded-full bg-green-500"
+            className="w-2 h-2 rounded-full bg-golden"
           />
           <span className="text-parchment-ghost">{t('connected')}: </span>
           <span className="font-mono text-xs text-parchment-dim">

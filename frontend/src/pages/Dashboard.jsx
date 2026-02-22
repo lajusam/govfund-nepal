@@ -81,8 +81,8 @@ export default function Dashboard() {
                     { label: 'Allocated', value: formatNPR(overview.totalAllocated), color: 'from-bronze to-bronze-light' },
                     { label: 'Released', value: formatNPR(overview.totalReleased), color: 'from-amber-glow to-golden' },
                     { label: 'Projects', value: overview.totalProjects, color: 'from-golden to-amber-glow' },
-                    { label: 'Active', value: overview.activeProjects, color: 'from-green-500 to-emerald-600' },
-                    { label: 'Utilization', value: `${overview.utilizationRate}%`, color: 'from-purple-500 to-purple-700' },
+                    { label: 'Active', value: overview.activeProjects, color: 'from-bronze-light to-bronze' },
+                    { label: 'Utilization', value: `${overview.utilizationRate}%`, color: 'from-amber-glow to-golden' },
                 ].map((stat, i) => (
                     <div key={i} className="card p-4 relative overflow-hidden group hover:-translate-y-1 transition-all">
                         <div className={`absolute top-0 left-0 w-full h-1 bg-gradient-to-r ${stat.color}`}></div>
