@@ -14,7 +14,7 @@ export default function Navbar() {
     const { t } = useLanguage();
 
     const NAV_LINKS = [
-        { to: '/', label: t('home') },
+        { to: '/home', label: t('home') },
         { to: '/dashboard', label: t('dashboard') },
         { to: '/projects', label: t('projects') },
     ];
@@ -29,7 +29,7 @@ export default function Navbar() {
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                 <div className="flex items-center justify-between h-16">
                     {/* Logo */}
-                    <Link to="/" className="flex items-center gap-3 group">
+                    <Link to="/home" className="flex items-center gap-3 group">
                         <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-golden to-bronze flex items-center justify-center shadow-golden-sm group-hover:shadow-golden-md transition-shadow">
                             <svg className="w-6 h-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 6l3 1m0 0l-3 9a5.002 5.002 0 006.001 0M6 7l3 9M6 7l6-2m6 2l3-1m-3 1l-3 9a5.002 5.002 0 006.001 0M18 7l3 9m-3-9l-6-2m0-2v2m0 16V5m0 16H9m3 0h3" />
