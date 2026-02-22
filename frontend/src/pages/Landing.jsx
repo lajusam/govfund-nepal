@@ -110,13 +110,13 @@ function NepalFlagDecor() {
     return (
         <motion.svg
             viewBox="0 0 100 120"
-            className="w-24 h-28 opacity-10"
+            className="w-28 h-32 opacity-60 drop-shadow-[0_0_12px_rgba(220,20,60,0.7)]"
             initial={{ rotate: -5, scale: 0.9 }}
             animate={{ rotate: 5, scale: 1 }}
             transition={{ duration: 4, repeat: Infinity, repeatType: 'reverse', ease: 'easeInOut' }}
         >
-            <polygon points="0,0 100,30 0,60" fill="#DC143C" stroke="#003893" strokeWidth="3" />
-            <polygon points="0,60 100,90 0,120" fill="#DC143C" stroke="#003893" strokeWidth="3" />
+            <polygon points="0,0 100,30 0,60" fill="#DC143C" stroke="#003893" strokeWidth="4" />
+            <polygon points="0,60 100,90 0,120" fill="#DC143C" stroke="#003893" strokeWidth="4" />
         </motion.svg>
     );
 }
