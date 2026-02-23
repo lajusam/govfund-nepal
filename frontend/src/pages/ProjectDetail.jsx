@@ -73,12 +73,14 @@ export default function ProjectDetail() {
             datasets: [{
                 label: 'Cumulative Released',
                 data: releases.map(r => r.amount),
-                borderColor: '#FFB81C',
-                backgroundColor: 'rgba(255, 184, 28, 0.10)',
+                borderColor: '#2F5D8A',
+                backgroundColor: 'rgba(47,93,138,0.08)',
                 fill: true,
                 tension: 0.4,
                 pointRadius: 5,
-                pointBackgroundColor: '#FFB81C',
+                pointBackgroundColor: '#2F5D8A',
+                pointBorderColor: '#FFFFFF',
+                pointBorderWidth: 2,
             }],
         };
     }, [project]);
@@ -218,12 +220,12 @@ export default function ProjectDetail() {
                                     plugins: {
                                         legend: { display: false },
                                         tooltip: {
-                                            backgroundColor: 'rgba(45,37,24,0.95)',
-                                            borderColor: 'rgba(255,184,28,0.30)',
+                                            backgroundColor: 'rgba(255,255,255,0.98)',
+                                            borderColor: '#D1D5DB',
                                             borderWidth: 1,
-                                            titleColor: '#F5F1E6',
-                                            bodyColor: '#C4A96E',
-                                            padding: 10,
+                                            titleColor: '#0B2A4A',
+                                            bodyColor: '#4B5563',
+                                            padding: 12,
                                             callbacks: { label: (ctx) => ` ${formatNPR(ctx.raw)}` },
                                         },
                                     },
@@ -231,15 +233,16 @@ export default function ProjectDetail() {
                                         y: {
                                             ticks: {
                                                 callback: (v) => formatNPR(v),
-                                                color: '#C4A96E',
+                                                color: '#6B7280',
+                                                font: { size: 11 },
                                             },
-                                            grid: { color: 'rgba(255,184,28,0.08)' },
-                                            border: { color: 'rgba(142,111,62,0.25)' },
+                                            grid: { color: 'rgba(209,213,219,0.60)' },
+                                            border: { color: '#D1D5DB' },
                                         },
                                         x: {
                                             grid: { display: false },
-                                            ticks: { color: '#C4A96E' },
-                                            border: { color: 'rgba(142,111,62,0.25)' },
+                                            ticks: { color: '#6B7280', font: { size: 11 } },
+                                            border: { color: '#D1D5DB' },
                                         },
                                     },
                                 }}

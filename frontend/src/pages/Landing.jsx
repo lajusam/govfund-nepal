@@ -170,9 +170,9 @@ export default function Landing() {
                 <div
                     className="absolute inset-0 z-[3] pointer-events-none"
                     style={{
-                        backgroundImage: 'radial-gradient(circle, rgba(255,184,28,0.15) 1px, transparent 1px)',
+                        backgroundImage: 'radial-gradient(circle, rgba(255,255,255,0.12) 1px, transparent 1px)',
                         backgroundSize: '36px 36px',
-                        opacity: 0.04,
+                        opacity: 0.06,
                     }}
                 />
 
@@ -203,7 +203,7 @@ export default function Landing() {
                             <motion.span
                                 variants={fadeUp}
                                 custom={1}
-                                className="block text-parchment on-image-text"
+                                className="block text-white on-image-text"
                             >
                                 Transparent
                             </motion.span>
@@ -217,7 +217,7 @@ export default function Landing() {
                             <motion.span
                                 variants={fadeUp}
                                 custom={3}
-                                className="block text-parchment on-image-text"
+                                className="block text-white on-image-text"
                             >
                                 For Nepal
                             </motion.span>
@@ -227,10 +227,10 @@ export default function Landing() {
                         <motion.p
                             variants={fadeUp}
                             custom={4}
-                            className="text-lg md:text-xl text-parchment-dim max-w-lg mb-10 leading-relaxed on-image-text-sm"
+                            className="text-lg md:text-xl text-white/80 max-w-lg mb-10 leading-relaxed on-image-text-sm"
                         >
                             Every rupee tracked. Every project verifiable. Corruption is
-                                <span className="font-semibold text-amber-glow"> technically restricted </span>
+                                <span className="font-semibold text-gov-amber"> technically restricted </span>
                             by blockchain rules — not empty promises.
                         </motion.p>
 
@@ -249,7 +249,7 @@ export default function Landing() {
                                 <motion.button
                                     whileHover={{ scale: 1.05 }}
                                     whileTap={{ scale: 0.97 }}
-                                    className="btn-secondary text-lg px-8 py-3"
+                                    className="inline-flex items-center gap-2 px-8 py-3 rounded-lg text-white border-2 border-white/40 hover:bg-white/10 hover:border-white/70 transition-all font-semibold text-lg"
                                 >
                                     Explore Projects
                                 </motion.button>
@@ -257,7 +257,7 @@ export default function Landing() {
                         </motion.div>
 
                         {/* Trust badges */}
-                        <motion.div variants={fadeUp} custom={6} className="flex flex-wrap items-center gap-6 text-sm text-parchment-muted">
+                        <motion.div variants={fadeUp} custom={6} className="flex flex-wrap items-center gap-6 text-sm text-white/65">
                             {['Immutable Records', 'Public Verification', 'No Tampering'].map((text, i) => (
                                 <motion.div
                                     key={text}
@@ -265,7 +265,7 @@ export default function Landing() {
                                     whileHover={{ x: 4 }}
                                     transition={{ type: 'spring', stiffness: 300 }}
                                 >
-                                    <svg className="w-4 h-4 text-golden" fill="currentColor" viewBox="0 0 20 20">
+                                    <svg className="w-4 h-4 text-gov-amber" fill="currentColor" viewBox="0 0 20 20">
                                         <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
                                     </svg>
                                     {text}
@@ -372,7 +372,7 @@ export default function Landing() {
             >
                 {/* Decorative line */}
                 <motion.div
-                    className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-golden via-bronze to-golden"
+                    className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-gov-slate via-gov-navy to-gov-slate"
                     initial={{ scaleX: 0 }}
                     whileInView={{ scaleX: 1 }}
                     viewport={{ once: true }}
@@ -413,10 +413,10 @@ export default function Landing() {
             >
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                     <motion.div variants={fadeUp} className="text-center mb-16">
-                        <h2 className="text-3xl md:text-4xl font-heading font-bold text-parchment mb-3">
+                        <h2 className="text-3xl md:text-4xl font-heading font-bold text-white mb-3">
                             How It Works
                         </h2>
-                        <p className="text-parchment-muted text-lg">
+                        <p className="text-white/70 text-lg">
                             Blockchain-enforced transparency in 4 steps
                         </p>
                     </motion.div>
@@ -540,9 +540,9 @@ export default function Landing() {
                                     <div className="w-3 h-3 rounded-full bg-red-500" />
                                     <div className="w-3 h-3 rounded-full bg-yellow-500" />
                                     <div className="w-3 h-3 rounded-full bg-green-500" />
-                                    <span className="text-xs text-parchment-ghost ml-2">solana-explorer</span>
+                                    <span className="text-xs text-white/40 ml-2">solana-explorer</span>
                                 </div>
-                                    <div className="font-mono text-sm space-y-2 text-parchment-dim">
+                                    <div className="font-mono text-sm space-y-2 text-white/70">
                                     <motion.div
                                         initial={{ opacity: 0 }}
                                         whileInView={{ opacity: 1 }}
@@ -566,7 +566,7 @@ export default function Landing() {
                                         viewport={{ once: true }}
                                         transition={{ delay: 1.5 }}
                                     >
-                                        <span className="text-parchment-ghost">Block:</span> 284,931,847
+                                        <span className="text-white/45">Block:</span> 284,931,847
                                     </motion.div>
                                     <motion.div
                                         initial={{ opacity: 0 }}
@@ -574,7 +574,7 @@ export default function Landing() {
                                         viewport={{ once: true }}
                                         transition={{ delay: 2.0 }}
                                     >
-                                        <span className="text-parchment-ghost">Program:</span> <span className="text-golden">GovFNep...XXX</span>
+                                        <span className="text-white/45">Program:</span> <span className="text-gov-amber">GovFNep...XXX</span>
                                     </motion.div>
                                     <motion.div
                                         initial={{ opacity: 0 }}
@@ -582,7 +582,7 @@ export default function Landing() {
                                         viewport={{ once: true }}
                                         transition={{ delay: 2.5 }}
                                     >
-                                        <span className="text-parchment-ghost">Instruction:</span> allocateBudget
+                                        <span className="text-white/45">Instruction:</span> allocateBudget
                                     </motion.div>
                                     <motion.div
                                         initial={{ opacity: 0 }}
@@ -590,7 +590,7 @@ export default function Landing() {
                                         viewport={{ once: true }}
                                         transition={{ delay: 3.0 }}
                                     >
-                                        <span className="text-parchment-ghost">Amount:</span> <span className="text-amber-glow">NPR 50,000,000</span>
+                                        <span className="text-white/45">Amount:</span> <span className="text-gov-amber">NPR 50,000,000</span>
                                     </motion.div>
                                     <motion.div
                                         initial={{ opacity: 0 }}
@@ -635,7 +635,7 @@ export default function Landing() {
                     <motion.h2
                         variants={fadeUp}
                         custom={0}
-                        className="text-3xl md:text-5xl font-heading font-bold text-parchment mb-6"
+                        className="text-3xl md:text-5xl font-heading font-bold text-white mb-6"
                     >
                         Ready to explore
                         <br />
@@ -647,7 +647,7 @@ export default function Landing() {
                     <motion.p
                         variants={fadeUp}
                         custom={1}
-                        className="text-parchment-dim text-lg mb-10 max-w-2xl mx-auto"
+                        className="text-white/75 text-lg mb-10 max-w-2xl mx-auto"
                     >
                         Connect your Solana wallet and start verifying government spending in real-time.
                         Every transaction is on-chain and publicly auditable.
