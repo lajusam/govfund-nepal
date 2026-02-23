@@ -15,18 +15,18 @@ function ParticleCanvas() {
         let H = (canvas.height = window.innerHeight);
         let animId;
 
-        // Palette: gold tones on deep basalt
-        const COLORS = ['rgba(255,184,28,', 'rgba(250,217,128,', 'rgba(142,111,62,'];
+        // Palette: navy/slate tones on deep navy
+        const COLORS = ['rgba(47,93,138,', 'rgba(74,120,168,', 'rgba(255,255,255,'];
 
         const particles = Array.from({ length: 110 }, () => ({
             x:      Math.random() * W,
             y:      Math.random() * H,
             r:      Math.random() * 1.8 + 0.3,
-            alpha:  Math.random() * 0.55 + 0.08,
+            alpha:  Math.random() * 0.45 + 0.08,
             dx:     (Math.random() - 0.5) * 0.35,
             dy:    -(Math.random() * 0.45 + 0.1),
             color:  COLORS[Math.floor(Math.random() * COLORS.length)],
-            pulse:  Math.random() * Math.PI * 2, // phase offset
+            pulse:  Math.random() * Math.PI * 2,
         }));
 
         function draw() {
@@ -56,7 +56,7 @@ function ParticleCanvas() {
                         ctx.beginPath();
                         ctx.moveTo(particles[i].x, particles[i].y);
                         ctx.lineTo(particles[j].x,  particles[j].y);
-                        ctx.strokeStyle = `rgba(255,184,28,${(0.06 * (1 - d / 90)).toFixed(3)})`;
+                        ctx.strokeStyle = `rgba(255,255,255,${(0.05 * (1 - d / 90)).toFixed(3)})`;
                         ctx.lineWidth   = 0.5;
                         ctx.stroke();
                     }
@@ -110,7 +110,7 @@ function ScanLine() {
         <motion.div
             className="absolute left-0 right-0 h-px pointer-events-none"
             style={{
-                background: 'linear-gradient(90deg, transparent 0%, rgba(255,184,28,0.18) 30%, rgba(250,217,128,0.28) 50%, rgba(255,184,28,0.18) 70%, transparent 100%)',
+                background: 'linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.10) 30%, rgba(255,255,255,0.18) 50%, rgba(255,255,255,0.10) 70%, transparent 100%)',
                 zIndex: 3,
             }}
             animate={{ top: ['-2px', '100vh'] }}
@@ -126,7 +126,7 @@ function LogoRing({ size, delay, opacity, clockwise = true }) {
             className="absolute rounded-full border pointer-events-none"
             style={{
                 width: size, height: size,
-                borderColor: `rgba(255,184,28,${opacity})`,
+                borderColor: `rgba(255,255,255,${opacity})`,
                 top:  '50%', left: '50%',
                 marginTop:  -(size / 2),
                 marginLeft: -(size / 2),
@@ -149,13 +149,13 @@ function TrustBadge({ icon, label, delay }) {
             transition={{ duration: 0.7, delay, ease: [0.22, 1, 0.36, 1] }}
             className="flex items-center gap-2 px-3 py-1.5 rounded-full"
             style={{
-                background: 'rgba(45,37,24,0.70)',
-                border:     '1px solid rgba(142,111,62,0.30)',
+                background: 'rgba(255,255,255,0.10)',
+                border:     '1px solid rgba(255,255,255,0.20)',
                 backdropFilter: 'blur(8px)',
             }}
         >
             <span className="text-sm">{icon}</span>
-            <span className="text-xs font-medium" style={{ color: '#C4A96E' }}>{label}</span>
+            <span className="text-xs font-medium" style={{ color: 'rgba(255,255,255,0.85)' }}>{label}</span>
         </motion.div>
     );
 }
@@ -180,7 +180,7 @@ export default function Welcome() {
                     exit={{ opacity: 0, scale: 1.04 }}
                     transition={{ duration: 0.52, ease: [0.22, 1, 0.36, 1] }}
                     className="fixed inset-0 flex flex-col items-center justify-center overflow-hidden select-none"
-                    style={{ background: '#1A160F', zIndex: 9999 }}
+                    style={{ background: '#0B2A4A', zIndex: 9999 }}
                 >
                     {/* ── Particle field ── */}
                     <ParticleCanvas />
@@ -192,24 +192,24 @@ export default function Welcome() {
                     <AmbientOrb
                         delay={0}
                         style={{ width: 480, height: 480, top: '10%', left: '-8%',
-                                 background: '#FFB81C', opacity: 0.07, zIndex: 0 }}
+                                 background: '#2F5D8A', opacity: 0.18, zIndex: 0 }}
                     />
                     <AmbientOrb
                         delay={3}
                         style={{ width: 360, height: 360, bottom: '5%', right: '-5%',
-                                 background: '#8E6F3E', opacity: 0.09, zIndex: 0 }}
+                                 background: '#1E4A7A', opacity: 0.15, zIndex: 0 }}
                     />
                     <AmbientOrb
                         delay={1.5}
                         style={{ width: 220, height: 220, top: '55%', left: '15%',
-                                 background: '#FAD980', opacity: 0.05, zIndex: 0 }}
+                                 background: '#4A78A8', opacity: 0.10, zIndex: 0 }}
                     />
 
                     {/* ── Radial vignette ── */}
                     <div
                         className="absolute inset-0 pointer-events-none"
                         style={{
-                            background: 'radial-gradient(ellipse 70% 65% at 50% 50%, transparent 0%, rgba(26,22,15,0.55) 70%, rgba(26,22,15,0.92) 100%)',
+                            background: 'radial-gradient(ellipse 70% 65% at 50% 50%, transparent 0%, rgba(11,42,74,0.45) 70%, rgba(11,42,74,0.85) 100%)',
                             zIndex: 2,
                         }}
                     />
@@ -226,11 +226,11 @@ export default function Welcome() {
                             className="absolute w-8 h-8 pointer-events-none"
                             style={{ ...pos, zIndex: 4, rotate: pos.rot }}
                             initial={{ opacity: 0 }}
-                            animate={{ opacity: 0.35 }}
+                            animate={{ opacity: 0.40 }}
                             transition={{ delay: 1.2 + i * 0.1, duration: 0.6 }}
                         >
-                            <div className="absolute top-0 left-0 w-full h-px" style={{ background: '#8E6F3E' }} />
-                            <div className="absolute top-0 left-0 h-full w-px" style={{ background: '#8E6F3E' }} />
+                            <div className="absolute top-0 left-0 w-full h-px" style={{ background: 'rgba(255,255,255,0.35)' }} />
+                            <div className="absolute top-0 left-0 h-full w-px" style={{ background: 'rgba(255,255,255,0.35)' }} />
                         </motion.div>
                     ))}
 
@@ -246,22 +246,22 @@ export default function Welcome() {
                             style={{ width: 200, height: 200 }}
                         >
                             {/* Spinning rings */}
-                            <LogoRing size={230} delay={0}   opacity={0.14} clockwise={true}  />
-                            <LogoRing size={260} delay={1.5} opacity={0.08} clockwise={false} />
-                            <LogoRing size={195} delay={0.8} opacity={0.20} clockwise={true}  />
+                            <LogoRing size={230} delay={0}   opacity={0.18} clockwise={true}  />
+                            <LogoRing size={260} delay={1.5} opacity={0.10} clockwise={false} />
+                            <LogoRing size={195} delay={0.8} opacity={0.28} clockwise={true}  />
 
-                            {/* Golden halo pulse */}
+                            {/* Navy halo pulse */}
                             <motion.div
                                 className="absolute rounded-full"
                                 style={{
                                     width: 170, height: 170,
-                                    background: 'radial-gradient(circle, rgba(255,184,28,0.20) 0%, transparent 70%)',
+                                    background: 'radial-gradient(circle, rgba(47,93,138,0.35) 0%, transparent 70%)',
                                 }}
                                 animate={{ scale: [1, 1.22, 1], opacity: [0.6, 1, 0.6] }}
                                 transition={{ duration: 3.2, repeat: Infinity, ease: 'easeInOut' }}
                             />
 
-                            {/* Logo — already circular, display directly */}
+                            {/* Logo */}
                             <motion.img
                                 src="/logo.png"
                                 alt="GovFund Nepal"
@@ -269,11 +269,11 @@ export default function Welcome() {
                                 style={{
                                     width: 148,
                                     height: 148,
-                                    filter: 'drop-shadow(0 0 28px rgba(255,184,28,0.48))',
+                                    filter: 'drop-shadow(0 0 28px rgba(47,93,138,0.70))',
                                 }}
                                 whileHover={{
                                     scale: 1.06,
-                                    filter: 'drop-shadow(0 0 40px rgba(255,184,28,0.70))',
+                                    filter: 'drop-shadow(0 0 40px rgba(255,255,255,0.35))',
                                 }}
                                 transition={{ duration: 0.35 }}
                             />
@@ -290,10 +290,7 @@ export default function Welcome() {
                                 className="font-heading font-extrabold tracking-tight"
                                 style={{
                                     fontSize: 'clamp(2.5rem, 7vw, 4.5rem)',
-                                    background: 'linear-gradient(135deg, #FFB81C 0%, #FAD980 45%, #FFB81C 100%)',
-                                    WebkitBackgroundClip: 'text',
-                                    WebkitTextFillColor: 'transparent',
-                                    backgroundClip: 'text',
+                                    color: '#FFFFFF',
                                     lineHeight: 1.05,
                                     letterSpacing: '-0.02em',
                                 }}
@@ -312,7 +309,7 @@ export default function Welcome() {
                                 className="font-heading font-semibold tracking-[0.35em] uppercase"
                                 style={{
                                     fontSize: 'clamp(0.85rem, 2.5vw, 1.15rem)',
-                                    color: '#8E6F3E',
+                                    color: 'rgba(255,255,255,0.55)',
                                     letterSpacing: '0.38em',
                                 }}
                             >
@@ -331,7 +328,7 @@ export default function Welcome() {
                                 className="font-heading font-bold"
                                 style={{
                                     fontSize: 'clamp(1.25rem, 3.5vw, 2rem)',
-                                    color: '#F5F1E6',
+                                    color: '#FFFFFF',
                                     letterSpacing: '-0.01em',
                                     lineHeight: 1.25,
                                 }}
@@ -349,7 +346,7 @@ export default function Welcome() {
                                 className="font-heading font-bold"
                                 style={{
                                     fontSize: 'clamp(1.25rem, 3.5vw, 2rem)',
-                                    color: '#F5F1E6',
+                                    color: '#FFFFFF',
                                     letterSpacing: '-0.01em',
                                     lineHeight: 1.25,
                                 }}
@@ -357,7 +354,7 @@ export default function Welcome() {
                                 On-Chain.{' '}
                                 <span
                                     style={{
-                                        background: 'linear-gradient(90deg, #FFB81C, #FAD980)',
+                                        background: 'linear-gradient(90deg, #E6A400, #C89200)',
                                         WebkitBackgroundClip: 'text',
                                         WebkitTextFillColor: 'transparent',
                                         backgroundClip: 'text',
@@ -374,7 +371,7 @@ export default function Welcome() {
                             animate={{ opacity: 1, y: 0 }}
                             transition={{ duration: 0.70, delay: 1.20, ease: [0.22, 1, 0.36, 1] }}
                             style={{
-                                color: '#C4A96E',
+                                color: 'rgba(255,255,255,0.70)',
                                 fontSize: 'clamp(0.8rem, 2vw, 1rem)',
                                 maxWidth: 380,
                                 lineHeight: 1.65,
@@ -401,12 +398,12 @@ export default function Welcome() {
                                 className="relative overflow-hidden font-heading font-bold rounded-2xl px-12 py-4 text-lg tracking-wide outline-none focus:outline-none"
                                 style={{
                                     background: btnHovered
-                                        ? 'linear-gradient(135deg, #FAD980 0%, #FFB81C 60%, #FAD980 100%)'
-                                        : 'linear-gradient(135deg, #FFB81C 0%, #E09F00 100%)',
-                                    color: '#1A160F',
+                                        ? 'linear-gradient(135deg, #C89200 0%, #E6A400 60%, #C89200 100%)'
+                                        : 'linear-gradient(135deg, #E6A400 0%, #C89200 100%)',
+                                    color: '#FFFFFF',
                                     boxShadow: btnHovered
-                                        ? '0 0 0 2px rgba(250,217,128,0.5), 0 20px 48px rgba(255,184,28,0.50), 0 4px 16px rgba(255,184,28,0.35)'
-                                        : '0 8px 32px rgba(255,184,28,0.35), 0 2px 8px rgba(255,184,28,0.25)',
+                                        ? '0 0 0 2px rgba(230,164,0,0.40), 0 20px 48px rgba(230,164,0,0.35), 0 4px 16px rgba(0,0,0,0.25)'
+                                        : '0 8px 32px rgba(230,164,0,0.30), 0 2px 8px rgba(0,0,0,0.20)',
                                     transition: 'background 0.3s, box-shadow 0.3s',
                                     cursor: 'pointer',
                                     letterSpacing: '0.04em',
@@ -417,9 +414,9 @@ export default function Welcome() {
                                 <motion.span
                                     className="absolute inset-0 pointer-events-none"
                                     style={{
-                                        background: 'linear-gradient(105deg, transparent 30%, rgba(255,255,255,0.28) 50%, transparent 70%)',
+                                        background: 'linear-gradient(105deg, transparent 30%, rgba(255,255,255,0.22) 50%, transparent 70%)',
                                     }}
-                                    animate={btnHovered ? { x: ['−100%', '200%'] } : { x: '-100%' }}
+                                    animate={btnHovered ? { x: ['-100%', '200%'] } : { x: '-100%' }}
                                     transition={{ duration: 0.55, ease: 'easeIn' }}
                                 />
                                 <span className="relative z-10 flex items-center gap-3">
@@ -459,15 +456,15 @@ export default function Welcome() {
                         transition={{ delay: 2.2, duration: 0.8 }}
                         style={{ zIndex: 5 }}
                     >
-                        <span style={{ color: 'rgba(142,111,62,0.50)', fontSize: '0.7rem', letterSpacing: '0.20em', fontFamily: 'JetBrains Mono, monospace' }}>
+                        <span style={{ color: 'rgba(255,255,255,0.35)', fontSize: '0.7rem', letterSpacing: '0.20em', fontFamily: 'JetBrains Mono, monospace' }}>
                             DECENTRALIZED · TRANSPARENT · TRUSTLESS
                         </span>
                     </motion.div>
 
-                    {/* ── Horizontal gold divider line ── */}
+                    {/* ── Horizontal divider line ── */}
                     <motion.div
                         className="absolute left-0 right-0 pointer-events-none"
-                        style={{ bottom: 56, height: 1, background: 'linear-gradient(90deg, transparent, rgba(142,111,62,0.25) 30%, rgba(255,184,28,0.18) 50%, rgba(142,111,62,0.25) 70%, transparent)', zIndex: 4 }}
+                        style={{ bottom: 56, height: 1, background: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.12) 30%, rgba(255,255,255,0.20) 50%, rgba(255,255,255,0.12) 70%, transparent)', zIndex: 4 }}
                         initial={{ scaleX: 0, opacity: 0 }}
                         animate={{ scaleX: 1, opacity: 1 }}
                         transition={{ delay: 2.0, duration: 1.2, ease: [0.22, 1, 0.36, 1] }}
@@ -477,5 +474,3 @@ export default function Welcome() {
         </AnimatePresence>
     );
 }
-
-
