@@ -52,6 +52,13 @@ export default {
                 'gov-red':    '#9B1C1C',
                 'gov-info':   '#2563EB',
 
+                // Figma system — Brand / Subtle + State tokens
+                'gov-subtle':        '#4F7CA6', // Brand/Subtle — tabs, icons, highlights
+                'gov-selected':      '#D6E4F0', // State/Selected — active tab bg
+                'gov-hover-bg':      '#EBF2F9', // State/Hover — row/item hover bg
+                'gov-border-strong': '#9CA3AF', // Border/Strong — table separators
+                'gov-divider':       '#E5E7EB', // Divider/Subtle — section dividers
+
                 // LEGACY ALIASES — All existing className refs auto-resolve.
                 // basalt => Deep Navy (header, footer, dark hero)
                 basalt: {
@@ -150,11 +157,16 @@ export default {
                 'basalt-xl':   '0 16px 64px 0 rgba(11,42,74,0.20)',
                 'card':        '0 1px 3px rgba(11,42,74,0.08), 0 4px 16px rgba(11,42,74,0.05)',
                 'card-hover':  '0 4px 20px rgba(11,42,74,0.13), 0 0 0 1px rgba(47,93,138,0.16)',
+                'card-accent': '0 4px 20px rgba(11,42,74,0.12), -3px 0 0 #2F5D8A',
                 'amber-sm':    '0 2px 8px 0 rgba(230,164,0,0.20)',
                 'amber-md':    '0 4px 18px 0 rgba(230,164,0,0.28)',
                 'amber-lg':    '0 8px 32px 0 rgba(230,164,0,0.34)',
                 'amber-xl':    '0 16px 48px 0 rgba(230,164,0,0.40)',
                 'inner-amber': 'inset 0 1px 0 rgba(230,164,0,0.12)',
+                'focus-ring':  '0 0 0 3px rgba(47,93,138,0.28)',
+                'focus-ring-amber': '0 0 0 3px rgba(230,164,0,0.35)',
+                'metric':      '0 2px 8px rgba(11,42,74,0.07)',
+                'nav':         '0 2px 16px rgba(11,42,74,0.22)',
             },
 
             animation: {
@@ -166,7 +178,12 @@ export default {
                 'fade-in':      'fadeIn 0.5s ease-out',
                 'shimmer':      'shimmer 2.2s linear infinite',
                 'pulse-golden': 'pulseGov 2s ease-in-out infinite',
-                'scan-line':    'scanLine 3s linear infinite',
+                'scan-line':      'scanLine 3s linear infinite',
+                'scale-in':       'scaleIn 0.35s cubic-bezier(0.22,1,0.36,1)',
+                'slide-in-left':  'slideInLeft 0.45s cubic-bezier(0.22,1,0.36,1)',
+                'slide-in-right': 'slideInRight 0.45s cubic-bezier(0.22,1,0.36,1)',
+                'ripple':         'ripple 0.55s linear',
+                'fade-slide-up':  'fadeSlideUp 0.5s cubic-bezier(0.22,1,0.36,1)',
             },
 
             keyframes: {
@@ -197,6 +214,30 @@ export default {
                 scanLine: {
                     '0%':   { transform: 'translateX(-100%)' },
                     '100%': { transform: 'translateX(400%)' },
+                },
+                scaleIn: {
+                    from: { opacity: '0', transform: 'scale(0.92)' },
+                    to:   { opacity: '1', transform: 'scale(1)' },
+                },
+                slideInLeft: {
+                    from: { opacity: '0', transform: 'translateX(-32px)' },
+                    to:   { opacity: '1', transform: 'translateX(0)' },
+                },
+                slideInRight: {
+                    from: { opacity: '0', transform: 'translateX(32px)' },
+                    to:   { opacity: '1', transform: 'translateX(0)' },
+                },
+                ripple: {
+                    '0%':   { transform: 'scale(0)', opacity: '0.45' },
+                    '100%': { transform: 'scale(3.5)', opacity: '0' },
+                },
+                progressFill: {
+                    from: { transform: 'scaleX(0)', transformOrigin: 'left' },
+                    to:   { transform: 'scaleX(1)', transformOrigin: 'left' },
+                },
+                fadeSlideUp: {
+                    from: { opacity: '0', transform: 'translateY(12px)' },
+                    to:   { opacity: '1', transform: 'translateY(0)' },
                 },
             },
 
