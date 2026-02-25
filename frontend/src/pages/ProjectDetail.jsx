@@ -1,6 +1,6 @@
 ﻿import React, { useEffect, useState, useMemo } from 'react';
 import { useParams, Link } from 'react-router-dom';
-import { getProject, getFeedback, submitFeedback, formatNPR, getStatusColor, getStatusBg } from '../services/api';
+import { getProject, getFeedback, submitFeedback, formatNPR, getStatusColor, getStatusBg, getExplorerUrl, getAccountExplorerUrl } from '../services/api';
 import { Chart as ChartJS, CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend, Filler } from 'chart.js';
 import { Line } from 'react-chartjs-2';
 
@@ -16,8 +16,8 @@ function MilestoneTracker({ milestones, total }) {
                     <div key={i} className="flex items-start gap-4 mb-6 last:mb-0">
                         {/* Timeline line + dot */}
                         <div className="flex flex-col items-center">
-                            <div className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold border-2 transition-all ${isCompleted ? 'bg-green-500 border-green-500 text-white' :
-                                    isActive ? 'bg-golden border-golden text-basalt animate-pulse' :
+                            <div className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold border-2 transition-all ${isCompleted ? 'bg-golden border-golden text-basalt' :
+                                    isActive ? 'bg-golden/15 border-golden text-golden animate-pulse' :
                                         'bg-earth-light border-earth-border text-parchment-ghost'
                                 }`}>
                                 {isCompleted ? '✓' : i + 1}
@@ -30,8 +30,11 @@ function MilestoneTracker({ milestones, total }) {
                         <div className="flex-1 pb-2">
                             <div className="flex items-center gap-2 mb-1">
                                 <h4 className="font-semibold text-sm text-parchment">{m.title}</h4>
-                                <span className={`badge text-[10px] ${isCompleted ? 'badge-active' : isActive ? 'bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400' : 'badge-pending'
-                                    }`}>
+                                <span className={`badge text-[10px] ${
+                                    isCompleted ? 'badge-active' :
+                                    isActive ? 'badge-pending border-golden/40 text-golden' :
+                                    'badge-pending'
+                                }`}>
                                     {m.status}
                                 </span>
                             </div>
@@ -70,12 +73,14 @@ export default function ProjectDetail() {
             datasets: [{
                 label: 'Cumulative Released',
                 data: releases.map(r => r.amount),
-                borderColor: '#FFB81C',
-                backgroundColor: 'rgba(255, 184, 28, 0.10)',
+                borderColor: '#8E6F3E',
+                backgroundColor: 'rgba(142,111,62,0.08)',
                 fill: true,
                 tension: 0.4,
                 pointRadius: 5,
-                pointBackgroundColor: '#FFB81C',
+                pointBackgroundColor: '#8E6F3E',
+                pointBorderColor: '#FFFFFF',
+                pointBorderWidth: 2,
             }],
         };
     }, [project]);
@@ -175,7 +180,7 @@ export default function ProjectDetail() {
                             <span className="font-semibold">{milestonePct}%</span>
                         </div>
                         <div className="progress-bar">
-                            <div className="progress-fill bg-gradient-to-r from-green-400 to-green-600" style={{ width: `${milestonePct}%` }}></div>
+                            <div className="progress-fill bg-gradient-to-r from-bronze to-bronze-light" style={{ width: `${milestonePct}%` }}></div>
                         </div>
                     </div>
                 </div>
@@ -214,11 +219,31 @@ export default function ProjectDetail() {
                                     responsive: true,
                                     plugins: {
                                         legend: { display: false },
-                                        tooltip: { callbacks: { label: (ctx) => formatNPR(ctx.raw) } },
+                                        tooltip: {
+                                            backgroundColor: 'rgba(45,37,24,0.95)',
+                                            borderColor: 'rgba(142,111,62,0.28)',
+                                            borderWidth: 1,
+                                            titleColor: '#F5F1E6',
+                                            bodyColor: '#C4A96E',
+                                            padding: 12,
+                                            callbacks: { label: (ctx) => ` ${formatNPR(ctx.raw)}` },
+                                        },
                                     },
                                     scales: {
-                                        y: { ticks: { callback: (v) => formatNPR(v) }, grid: { color: 'rgba(0,0,0,0.05)' } },
-                                        x: { grid: { display: false } },
+                                        y: {
+                                            ticks: {
+                                                callback: (v) => formatNPR(v),
+                                                color: '#C4A96E',
+                                                font: { size: 11 },
+                                            },
+                                            grid: { color: 'rgba(142,111,62,0.18)' },
+                                            border: { color: 'rgba(142,111,62,0.28)' },
+                                        },
+                                        x: {
+                                            grid: { display: false },
+                                            ticks: { color: '#C4A96E', font: { size: 11 } },
+                                            border: { color: 'rgba(142,111,62,0.28)' },
+                                        },
                                     },
                                 }}
                             />
@@ -236,15 +261,35 @@ export default function ProjectDetail() {
                                     <tr className="border-b border-earth-border">
                                         <th className="text-left py-3 text-parchment-muted font-medium">Date</th>
                                         <th className="text-left py-3 text-parchment-muted font-medium">Amount</th>
-                                        <th className="text-left py-3 text-parchment-muted font-medium">Description</th>
+                                        <th className="text-left py-3 text-parchment-muted font-medium hidden sm:table-cell">Description</th>
+                                        <th className="text-left py-3 text-parchment-muted font-medium">Tx</th>
                                     </tr>
                                 </thead>
                                 <tbody>
                                     {p.fundReleases.map((r, i) => (
                                         <tr key={i} className="border-b border-earth-border hover:bg-earth-light transition-colors">
-                                            <td className="py-3 text-gray-600 dark:text-gray-300">{new Date(r.date).toLocaleDateString()}</td>
-                                            <td className="py-3 font-semibold text-golden">{formatNPR(r.amount)}</td>
-                                            <td className="py-3 text-gray-600 dark:text-gray-300">{r.description}</td>
+                                            <td className="py-3 text-parchment-muted whitespace-nowrap">{new Date(r.date).toLocaleDateString()}</td>
+                                            <td className="py-3 font-semibold text-golden whitespace-nowrap">{formatNPR(r.amount)}</td>
+                                            <td className="py-3 text-parchment-muted hidden sm:table-cell">{r.description || '—'}</td>
+                                            <td className="py-3">
+                                                {r.txSignature ? (
+                                                    <a
+                                                        href={getExplorerUrl(r.txSignature)}
+                                                        target="_blank"
+                                                        rel="noopener noreferrer"
+                                                        className="inline-flex items-center gap-1 text-xs font-mono text-golden hover:text-amber-glow transition-colors group"
+                                                        title={r.txSignature}
+                                                    >
+                                                        <span className="hidden sm:inline">{r.txSignature.slice(0, 8)}&hellip;{r.txSignature.slice(-6)}</span>
+                                                        <span className="sm:hidden">View</span>
+                                                        <svg className="w-3 h-3 opacity-60 group-hover:opacity-100" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                                                        </svg>
+                                                    </a>
+                                                ) : (
+                                                    <span className="text-xs text-parchment-ghost">—</span>
+                                                )}
+                                            </td>
                                         </tr>
                                     ))}
                                 </tbody>
@@ -259,14 +304,14 @@ export default function ProjectDetail() {
                         </h3>
                         <form onSubmit={handleSubmitFeedback} className="mb-6 p-4 bg-earth rounded-xl">
                             <div className="flex items-center gap-4 mb-3">
-                                <label className="text-sm text-gray-600 dark:text-gray-300">Rating:</label>
+                                <label className="text-sm text-parchment-muted">Rating:</label>
                                 <div className="flex gap-1">
                                     {[1, 2, 3, 4, 5].map(star => (
                                         <button
                                             key={star}
                                             type="button"
                                             onClick={() => setNewFeedback(f => ({ ...f, rating: star }))}
-                                            className={`text-xl ${star <= newFeedback.rating ? 'text-yellow-400' : 'text-gray-300'} hover:text-yellow-400 transition-colors`}
+                                            className={`text-xl transition-colors ${star <= newFeedback.rating ? 'text-golden' : 'text-parchment-ghost'} hover:text-golden`}
                                         >★</button>
                                     ))}
                                 </div>
@@ -291,11 +336,11 @@ export default function ProjectDetail() {
                                     <div key={i} className="p-4 bg-earth rounded-xl border border-earth-border">
                                         <div className="flex items-center justify-between mb-2">
                                             <div className="flex items-center gap-2">
-                                                <div className="text-sm text-yellow-400">{'★'.repeat(f.rating)}{'☆'.repeat(5 - f.rating)}</div>
+                                                <div className="text-sm text-golden">{'★'.repeat(f.rating)}{'☆'.repeat(5 - f.rating)}</div>
                                             </div>
                                             <span className="text-xs text-parchment-muted">{new Date(f.createdAt).toLocaleDateString()}</span>
                                         </div>
-                                        <p className="text-sm text-gray-600 dark:text-gray-300">{f.comment}</p>
+                                        <p className="text-sm text-parchment-dim">{f.comment}</p>
                                     </div>
                                 ))}
                             </div>
@@ -346,33 +391,115 @@ export default function ProjectDetail() {
                                 {p.budgetAllocations.map((a, i) => (
                                     <div key={i} className="p-3 bg-earth rounded-xl">
                                         <div className="flex justify-between items-center mb-1">
-                                            <span className="text-sm font-semibold text-parchment">{formatNPR(a.amount)}</span>
+                                            <span className="text-sm font-semibold text-amber-glow">{formatNPR(a.amount)}</span>
                                             <span className="text-xs text-parchment-muted">{new Date(a.date).toLocaleDateString()}</span>
                                         </div>
                                         <p className="text-xs text-parchment-muted">{a.description}</p>
+                                        {a.txSignature && (
+                                            <a
+                                                href={getExplorerUrl(a.txSignature)}
+                                                target="_blank"
+                                                rel="noopener noreferrer"
+                                                className="inline-flex items-center gap-1 mt-1.5 text-[10px] font-mono text-golden hover:text-amber-glow transition-colors"
+                                            >
+                                                Tx: {a.txSignature.slice(0, 8)}…{a.txSignature.slice(-6)}
+                                                <svg className="w-2.5 h-2.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                                                </svg>
+                                            </a>
+                                        )}
                                     </div>
                                 ))}
                             </div>
                         </div>
                     )}
 
-                    {/* Solana Explorer */}
+                    {/* Solana On-Chain Info */}
                     <div className="card p-6">
                         <h3 className="font-heading font-bold text-lg text-parchment mb-4">
-                            🔗 Blockchain
+                            ⛓️ On-Chain Data
                         </h3>
-                        <a
-                            href="https://explorer.solana.com/?cluster=devnet"
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="flex items-center gap-3 p-3 bg-earth rounded-xl hover:bg-earth-light transition-colors"
-                        >
-                            <div className="w-8 h-8 rounded-lg bg-purple-100 dark:bg-purple-900/30 flex items-center justify-center text-purple-600 text-sm">⛓</div>
-                            <div>
-                                <p className="text-sm font-medium text-parchment">View on Solana Explorer</p>
-                                <p className="text-xs text-parchment-muted">Devnet Cluster</p>
+
+                        {/* Project PDA */}
+                        {p.pda && (
+                            <div className="mb-4 p-3 bg-earth rounded-xl">
+                                <p className="text-[10px] text-parchment-ghost uppercase tracking-wider mb-1">Project PDA (Devnet)</p>
+                                <a
+                                    href={getAccountExplorerUrl(p.pda)}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="flex items-center justify-between group hover:bg-earth-light rounded-lg p-1 -m-1 transition-colors"
+                                >
+                                    <span className="text-xs font-mono text-golden group-hover:text-amber-glow break-all leading-relaxed">
+                                        {p.pda}
+                                    </span>
+                                    <svg className="w-3.5 h-3.5 ml-2 flex-shrink-0 text-parchment-ghost group-hover:text-golden transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                                    </svg>
+                                </a>
                             </div>
-                        </a>
+                        )}
+
+                        {/* Recent on-chain transactions */}
+                        {(() => {
+                            const txList = [
+                                ...(p.fundReleases || []).filter(r => r.txSignature).map(r => ({ sig: r.txSignature, label: `Released ${formatNPR(r.amount)}`, date: r.date, type: 'release' })),
+                                ...(p.budgetAllocations || []).filter(a => a.txSignature).map(a => ({ sig: a.txSignature, label: `Allocated ${formatNPR(a.amount)}`, date: a.date, type: 'allocate' })),
+                            ].sort((a, b) => new Date(b.date) - new Date(a.date)).slice(0, 8);
+
+                            return txList.length > 0 ? (
+                                <div>
+                                    <p className="text-[10px] text-parchment-ghost uppercase tracking-wider mb-3">Recent Transactions</p>
+                                    <div className="space-y-2">
+                                        {txList.map((tx, i) => (
+                                            <a
+                                                key={i}
+                                                href={getExplorerUrl(tx.sig)}
+                                                target="_blank"
+                                                rel="noopener noreferrer"
+                                                className="flex items-center gap-3 p-2 bg-earth rounded-lg hover:bg-earth-light transition-colors group"
+                                            >
+                                                <div className={`w-6 h-6 rounded-full flex items-center justify-center text-[10px] flex-shrink-0 ${
+                                                    tx.type === 'release' ? 'bg-golden/15 text-golden' : 'bg-amber-glow/10 text-amber-glow'
+                                                }`}>
+                                                    {tx.type === 'release' ? '⇓' : '⇑'}
+                                                </div>
+                                                <div className="flex-1 min-w-0">
+                                                    <p className="text-xs text-parchment font-medium truncate">{tx.label}</p>
+                                                    <p className="text-[10px] font-mono text-parchment-ghost">
+                                                        {tx.sig.slice(0, 8)}&hellip;{tx.sig.slice(-6)}
+                                                    </p>
+                                                </div>
+                                                <svg className="w-3 h-3 text-parchment-ghost group-hover:text-golden transition-colors flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                                                </svg>
+                                            </a>
+                                        ))}
+                                    </div>
+                                </div>
+                            ) : (
+                                <p className="text-xs text-parchment-ghost mb-3">No on-chain transaction records yet.</p>
+                            );
+                        })()}
+
+                        {/* Solana Explorer link */}
+                        <div className="mt-4 pt-3 border-t border-earth-border">
+                            <a
+                                href="https://explorer.solana.com/?cluster=devnet"
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="flex items-center gap-3 p-3 bg-earth rounded-xl hover:bg-earth-light transition-colors group"
+                            >
+                                <div className="w-8 h-8 rounded-lg bg-golden/10 border border-golden/20 flex items-center justify-center text-golden text-sm">⛓</div>
+                                <div>
+                                    <p className="text-sm font-medium text-parchment group-hover:text-golden transition-colors">Solana Explorer</p>
+                                    <p className="text-xs text-parchment-muted">Devnet Cluster</p>
+                                </div>
+                                <svg className="w-4 h-4 ml-auto text-parchment-ghost group-hover:text-golden transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                                </svg>
+                            </a>
+                        </div>
                     </div>
                 </div>
             </div>
