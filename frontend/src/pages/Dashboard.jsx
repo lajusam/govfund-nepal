@@ -80,17 +80,17 @@ export default function Dashboard() {
             {/* Overview Cards */}
             <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4 mb-12">
                 {[
-                    { label: 'Total Budget', value: formatNPR(overview.totalBudget), color: 'from-gov-slate to-gov-navy' },
-                    { label: 'Allocated', value: formatNPR(overview.totalAllocated), color: 'from-gov-navy to-gov-slate' },
-                    { label: 'Released', value: formatNPR(overview.totalReleased), color: 'from-gov-green to-gov-slate' },
-                    { label: 'Projects', value: overview.totalProjects, color: 'from-gov-info to-gov-slate' },
-                    { label: 'Active', value: overview.activeProjects, color: 'from-gov-slate/80 to-gov-navy/80' },
-                    { label: 'Utilization', value: `${overview.utilizationRate}%`, color: 'from-gov-amber to-gov-amber-hover' },
+                    { label: 'Total Budget', value: formatNPR(overview.totalBudget), color: 'from-golden to-golden-600' },
+                    { label: 'Allocated', value: formatNPR(overview.totalAllocated), color: 'from-bronze to-bronze-light' },
+                    { label: 'Released', value: formatNPR(overview.totalReleased), color: 'from-amber-glow to-golden' },
+                    { label: 'Projects', value: overview.totalProjects, color: 'from-golden to-amber-glow' },
+                    { label: 'Active', value: overview.activeProjects, color: 'from-green-500 to-emerald-600' },
+                    { label: 'Utilization', value: `${overview.utilizationRate}%`, color: 'from-purple-500 to-purple-700' },
                 ].map((stat, i) => (
                     <div key={i} className="card p-4 relative overflow-hidden group hover:-translate-y-1 transition-all">
                         <div className={`absolute top-0 left-0 w-full h-1 bg-gradient-to-r ${stat.color}`}></div>
                         <p className="text-xs text-parchment-ghost mb-1">{stat.label}</p>
-                        <p className="text-lg md:text-xl font-heading font-bold text-gov-navy">{stat.value}</p>
+                        <p className="text-lg md:text-xl font-heading font-bold text-parchment">{stat.value}</p>
                     </div>
                 ))}
             </div>
@@ -119,7 +119,6 @@ export default function Dashboard() {
                                         titleColor: '#0B2A4A',
                                         bodyColor: '#4B5563',
                                         padding: 12,
-                                        boxShadow: '0 4px 16px rgba(11,42,74,0.12)',
                                         callbacks: {
                                             label: (ctx) => ` ${ctx.dataset.label}: ${formatNPR(ctx.raw)}`,
                                         },
