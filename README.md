@@ -117,7 +117,7 @@ This is a demonstration/prototype. Devnet provides free SOL for testing and iden
 | Terai Irrigation Canal System | Madhesh | Sarlahi | Agriculture |
 | Rural Drinking Water Supply | Karnali | Jumla | Water Supply |
 | Earthquake Housing Reconstruction | Bagmati | Sindhupalchok | Reconstruction |
-| School Infrastructure Development | Lumbini | Rupandehi | Education |
+| School Infrastructure Development | Lumbini | Rupandehi| Education|
 
 ## License
 
