@@ -3,19 +3,16 @@ import React, { useState, useCallback } from 'react';
 /**
  * IPFSDocumentLink — opens IPFS documents using gateway fallback.
  *
- * Problem: gateway.pinata.cloud only serves files pinned to YOUR Pinata account.
- *          Seed-data hashes or files pinned elsewhere cause ERR_ID:00016 timeout.
- *
- * Solution: Try multiple public gateways in order. If the first fails (HEAD check),
- *           fall back to the next. On click, open the first reachable gateway URL.
+ * Documents pinned to your Pinata account are best served by Pinata's
+ * dedicated gateway. Public gateways are used as fallbacks.
  */
 
 const GATEWAYS = [
+    'https://gateway.pinata.cloud/ipfs/',   // Best for YOUR pinned files
     'https://ipfs.io/ipfs/',
     'https://cloudflare-ipfs.com/ipfs/',
     'https://dweb.link/ipfs/',
     'https://w3s.link/ipfs/',
-    'https://gateway.pinata.cloud/ipfs/',   // Pinata last — only works for your pins
 ];
 
 export function getIPFSGatewayUrl(hash, gatewayIndex = 0) {
@@ -26,19 +23,21 @@ export function getIPFSGatewayUrl(hash, gatewayIndex = 0) {
 
 export default function IPFSDocumentLink({ ipfsHash, name, children }) {
     const [checking, setChecking] = useState(false);
+    const [error, setError] = useState(false);
 
     const openDocument = useCallback(async (e) => {
         e.preventDefault();
         if (!ipfsHash) return;
 
         setChecking(true);
+        setError(false);
 
-        // Try each gateway with a quick HEAD request
+        // Try each gateway with a quick fetch check
         for (const gw of GATEWAYS) {
             const url = `${gw}${ipfsHash}`;
             try {
                 const controller = new AbortController();
-                const timeoutId = setTimeout(() => controller.abort(), 6000);
+                const timeoutId = setTimeout(() => controller.abort(), 8000);
 
                 const res = await fetch(url, {
                     method: 'HEAD',
@@ -58,9 +57,17 @@ export default function IPFSDocumentLink({ ipfsHash, name, children }) {
             }
         }
 
-        // If all HEAD checks fail/timeout, just open the first public gateway directly
-        // (the browser can still load it even if HEAD from JS was blocked by CORS)
+        // If all HEAD checks fail/timeout, open Pinata gateway directly anyway
+        // (browser may still load it — CORS only blocks JS, not navigation)
         setChecking(false);
+        window.open(`${GATEWAYS[0]}${ipfsHash}`, '_blank', 'noopener,noreferrer');
+    }, [ipfsHash]);
+
+    // Direct open without gateway probing (faster, used as retry)
+    const openDirect = useCallback((e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        setError(false);
         window.open(`${GATEWAYS[0]}${ipfsHash}`, '_blank', 'noopener,noreferrer');
     }, [ipfsHash]);
 
@@ -88,12 +95,35 @@ export default function IPFSDocumentLink({ ipfsHash, name, children }) {
             rel="noopener noreferrer"
             className="flex items-center gap-3 p-3 bg-earth rounded-xl hover:bg-earth-light transition-colors group"
         >
-            <div className="w-8 h-8 rounded-lg bg-golden/10 flex items-center justify-center text-golden text-sm">📎</div>
+            <div className="w-8 h-8 rounded-lg bg-golden/10 flex items-center justify-center text-golden text-sm">
+                {error ? '⚠️' : '📎'}
+            </div>
             <div className="flex-1 min-w-0">
-                <p className="text-sm font-medium text-parchment group-hover:text-golden transition-colors truncate">
-                    {checking ? 'Connecting to IPFS…' : (name || 'IPFS Document')}
-                </p>
-                <p className="text-[10px] text-parchment-muted font-mono truncate">{ipfsHash}</p>
+                {checking ? (
+                    <>
+                        <p className="text-sm font-medium text-golden animate-pulse truncate">
+                            Connecting to IPFS gateway…
+                        </p>
+                        <p className="text-[10px] text-parchment-muted">Checking multiple gateways</p>
+                    </>
+                ) : error ? (
+                    <>
+                        <p className="text-sm font-medium text-red-400 truncate">Gateway unavailable</p>
+                        <button
+                            onClick={openDirect}
+                            className="text-[10px] text-golden hover:text-amber-glow underline"
+                        >
+                            Try opening directly →
+                        </button>
+                    </>
+                ) : (
+                    <>
+                        <p className="text-sm font-medium text-parchment group-hover:text-golden transition-colors truncate">
+                            {name || 'IPFS Document'}
+                        </p>
+                        <p className="text-[10px] text-parchment-muted font-mono truncate">{ipfsHash}</p>
+                    </>
+                )}
             </div>
             {checking ? (
                 <span className="w-4 h-4 border-2 border-golden/40 border-t-golden rounded-full animate-spin flex-shrink-0" />

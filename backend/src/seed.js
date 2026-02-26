@@ -97,9 +97,9 @@ const projects = [
             { index: 5, title: 'Final Inspection & Handover', description: 'Quality inspection and project handover', status: 'Pending', updatedAt: new Date() },
         ],
         documents: [
-            { ipfsHash: 'QmT5NvUtoM5nWFfrQdVrFtvGfKFmG7AHE8P34isapyhCxX', name: 'Project Blueprint v1.0', uploadedAt: new Date('2025-01-10'), onChainIndex: 0 },
-            { ipfsHash: 'QmYwAPJzv5CZsnA625s3Xf2nemtYgPpHdWEz79ojWnPbdG', name: 'Environmental Impact Assessment', uploadedAt: new Date('2025-02-20'), onChainIndex: 1 },
-            { ipfsHash: 'QmZTR5bcpQD7cFgTorqxZDYaew1Wqgog96SA4iuLWwh2WP', name: 'Q3 2025 Progress Report', uploadedAt: new Date('2025-10-01'), onChainIndex: 2 },
+            { ipfsHash: 'QmXqwRofNB2ny2RNjVbAuAZqoEJhLiNdM5Rciz6Zo5Bd3D', name: 'Project Blueprint v1.0', uploadedAt: new Date('2025-01-10'), onChainIndex: 0 },
+            { ipfsHash: 'QmeqY9QGHmMjqYAtpS538KqwWaN8UQq8uVXdqMJMY5WeMj', name: 'Environmental Impact Assessment', uploadedAt: new Date('2025-02-20'), onChainIndex: 1 },
+            { ipfsHash: 'QmR8LamA6hYCjhHoTzPUTXRXewUAmnLGFCJT1juHMYqZJQ', name: 'Q3 2025 Progress Report', uploadedAt: new Date('2025-10-01'), onChainIndex: 2 },
         ],
         fundReleases: [
             { amount: 50000000, date: new Date('2025-02-15'), txSignature: '5xGk...demo1', description: 'Initial mobilization advance' },
@@ -135,8 +135,8 @@ const projects = [
             { index: 4, title: 'Testing & Commissioning', description: 'System testing and hospital commissioning', status: 'Pending', updatedAt: new Date() },
         ],
         documents: [
-            { ipfsHash: 'QmW2WQi7j6c7UZBA98gaNd8GNTg5oGELv8BXkdKqtqSeFZ', name: 'Hospital Design Plans', uploadedAt: new Date('2025-01-15'), onChainIndex: 0 },
-            { ipfsHash: 'QmPCPWkShC7VL7w2JQ8P1B7mZyVeSzDm5k3UtCwBz7zDqf', name: 'Medical Equipment Tender', uploadedAt: new Date('2025-05-10'), onChainIndex: 1 },
+            { ipfsHash: 'QmUTaq3mzZvsvdaZdah3ykp2b6i6pKaTLk4ak1mX9Wn6wc', name: 'Hospital Design Plans', uploadedAt: new Date('2025-01-15'), onChainIndex: 0 },
+            { ipfsHash: 'QmPcgEAv5iFLz7fbGSPdq8CUGJ7Z3e46uoDtJQDyjTTCqs', name: 'Medical Equipment Tender', uploadedAt: new Date('2025-05-10'), onChainIndex: 1 },
         ],
         fundReleases: [
             { amount: 100000000, date: new Date('2025-03-01'), txSignature: '7cLp...demo6', description: 'Foundation phase payment' },
@@ -171,7 +171,7 @@ const projects = [
             { index: 3, title: 'Pump Stations & Testing', description: '3 pump stations and full system testing', status: 'InProgress', updatedAt: new Date('2026-02-01') },
         ],
         documents: [
-            { ipfsHash: 'QmRVBRBJxgMHi5SU1p9D8Y6bqPmLkjBxJa3a8NqFybhSmG', name: 'Irrigation Master Plan', uploadedAt: new Date('2025-01-05'), onChainIndex: 0 },
+            { ipfsHash: 'QmdLyrFDYXq58174bttBtHufUXEgDWyxSzn1FygNCKgtuc', name: 'Irrigation Master Plan', uploadedAt: new Date('2025-01-05'), onChainIndex: 0 },
         ],
         fundReleases: [
             { amount: 30000000, date: new Date('2025-03-10'), txSignature: '2hQu...demo11', description: 'Survey and mobilization' },
@@ -206,7 +206,7 @@ const projects = [
             { index: 3, title: 'Distribution & Tap Stands', description: 'House connections and public tap stands', status: 'Pending', updatedAt: new Date() },
         ],
         documents: [
-            { ipfsHash: 'QmUNLLsPACCz1vLxQVkXqqLX5R1X345qqfHbsf67hvA3Nn', name: 'Water Quality Report', uploadedAt: new Date('2025-04-15'), onChainIndex: 0 },
+            { ipfsHash: 'QmNijvuhP2sTxmMkJwR2TpG6Jk2o3qAbAXFpjWs11Mr2d7', name: 'Water Quality Report', uploadedAt: new Date('2025-04-15'), onChainIndex: 0 },
         ],
         fundReleases: [
             { amount: 25000000, date: new Date('2025-04-01'), txSignature: '7mVz...demo16', description: 'Intake construction' },
@@ -241,8 +241,8 @@ const projects = [
             { index: 4, title: 'Quality Audit & Handover', description: 'Structural audit and key handover', status: 'InProgress', updatedAt: new Date('2026-02-01') },
         ],
         documents: [
-            { ipfsHash: 'QmXArUgARREVCbjfBjT2xZTYTJ3Vb1dD3vAAfMXLQUXdHK', name: 'NRA Compliance Certificate', uploadedAt: new Date('2025-01-20'), onChainIndex: 0 },
-            { ipfsHash: 'QmYGqo3TSPV5Fcnxz8mMPUcfoGbrTEEwMJcoFfW5sxMPzS', name: 'Phase 3 Completion Report', uploadedAt: new Date('2026-01-25'), onChainIndex: 1 },
+            { ipfsHash: 'QmXpibZuffCrkemD5LdyRFHKka9aXvmNt7Eyc9JxaowW3K', name: 'NRA Compliance Certificate', uploadedAt: new Date('2025-01-20'), onChainIndex: 0 },
+            { ipfsHash: 'QmQkZh3hmMRTvNt19gQCDn8FwQtJaLVbtLMekudU1syRaN', name: 'Phase 3 Completion Report', uploadedAt: new Date('2026-01-25'), onChainIndex: 1 },
         ],
         fundReleases: [
             { amount: 50000000, date: new Date('2025-02-20'), txSignature: '3qZd...demo20', description: 'Survey and design' },
@@ -278,7 +278,7 @@ const projects = [
             { index: 3, title: 'Furniture & Equipment', description: 'Desks, lab equipment, computers, library books', status: 'Pending', updatedAt: new Date() },
         ],
         documents: [
-            { ipfsHash: 'QmNRCQWL4vJchDw4o8rmr8KncANFFeJ5o3bDuHVTpBK9YB', name: 'School Assessment Report', uploadedAt: new Date('2025-06-01'), onChainIndex: 0 },
+            { ipfsHash: 'QmTcap2PFoQzZMzrrbBaNbupcg89dG8AtkkQpJoo6ymyQy', name: 'School Assessment Report', uploadedAt: new Date('2025-06-01'), onChainIndex: 0 },
         ],
         fundReleases: [
             { amount: 15000000, date: new Date('2025-06-15'), txSignature: '7wFj...demo26', description: 'Assessment and design' },
