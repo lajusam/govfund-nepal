@@ -235,7 +235,7 @@ export async function verifyIPFSHash(ipfsHash) {
 /** GET /api/ipfs/resolve/:hash — resolve the fastest gateway URL for a hash */
 export async function resolveIPFSUrl(ipfsHash) {
     const data = await safeFetch(`/ipfs/resolve/${ipfsHash}`);
-    return data?.gatewayUrl || `https://gateway.pinata.cloud/ipfs/${ipfsHash}`;
+    return data?.gatewayUrl || `https://ipfs.io/ipfs/${ipfsHash}`;
 }
 
 // ═════════════════════════════════════════════════════════════════════════════

@@ -3,6 +3,7 @@ import { useParams, Link } from 'react-router-dom';
 import { getProject, getFeedback, submitFeedback, formatNPR, getStatusColor, getStatusBg, getExplorerUrl, getAccountExplorerUrl } from '../services/api';
 import { Chart as ChartJS, CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend, Filler } from 'chart.js';
 import { Line } from 'react-chartjs-2';
+import IPFSDocumentLink from '../components/IPFSDocumentLink';
 
 ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend, Filler);
 
@@ -365,20 +366,11 @@ export default function ProjectDetail() {
                         {p.documents?.length > 0 ? (
                             <div className="space-y-3">
                                 {p.documents.map((doc, i) => (
-                                    <a
+                                    <IPFSDocumentLink
                                         key={i}
-                                        href={`https://gateway.pinata.cloud/ipfs/${doc.ipfsHash}`}
-                                        target="_blank"
-                                        rel="noopener noreferrer"
-                                        className="flex items-center gap-3 p-3 bg-earth rounded-xl hover:bg-earth-light transition-colors group"
-                                    >
-                                        <div className="w-8 h-8 rounded-lg bg-golden/10 flex items-center justify-center text-golden text-sm">📎</div>
-                                        <div className="flex-1 min-w-0">
-                                            <p className="text-sm font-medium text-parchment group-hover:text-golden transition-colors truncate">{doc.name}</p>
-                                            <p className="text-[10px] text-parchment-muted font-mono truncate">{doc.ipfsHash}</p>
-                                        </div>
-                                        <span className="text-parchment-muted text-xs">↗</span>
-                                    </a>
+                                        ipfsHash={doc.ipfsHash}
+                                        name={doc.name}
+                                    />
                                 ))}
                             </div>
                         ) : (

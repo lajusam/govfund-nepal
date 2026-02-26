@@ -64,11 +64,11 @@ const ALLOWED_MIME_TYPES = new Set([
 // Public IPFS gateways — ordered by reliability.
 // The dedicated gateway is tried first, public gateways are fallbacks.
 const GATEWAYS = [
-    'https://gateway.pinata.cloud/ipfs/',
     'https://ipfs.io/ipfs/',
     'https://cloudflare-ipfs.com/ipfs/',
     'https://dweb.link/ipfs/',
     'https://w3s.link/ipfs/',
+    'https://gateway.pinata.cloud/ipfs/',
 ];
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
