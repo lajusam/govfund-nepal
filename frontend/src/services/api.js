@@ -171,12 +171,6 @@ export async function getHealth() {
     return data || { status: 'unknown' };
 }
 
-/** GET /api/demo-projects — all seeded MongoDB projects */
-export async function getDemoProjects() {
-    const data = await safeFetch('/demo-projects');
-    return data || [];
-}
-
 // ═════════════════════════════════════════════════════════════════════════════
 // Admin routes  (require x-wallet-* headers — call setAdminHeaders() first)
 // ═════════════════════════════════════════════════════════════════════════════

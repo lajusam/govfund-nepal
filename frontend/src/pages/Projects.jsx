@@ -12,11 +12,16 @@ function ProjectCard({ project }) {
         : 0;
 
     return (
-        <Link to={`/project/${p.projectId}`} className="card p-6 group hover:-translate-y-1 transition-all duration-300 block">
+        <Link to={`/project/${p.projectId}`} className={`card p-6 group hover:-translate-y-1 transition-all duration-300 block ${p.status === 'Completed' ? 'opacity-75 border-parchment-ghost/20' : ''}`}>
             {/* Status badge */}
             <div className="flex items-start justify-between mb-4">
-                <span className={`badge ${p.status === 'Active' ? 'badge-active' : 'badge-completed'}`}>
-                    {p.status}
+                <span className={`badge ${
+                    p.status === 'Active' ? 'badge-active' :
+                    p.status === 'Completed' ? 'bg-earth text-parchment-ghost border border-parchment-ghost/30' :
+                    p.status === 'Suspended' ? 'bg-red-900/20 text-red-400 border border-red-500/30' :
+                    'badge-completed'
+                }`}>
+                    {p.status === 'Completed' ? '🔒 Closed' : p.status}
                 </span>
                 <span className="text-xs text-parchment-ghost">{p.province}</span>
             </div>

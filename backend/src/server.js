@@ -10,9 +10,6 @@ const analyticsRoutes = require('./routes/analytics');
 const adminRoutes = require('./routes/admin');
 const feedbackRoutes = require('./routes/feedback');
 
-// Import your Project model for demo-projects route
-const Project = require('./models/Project'); // make sure this path is correct
-
 const app = express();
 const PORT = process.env.PORT || 5000;
 
@@ -44,20 +41,8 @@ app.get('/api', (req, res) => {
             '/api/admin',
             '/api/feedback',
             '/api/health',
-            '/api/demo-projects'
         ]
     });
-});
-
-// Demo projects route to fetch seeded projects
-app.get('/api/demo-projects', async (req, res) => {
-    try {
-        const projects = await Project.find(); // fetch all seeded projects
-        res.json(projects);
-    } catch (err) {
-        console.error('Error fetching demo projects:', err);
-        res.status(500).json({ error: 'Failed to fetch projects', message: err.message });
-    }
 });
 
 // === Other project routes ===
@@ -94,7 +79,6 @@ mongoose.connect(MONGO_URI)
         app.listen(PORT, () => {
             console.log(`✅ Server running on port ${PORT}`);
             console.log(`   Test API: http://localhost:${PORT}/api`);
-            console.log(`   Demo projects: http://localhost:${PORT}/api/demo-projects`);
         });
     })
     .catch(err => {

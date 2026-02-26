@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback, useRef } from 'react';
+import React, { useState, useEffect, useCallback, useRef, useMemo } from 'react';
 import { useWallet, useConnection } from '@solana/wallet-adapter-react';
 import { WalletMultiButton } from '@solana/wallet-adapter-react-ui';
 import { useSolana } from '../context/WalletContext';
@@ -534,15 +534,20 @@ export default function Admin() {
     : [];
 
   // ── Fetch projects (chain-first via backend, falls back to MongoDB cache) ──
-  const refreshProjects = useCallback(async () => {
-    try {
-      // Don't force source=cache — let backend try chain first so new on-chain projects appear
-      const res = await api.get('/projects');
-      const data = res.data || [];
-      setProjects(data);
-      try { sessionStorage.setItem('govfund-projects', JSON.stringify(data)); } catch {}
-    } catch {
-      // Keep existing cached data
+  const refreshProjects = useCallback(async (retries = 2) => {
+    for (let attempt = 0; attempt <= retries; attempt++) {
+      try {
+        const res = await api.get('/projects');
+        const data = res.data || [];
+        setProjects(data);
+        try { sessionStorage.setItem('govfund-projects', JSON.stringify(data)); } catch {}
+        return; // success
+      } catch (err) {
+        console.warn(`[refreshProjects] attempt ${attempt + 1} failed:`, err.message);
+        if (attempt < retries) {
+          await new Promise(r => setTimeout(r, 1500));
+        }
+      }
     }
   }, []);
 
@@ -582,26 +587,57 @@ export default function Admin() {
     }
   }, [program, programReady]);
 
-  // Refresh on-chain data for known project IDs
+  // Fetch ALL on-chain projects (not just known ones) so new projects always appear
   const refreshOnChainData = useCallback(async () => {
-    if (!program || !programReady || projects.length === 0) return;
-    const results = await Promise.allSettled(
-      projects.map((p) => fetchOnChainProject(p.projectId))
-    );
-    const onChain = results
-      .filter((r) => r.status === 'fulfilled' && r.value)
-      .map((r) => r.value);
-    setOnChainProjects(onChain);
-  }, [program, programReady, projects, fetchOnChainProject]);
+    if (!program || !programReady) return;
+    try {
+      const accounts = await program.account.project.all();
+      const onChain = accounts.map(({ publicKey: pk, account }) => {
+        const statusKey = Object.keys(account.status)[0];
+        return {
+          projectId: account.projectId,
+          name: account.name,
+          province: account.province,
+          district: account.district,
+          sector: account.sector,
+          contractor: account.contractor,
+          totalBudget: account.totalBudget.toNumber(),
+          allocatedBudget: account.allocatedBudget.toNumber(),
+          releasedAmount: account.releasedAmount.toNumber(),
+          status: statusKey ? statusKey.charAt(0).toUpperCase() + statusKey.slice(1) : 'Active',
+          milestoneCount: account.milestoneCount,
+          milestonesCompleted: account.milestonesCompleted,
+          admin: account.admin.toBase58(),
+          createdAt: account.createdAt.toNumber(),
+          updatedAt: account.updatedAt.toNumber(),
+          estimatedCompletion: new Date(account.estimatedCompletion.toNumber() * 1000).toISOString(),
+          documentCount: account.documentCount,
+          pda: pk.toBase58(),
+          onChain: true,
+        };
+      });
+      setOnChainProjects(onChain);
+    } catch (err) {
+      console.warn('[Admin] Failed to fetch all on-chain projects:', err.message);
+    }
+  }, [program, programReady]);
 
   useEffect(() => { refreshProjects(); }, [refreshProjects]);
   useEffect(() => { refreshOnChainData(); }, [refreshOnChainData]);
 
-  // Merge backend-cached + on-chain data (on-chain takes precedence for numeric fields)
-  const mergedProjects = projects.map((p) => {
-    const oc = onChainProjects.find((o) => o.projectId === p.projectId);
-    return oc ? { ...p, ...oc } : p;
-  });
+  // Merge backend-cached + on-chain data; on-chain takes precedence for financial fields.
+  // CRITICAL: also include on-chain-only projects not yet in MongoDB.
+  const mergedProjects = useMemo(() => {
+    const map = new Map();
+    // Start with all backend (MongoDB) projects
+    for (const p of projects) map.set(p.projectId, { ...p });
+    // Override/add with on-chain data (source of truth for financials)
+    for (const oc of onChainProjects) {
+      const existing = map.get(oc.projectId);
+      map.set(oc.projectId, existing ? { ...existing, ...oc } : oc);
+    }
+    return Array.from(map.values());
+  }, [projects, onChainProjects]);
 
   // ── Helpers ──
   const showMsg = (text, type, txSig = null) => {
@@ -622,10 +658,9 @@ export default function Admin() {
     return true;
   };
 
-  // Base helper: delay then call any admin sync endpoint
+  // Base helper: call any admin sync endpoint (no artificial delay — backend has retries)
   const syncAction = async (endpoint, payload) => {
     try {
-      await new Promise(resolve => setTimeout(resolve, 2000));
       await api.post(endpoint, payload, {
         headers: { 'x-wallet-address': publicKey.toBase58() },
       });
@@ -720,8 +755,33 @@ export default function Admin() {
         sig
       );
 
-      await syncProject(projectId, sig, { province, district, sector, contractor, estimatedCompletion, description });
+      // Optimistic update: add project to local state immediately
+      const newProject = {
+        projectId, name, province, district, sector, contractor,
+        totalBudget: Number(totalBudget),
+        allocatedBudget: 0,
+        releasedAmount: 0,
+        status: 'Active',
+        milestoneCount,
+        milestonesCompleted: 0,
+        admin: publicKey.toBase58(),
+        estimatedCompletion: new Date(estimatedCompletion).toISOString(),
+        onChain: true,
+        pda: getProjectPDA(projectId)[0].toBase58(),
+        description: description || '',
+      };
+      setProjects(prev => [...prev, newProject]);
+
+      // Sync to backend (sends all form data as fallback for chain fetch failures)
+      await syncProject(projectId, sig, {
+        name, province, district, sector, contractor,
+        totalBudget: Number(totalBudget), milestoneCount,
+        estimatedCompletion, description,
+      });
+      // Refresh from backend + chain to get authoritative merged state
       await refreshProjects();
+      // Schedule delayed re-sync to catch chain confirmation
+      setTimeout(() => { refreshProjects(); refreshOnChainData(); }, 4000);
 
       // Clear form + session
       const emptyForm = {
@@ -767,8 +827,17 @@ export default function Admin() {
       });
 
       showMsg(`${t('budgetAllocated')} ${t('txLabel')}: ${sig.slice(0, 16)}...`, 'success', sig);
+
+      // Optimistic update: reflect allocation immediately
+      setProjects(prev => prev.map(p =>
+        p.projectId === allocateForm.projectId
+          ? { ...p, allocatedBudget: (p.allocatedBudget || 0) + Number(allocateForm.amount) }
+          : p
+      ));
+
       await syncAllocate(allocateForm.projectId, sig, allocateForm.amount, allocateForm.description);
       await refreshProjects();
+      setTimeout(() => { refreshProjects(); refreshOnChainData(); }, 4000);
       setAllocateForm({ projectId: '', amount: '', description: '' });
       try { sessionStorage.removeItem('govfund-allocateForm'); } catch {}
     } catch (err) {
@@ -808,8 +877,17 @@ export default function Admin() {
       });
 
       showMsg(`${t('fundsReleased')} ${t('txLabel')}: ${sig.slice(0, 16)}...`, 'success', sig);
+
+      // Optimistic update: reflect release immediately
+      setProjects(prev => prev.map(p =>
+        p.projectId === releaseForm.projectId
+          ? { ...p, releasedAmount: (p.releasedAmount || 0) + Number(releaseForm.amount) }
+          : p
+      ));
+
       await syncRelease(releaseForm.projectId, sig, releaseForm.amount, releaseForm.description);
       await refreshProjects();
+      setTimeout(() => { refreshProjects(); refreshOnChainData(); }, 4000);
       setReleaseForm({ projectId: '', amount: '', description: '' });
       try { sessionStorage.removeItem('govfund-releaseForm'); } catch {}
     } catch (err) {
@@ -957,8 +1035,17 @@ export default function Admin() {
           });
 
           showMsg(`${t('projectClosed')} ${t('txLabel')}: ${sig.slice(0, 16)}...`, 'success', sig);
+
+          // Optimistic update: reflect closed status immediately
+          setProjects(prev => prev.map(p =>
+            p.projectId === projectId
+              ? { ...p, status: 'Completed' }
+              : p
+          ));
+
           await syncClose(projectId, sig);
           await refreshProjects();
+          setTimeout(() => { refreshProjects(); refreshOnChainData(); }, 4000);
           setCloseForm({ projectId: '' });
           try { sessionStorage.removeItem('govfund-closeForm'); } catch {}
         } catch (err) {

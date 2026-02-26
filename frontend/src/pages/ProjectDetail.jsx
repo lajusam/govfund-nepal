@@ -124,7 +124,12 @@ export default function ProjectDetail() {
                 <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-4 mb-6">
                     <div>
                         <div className="flex items-center gap-3 mb-2">
-                            <span className={`badge ${p.status === 'Active' ? 'badge-active' : 'badge-completed'}`}>{p.status}</span>
+                            <span className={`badge ${
+                                p.status === 'Active' ? 'badge-active' :
+                                p.status === 'Completed' ? 'bg-earth text-parchment-ghost border border-parchment-ghost/30' :
+                                p.status === 'Suspended' ? 'bg-red-900/20 text-red-400 border border-red-500/30' :
+                                'badge-completed'
+                            }`}>{p.status === 'Completed' ? '🔒 Closed' : p.status}</span>
                             <span className="text-sm text-parchment-muted">{p.province} → {p.district} → {p.sector}</span>
                         </div>
                         <h1 className="text-2xl md:text-3xl font-heading font-bold text-parchment">{p.name}</h1>

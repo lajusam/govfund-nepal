@@ -25,24 +25,35 @@ const {
 
 // POST: Sync a newly created project from chain → MongoDB
 // Called by frontend AFTER the on-chain createProject tx succeeds
+// Accepts full project data as fallback in case chain fetch fails (devnet RPC rate limits)
 router.post('/projects/sync', verifyAdmin, async (req, res) => {
     try {
-        const { projectId, txSignature, description } = req.body;
+        const {
+            projectId, txSignature, description,
+            // Fallback fields sent by frontend (used if chain fetch fails)
+            name, province, district, sector, contractor,
+            totalBudget, milestoneCount, estimatedCompletion,
+        } = req.body;
 
         if (!projectId) {
             return res.status(400).json({ error: 'projectId is required' });
         }
 
-        // Fetch the project from Solana to verify it exists on-chain
-        const onChainProject = await fetchProjectFromChain(projectId);
-        if (!onChainProject) {
-            return res.status(404).json({ error: 'Project not found on-chain. Ensure the transaction was confirmed.' });
+        // Try to fetch from Solana with retries (devnet can be slow)
+        let onChainProject = null;
+        for (let attempt = 0; attempt < 3; attempt++) {
+            onChainProject = await fetchProjectFromChain(projectId);
+            if (onChainProject) break;
+            if (attempt < 2) await new Promise(r => setTimeout(r, 2500));
         }
 
-        // Upsert into MongoDB as a cached copy
-        const project = await Project.findOneAndUpdate(
-            { projectId },
-            {
+        // Compute PDA for explorer URL even without chain data
+        const [pda] = getProjectPDA(projectId);
+        const pdaBase58 = pda.toBase58();
+
+        // Build upsert data: prefer on-chain values, fallback to frontend-provided data
+        const upsertData = onChainProject
+            ? {
                 projectId: onChainProject.projectId,
                 name: onChainProject.name,
                 province: onChainProject.province,
@@ -60,18 +71,45 @@ router.post('/projects/sync', verifyAdmin, async (req, res) => {
                 onChainAddress: onChainProject.publicKey,
                 solanaExplorerUrl: getAccountExplorerUrl(onChainProject.publicKey),
                 description: description || '',
-            },
+            }
+            : {
+                // Fallback: use frontend-provided data so project is always persisted
+                projectId,
+                name: name || projectId,
+                province: province || '',
+                district: district || '',
+                sector: sector || '',
+                contractor: contractor || '',
+                totalBudget: totalBudget ? Number(totalBudget) : 0,
+                allocatedBudget: 0,
+                releasedAmount: 0,
+                status: 'Active',
+                milestoneCount: milestoneCount ? Number(milestoneCount) : 1,
+                milestonesCompleted: 0,
+                adminWallet: req.walletAddress || ADMIN_WALLET,
+                estimatedCompletion: estimatedCompletion ? new Date(estimatedCompletion) : new Date(),
+                onChainAddress: pdaBase58,
+                solanaExplorerUrl: getAccountExplorerUrl(pdaBase58),
+                description: description || '',
+            };
+
+        const project = await Project.findOneAndUpdate(
+            { projectId },
+            upsertData,
             { upsert: true, new: true, setDefaultsOnInsert: true }
         );
 
-        // Record the creation tx if provided
         if (txSignature) {
             project.budgetAllocations = project.budgetAllocations || [];
         }
         await project.save();
 
+        console.log(`[sync] Project ${projectId} synced (source: ${onChainProject ? 'chain' : 'frontend fallback'})`);
+
         res.status(201).json({
-            message: 'Project synced from blockchain',
+            message: onChainProject
+                ? 'Project synced from blockchain'
+                : 'Project cached from frontend data (chain confirmation pending)',
             project,
             onChain: onChainProject,
             explorerUrl: txSignature ? getExplorerUrl(txSignature) : null,
@@ -87,34 +125,62 @@ router.post('/projects/:projectId/sync-allocate', verifyAdmin, async (req, res) 
         const { txSignature, amount, description } = req.body;
         const { projectId } = req.params;
 
-        const onChainProject = await fetchProjectFromChain(projectId);
-        if (!onChainProject) {
-            return res.status(404).json({ error: 'Project not found on-chain' });
+        // Try chain fetch but don't fail if unavailable
+        let onChainProject = null;
+        try {
+            onChainProject = await fetchProjectFromChain(projectId);
+        } catch (err) {
+            console.warn(`[sync-allocate] Chain fetch failed for ${projectId}:`, err.message);
         }
 
-        // Update MongoDB cache with on-chain values (source of truth)
-        const project = await Project.findOneAndUpdate(
-            { projectId },
-            {
-                allocatedBudget: onChainProject.allocatedBudget,
-                $push: {
-                    budgetAllocations: {
-                        amount: amount || 0,
-                        date: new Date(),
-                        txSignature: txSignature || '',
-                        description: description || `Budget allocation synced from chain`,
-                    },
+        // Build update: prefer chain data, fallback to increment with frontend amount
+        const updateOps = {
+            $push: {
+                budgetAllocations: {
+                    amount: amount ? Number(amount) : 0,
+                    date: new Date(),
+                    txSignature: txSignature || '',
+                    description: description || 'Budget allocation synced from chain',
                 },
             },
-            { new: true }
-        );
+        };
+
+        if (onChainProject) {
+            // Chain data is source of truth
+            updateOps.allocatedBudget = onChainProject.allocatedBudget;
+            updateOps.releasedAmount = onChainProject.releasedAmount;
+            updateOps.status = onChainProject.status;
+        } else if (amount) {
+            // Fallback: increment by the amount the frontend reported
+            updateOps.$inc = { allocatedBudget: Number(amount) };
+        }
+
+        // $inc and top-level field can't coexist on same field, handle separately
+        let project;
+        if (updateOps.$inc) {
+            const { $push, $inc } = updateOps;
+            project = await Project.findOneAndUpdate(
+                { projectId },
+                { $push, $inc },
+                { new: true }
+            );
+        } else {
+            const { $push, ...setFields } = updateOps;
+            project = await Project.findOneAndUpdate(
+                { projectId },
+                { ...setFields, $push },
+                { new: true }
+            );
+        }
 
         if (!project) {
             return res.status(404).json({ error: 'Project not found in cache. Run /sync first.' });
         }
 
+        console.log(`[sync-allocate] ${projectId}: allocated=${project.allocatedBudget} (source: ${onChainProject ? 'chain' : 'fallback'})`);
+
         res.json({
-            message: 'Budget allocation synced from blockchain',
+            message: 'Budget allocation synced',
             project,
             onChain: onChainProject,
             explorerUrl: txSignature ? getExplorerUrl(txSignature) : null,
@@ -130,33 +196,58 @@ router.post('/projects/:projectId/sync-release', verifyAdmin, async (req, res) =
         const { txSignature, amount, description } = req.body;
         const { projectId } = req.params;
 
-        const onChainProject = await fetchProjectFromChain(projectId);
-        if (!onChainProject) {
-            return res.status(404).json({ error: 'Project not found on-chain' });
+        // Try chain fetch but don't fail if unavailable
+        let onChainProject = null;
+        try {
+            onChainProject = await fetchProjectFromChain(projectId);
+        } catch (err) {
+            console.warn(`[sync-release] Chain fetch failed for ${projectId}:`, err.message);
         }
 
-        const project = await Project.findOneAndUpdate(
-            { projectId },
-            {
-                releasedAmount: onChainProject.releasedAmount,
-                $push: {
-                    fundReleases: {
-                        amount: amount || 0,
-                        date: new Date(),
-                        txSignature: txSignature || '',
-                        description: description || `Fund release synced from chain`,
-                    },
+        const updateOps = {
+            $push: {
+                fundReleases: {
+                    amount: amount ? Number(amount) : 0,
+                    date: new Date(),
+                    txSignature: txSignature || '',
+                    description: description || 'Fund release synced from chain',
                 },
             },
-            { new: true }
-        );
+        };
+
+        if (onChainProject) {
+            updateOps.releasedAmount = onChainProject.releasedAmount;
+            updateOps.allocatedBudget = onChainProject.allocatedBudget;
+            updateOps.status = onChainProject.status;
+        } else if (amount) {
+            updateOps.$inc = { releasedAmount: Number(amount) };
+        }
+
+        let project;
+        if (updateOps.$inc) {
+            const { $push, $inc } = updateOps;
+            project = await Project.findOneAndUpdate(
+                { projectId },
+                { $push, $inc },
+                { new: true }
+            );
+        } else {
+            const { $push, ...setFields } = updateOps;
+            project = await Project.findOneAndUpdate(
+                { projectId },
+                { ...setFields, $push },
+                { new: true }
+            );
+        }
 
         if (!project) {
             return res.status(404).json({ error: 'Project not found in cache. Run /sync first.' });
         }
 
+        console.log(`[sync-release] ${projectId}: released=${project.releasedAmount} (source: ${onChainProject ? 'chain' : 'fallback'})`);
+
         res.json({
-            message: 'Fund release synced from blockchain',
+            message: 'Fund release synced',
             project,
             onChain: onChainProject,
             explorerUrl: txSignature ? getExplorerUrl(txSignature) : null,
@@ -260,14 +351,28 @@ router.post('/projects/:projectId/sync-close', verifyAdmin, async (req, res) => 
         const { txSignature } = req.body;
         const { projectId } = req.params;
 
-        const onChainProject = await fetchProjectFromChain(projectId);
-        if (!onChainProject) {
-            return res.status(404).json({ error: 'Project not found on-chain' });
+        // Try chain fetch but don't block on failure
+        let onChainProject = null;
+        try {
+            onChainProject = await fetchProjectFromChain(projectId);
+        } catch (err) {
+            console.warn(`[sync-close] Chain fetch failed for ${projectId}:`, err.message);
+        }
+
+        // Always update status — if chain says Completed, use that; otherwise
+        // the close_project tx succeeded on-chain so status must be Completed
+        const newStatus = onChainProject?.status || 'Completed';
+
+        const updateData = { status: newStatus };
+        if (onChainProject) {
+            updateData.releasedAmount = onChainProject.releasedAmount;
+            updateData.allocatedBudget = onChainProject.allocatedBudget;
+            updateData.milestonesCompleted = onChainProject.milestonesCompleted;
         }
 
         const project = await Project.findOneAndUpdate(
             { projectId },
-            { status: onChainProject.status },
+            updateData,
             { new: true }
         );
 
@@ -275,8 +380,10 @@ router.post('/projects/:projectId/sync-close', verifyAdmin, async (req, res) => 
             return res.status(404).json({ error: 'Project not found in cache' });
         }
 
+        console.log(`[sync-close] ${projectId}: status=${newStatus} (source: ${onChainProject ? 'chain' : 'fallback'})`);
+
         res.json({
-            message: 'Project close synced from blockchain',
+            message: 'Project close synced',
             project,
             onChain: onChainProject,
             explorerUrl: txSignature ? getExplorerUrl(txSignature) : null,
