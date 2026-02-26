@@ -722,6 +722,16 @@ export default function Admin() {
     try {
       const [projectPDA] = getProjectPDA(projectId);
       const completionTimestamp = new BN(Math.floor(new Date(estimatedCompletion).getTime() / 1000));
+      const budgetBN = new BN(String(Math.floor(Number(totalBudget))));
+
+      if (budgetBN.lte(new BN(0))) {
+        return showMsg('Budget must be greater than zero', 'error');
+      }
+
+      const mcCount = Number(milestoneCount);
+      if (!Number.isInteger(mcCount) || mcCount < 1 || mcCount > 20) {
+        return showMsg('Milestone count must be between 1 and 20', 'error');
+      }
 
       const tx = await program.methods
         .createProject(
@@ -731,8 +741,8 @@ export default function Admin() {
           district,
           sector,
           contractor,
-          new BN(totalBudget),
-          milestoneCount,
+          budgetBN,
+          mcCount,
           completionTimestamp
         )
         .accounts({
@@ -806,16 +816,38 @@ export default function Admin() {
     try {
       const { projectId, amount } = allocateForm;
       if (!projectId || !amount) return showMsg(t('fillAllFields'), 'error');
+
+      const amountNum = Number(amount);
+      if (!Number.isFinite(amountNum) || amountNum <= 0) {
+        return showMsg('Amount must be a positive number', 'error');
+      }
+
       const [projectPDA] = getProjectPDA(projectId);
 
-      // Pre-flight: verify project exists on-chain before building tx
-      const accInfo = await connection.getAccountInfo(projectPDA);
-      if (!accInfo) {
+      // ── Pre-flight: fetch on-chain state & validate ──
+      let projectAccount;
+      try {
+        projectAccount = await fetchAccountWithRetry(
+          () => program.account.project.fetch(projectPDA), 2, 1000
+        );
+      } catch {
         return showMsg('Project not found on Solana. Only projects created through this admin panel can be managed on-chain.', 'error');
       }
 
+      const statusKey = Object.keys(projectAccount.status)[0];
+      if (statusKey !== 'active') {
+        return showMsg(`Cannot allocate — project status is "${statusKey}". Only Active projects accept allocations.`, 'error');
+      }
+
+      const totalBudget = projectAccount.totalBudget.toNumber();
+      const currentAllocated = projectAccount.allocatedBudget.toNumber();
+      const remaining = totalBudget - currentAllocated;
+      if (amountNum > remaining) {
+        return showMsg(`Allocation of ${formatNPR(amountNum)} exceeds remaining budget of ${formatNPR(remaining)} (total: ${formatNPR(totalBudget)}, already allocated: ${formatNPR(currentAllocated)})`, 'error');
+      }
+
       const tx = await program.methods
-        .allocateBudget(new BN(amount))
+        .allocateBudget(new BN(amountNum.toString()))
         .accounts({ project: projectPDA, admin: publicKey })
         .transaction();
 
@@ -856,16 +888,38 @@ export default function Admin() {
     try {
       const { projectId, amount } = releaseForm;
       if (!projectId || !amount) return showMsg(t('fillAllFields'), 'error');
+
+      const amountNum = Number(amount);
+      if (!Number.isFinite(amountNum) || amountNum <= 0) {
+        return showMsg('Amount must be a positive number', 'error');
+      }
+
       const [projectPDA] = getProjectPDA(projectId);
 
-      // Pre-flight: verify project exists on-chain before building tx
-      const accInfo = await connection.getAccountInfo(projectPDA);
-      if (!accInfo) {
+      // ── Pre-flight: fetch on-chain state & validate ──
+      let projectAccount;
+      try {
+        projectAccount = await fetchAccountWithRetry(
+          () => program.account.project.fetch(projectPDA), 2, 1000
+        );
+      } catch {
         return showMsg('Project not found on Solana. Only projects created through this admin panel can be managed on-chain.', 'error');
       }
 
+      const statusKey = Object.keys(projectAccount.status)[0];
+      if (statusKey !== 'active') {
+        return showMsg(`Cannot release funds — project status is "${statusKey}". Only Active projects accept releases.`, 'error');
+      }
+
+      const currentAllocated = projectAccount.allocatedBudget.toNumber();
+      const currentReleased = projectAccount.releasedAmount.toNumber();
+      const releasable = currentAllocated - currentReleased;
+      if (amountNum > releasable) {
+        return showMsg(`Release of ${formatNPR(amountNum)} exceeds releasable funds of ${formatNPR(releasable)} (allocated: ${formatNPR(currentAllocated)}, already released: ${formatNPR(currentReleased)})`, 'error');
+      }
+
       const tx = await program.methods
-        .releaseFunds(new BN(amount))
+        .releaseFunds(new BN(amountNum.toString()))
         .accounts({ project: projectPDA, admin: publicKey })
         .transaction();
 
@@ -908,10 +962,23 @@ export default function Admin() {
       if (!projectId || description === '') return showMsg(t('fillAllFields'), 'error');
       const [projectPDA] = getProjectPDA(projectId);
 
-      // Pre-flight: verify project exists on-chain before building tx
-      const accInfo = await connection.getAccountInfo(projectPDA);
-      if (!accInfo) {
+      // ── Pre-flight: fetch on-chain project & validate ──
+      let projectAccount;
+      try {
+        projectAccount = await fetchAccountWithRetry(
+          () => program.account.project.fetch(projectPDA), 2, 1000
+        );
+      } catch {
         return showMsg('Project not found on Solana. Only projects created through this admin panel can be managed on-chain.', 'error');
+      }
+
+      const statusKey = Object.keys(projectAccount.status)[0];
+      if (statusKey !== 'active') {
+        return showMsg(`Cannot update milestone — project status is "${statusKey}". Only Active projects allow milestone updates.`, 'error');
+      }
+
+      if (index >= projectAccount.milestoneCount) {
+        return showMsg(`Invalid milestone index ${index}. Project has ${projectAccount.milestoneCount} milestones (0-${projectAccount.milestoneCount - 1}).`, 'error');
       }
 
       const [milestonePDA] = getMilestonePDA(projectPDA, index);
@@ -1014,10 +1081,26 @@ export default function Admin() {
         try {
           const [projectPDA] = getProjectPDA(projectId);
 
-          // Pre-flight: verify project exists on-chain before building tx
-          const accInfo = await connection.getAccountInfo(projectPDA);
-          if (!accInfo) {
+          // ── Pre-flight: fetch on-chain project & validate ──
+          let projectAccount;
+          try {
+            projectAccount = await fetchAccountWithRetry(
+              () => program.account.project.fetch(projectPDA), 2, 1000
+            );
+          } catch {
             showMsg('Project not found on Solana. Only projects created through this admin panel can be managed on-chain.', 'error');
+            setLoading(false);
+            return;
+          }
+
+          const statusKey = Object.keys(projectAccount.status)[0];
+          if (statusKey === 'completed') {
+            showMsg('This project is already closed.', 'error');
+            setLoading(false);
+            return;
+          }
+          if (statusKey !== 'active') {
+            showMsg(`Cannot close — project status is "${statusKey}". Only Active projects can be closed.`, 'error');
             setLoading(false);
             return;
           }

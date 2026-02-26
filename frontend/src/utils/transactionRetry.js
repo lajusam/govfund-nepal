@@ -1,32 +1,34 @@
 import { TransactionExpiredBlockheightExceededError } from '@solana/web3.js';
 
+// ═══════════════════════════════════════════════════════════════
+// Anchor GovFund error map — mirrors on-chain GovFundError enum
+// ═══════════════════════════════════════════════════════════════
+const ANCHOR_ERROR_MAP = {
+  6000: 'String exceeds maximum allowed length',
+  6001: 'Budget amount must be greater than zero',
+  6002: 'Milestone count must be between 1 and 20',
+  6003: 'Project is not in Active status — cannot allocate, release, or modify a closed project',
+  6004: 'Allocation amount exceeds total project budget',
+  6005: 'Release amount exceeds allocated budget',
+  6006: 'Unauthorized: your wallet is not the project admin',
+  6007: 'Invalid milestone index',
+};
+
+// Well-known Solana runtime error messages
+const RUNTIME_ERRORS = {
+  'AccountNotFound':         'Account not found on-chain — the project may not exist yet',
+  'InsufficientFunds':       'Insufficient SOL to pay transaction fees',
+  'AccountAlreadyExists':    'This project ID already exists on-chain',
+  'InvalidAccountData':      'Account data is corrupted or invalid',
+  'AccountDataTooSmall':     'Account size too small — contact the developer',
+  'ProgramAccountNotFound':  'The GovFund program is not deployed on this network',
+};
+
 /**
- * Send a Solana transaction with automatic retry + exponential back-off.
- *
- * Flow:
- *   1. Get a fresh blockhash
- *   2. sendTransaction (wallet signs + sends)
- *   3. confirmTransaction
- *   4. On transient failure → wait → retry (up to maxRetries)
- *
- * @param {object}   opts
- * @param {object}   opts.transaction      - An unsigned Transaction object
- * @param {object}   opts.connection       - @solana/web3.js Connection
- * @param {Function} opts.sendTransaction  - wallet-adapter sendTransaction
- * @param {string}   [opts.commitment]     - 'confirmed' | 'finalized'
- * @param {number}   [opts.maxRetries]     - total retry attempts (default 3)
- * @param {number}   [opts.baseDelayMs]    - initial back-off delay (default 1500)
- * @param {Function} [opts.onRetry]        - callback(attempt, error) on retry
- * @returns {Promise<string>} confirmed signature
- */
-/**
- * Send a Solana transaction with automatic retry + exponential back-off.
- *
- * Flow:
- *   1. Get a fresh blockhash
- *   2. sendTransaction ONCE (wallet signs — Phantom popup appears exactly once)
- *   3. Retry confirmation polling up to maxRetries times (no more wallet prompts)
- *   4. On blockhash expiry → throw immediately (caller should warn user to retry)
+ * Send a Solana transaction with:
+ *   1. Client-side simulation (extracts program logs BEFORE wallet popup)
+ *   2. Wallet signing (Phantom popup — exactly once)
+ *   3. Confirmation polling with retry
  *
  * @param {object}   opts
  * @param {object}   opts.transaction      - An unsigned Transaction object
@@ -36,6 +38,7 @@ import { TransactionExpiredBlockheightExceededError } from '@solana/web3.js';
  * @param {number}   [opts.maxRetries]     - confirmation poll retries (default 3)
  * @param {number}   [opts.baseDelayMs]    - initial back-off delay (default 1500)
  * @param {Function} [opts.onRetry]        - callback(attempt, error) on retry
+ * @param {boolean}  [opts.skipSimulation] - bypass client-side simulation (default false)
  * @returns {Promise<string>} confirmed signature
  */
 export async function sendTransactionWithRetry({
@@ -46,6 +49,7 @@ export async function sendTransactionWithRetry({
   maxRetries = 3,
   baseDelayMs = 1500,
   onRetry,
+  skipSimulation = false,
 }) {
   // ── Step 1: Get a fresh blockhash (done ONCE before signing) ──────────────
   const { blockhash, lastValidBlockHeight } =
@@ -53,16 +57,54 @@ export async function sendTransactionWithRetry({
   transaction.recentBlockhash = blockhash;
   transaction.lastValidBlockHeight = lastValidBlockHeight;
 
-  // ── Step 2: Sign + send via wallet adapter — triggers Phantom popup ONCE ──
-  // We intentionally do NOT retry this step. Re-calling sendTransaction would
-  // show the "trust this domain" / signing popup again on every attempt.
-  const signature = await sendTransaction(transaction, connection, {
-    skipPreflight: false,
-    preflightCommitment: commitment,
-    maxRetries: 0, // we handle confirmation retries ourselves below
-  });
+  // ── Step 2: Client-side simulation — catch program errors BEFORE wallet popup ──
+  // This avoids the dreaded "Unexpected error" from Phantom by detecting issues
+  // while we still have access to program logs.
+  if (!skipSimulation) {
+    try {
+      const simResult = await connection.simulateTransaction(transaction, {
+        sigVerify: false, // we haven't signed yet
+        commitment: 'confirmed',
+      });
 
-  // ── Step 3: Poll for confirmation — no wallet interaction from here on ─────
+      if (simResult.value.err) {
+        // Extract the human-readable error from simulation logs
+        const decoded = decodeSimulationError(simResult.value.err, simResult.value.logs);
+        throw new SimulationError(decoded, simResult.value.logs);
+      }
+
+      // Log simulation success for debugging
+      console.log('[simulation] ✓ Pre-flight passed', {
+        unitsConsumed: simResult.value.unitsConsumed,
+        logsCount: simResult.value.logs?.length,
+      });
+    } catch (simErr) {
+      // Re-throw our own SimulationError as-is
+      if (simErr instanceof SimulationError) throw simErr;
+
+      // Network error during simulation — warn but continue (wallet will retry preflight)
+      console.warn('[simulation] Pre-flight simulation failed (non-fatal):', simErr.message);
+    }
+  }
+
+  // ── Step 3: Sign + send via wallet adapter — triggers Phantom popup ONCE ──
+  // skipPreflight: true because we already simulated above.
+  // This prevents Phantom from running its own preflight which produces generic errors.
+  let signature;
+  try {
+    signature = await sendTransaction(transaction, connection, {
+      skipPreflight: true,           // we already simulated
+      preflightCommitment: commitment,
+      maxRetries: 0,                 // we handle confirmation retries below
+    });
+  } catch (sendErr) {
+    // Wallet rejected, or Phantom's own preflight failed
+    // Try to extract a meaningful message
+    const parsed = parseWalletSendError(sendErr);
+    throw new Error(parsed);
+  }
+
+  // ── Step 4: Poll for confirmation — no wallet interaction from here on ─────
   let lastError;
 
   for (let attempt = 0; attempt <= maxRetries; attempt++) {
@@ -74,7 +116,7 @@ export async function sendTransactionWithRetry({
 
       if (result.value.err) {
         throw new Error(
-          `Transaction confirmed but failed: ${JSON.stringify(result.value.err)}`
+          `Transaction confirmed but failed on-chain: ${JSON.stringify(result.value.err)}`
         );
       }
 
@@ -83,7 +125,6 @@ export async function sendTransactionWithRetry({
       lastError = err;
 
       // Blockhash expired → transaction is permanently gone from mempool.
-      // There is nothing more to confirm; surface a clean message immediately.
       if (
         err instanceof TransactionExpiredBlockheightExceededError ||
         (err?.message || '').includes('block height exceeded') ||
@@ -113,11 +154,120 @@ export async function sendTransactionWithRetry({
 }
 
 /**
+ * Custom error class for simulation failures — preserves program logs.
+ */
+class SimulationError extends Error {
+  constructor(message, logs = []) {
+    super(message);
+    this.name = 'SimulationError';
+    this.logs = logs;
+  }
+}
+
+/**
+ * Decode a simulation error object + logs into a human-readable message.
+ * Handles Anchor custom errors (6xxx) and standard runtime errors.
+ */
+function decodeSimulationError(errObj, logs = []) {
+  // 1. Try Anchor custom error from the InstructionError tuple
+  //    Shape: { InstructionError: [instructionIndex, { Custom: errorCode }] }
+  if (errObj?.InstructionError) {
+    const [, inner] = errObj.InstructionError;
+    if (inner?.Custom !== undefined) {
+      const code = inner.Custom;
+      if (ANCHOR_ERROR_MAP[code]) {
+        return ANCHOR_ERROR_MAP[code];
+      }
+      return `Program error (code ${code})`;
+    }
+    // Named runtime error (e.g. { InstructionError: [0, "AccountNotFound"] })
+    if (typeof inner === 'string' && RUNTIME_ERRORS[inner]) {
+      return RUNTIME_ERRORS[inner];
+    }
+  }
+
+  // 2. Scan program logs for Anchor error messages
+  //    Anchor v0.30 logs: "Program log: AnchorError ... Error Code: ProjectNotActive. Error Number: 6003."
+  if (logs?.length) {
+    for (const line of logs) {
+      // Anchor error format
+      const anchorMatch = line.match(/Error Number: (\d+)/);
+      if (anchorMatch) {
+        const code = parseInt(anchorMatch[1], 10);
+        if (ANCHOR_ERROR_MAP[code]) return ANCHOR_ERROR_MAP[code];
+        return `Program error (code ${code})`;
+      }
+
+      // Anchor "Error Message:" format
+      const msgMatch = line.match(/Error Message: (.+?)\.?\s*$/);
+      if (msgMatch) return msgMatch[1];
+
+      // Generic program failure
+      if (line.includes('Program failed to complete')) {
+        return 'Transaction failed — the program rejected the instruction. Check project status and amounts.';
+      }
+    }
+  }
+
+  // 3. Fallback
+  return `Transaction simulation failed: ${JSON.stringify(errObj)}`;
+}
+
+/**
+ * Parse a WalletSendTransactionError into something the user can understand.
+ * Phantom often wraps errors as "Unexpected error" — we dig into the cause.
+ */
+function parseWalletSendError(err) {
+  const msg = err?.message || String(err);
+
+  // User rejected
+  if (msg.toLowerCase().includes('user rejected') || msg.toLowerCase().includes('user denied')) {
+    return 'Transaction was cancelled by the wallet';
+  }
+
+  // Phantom "Unexpected error" — try extracting inner cause
+  if (msg.includes('Unexpected error')) {
+    // Check for nested error or logs
+    const inner = err?.error || err?.cause;
+    if (inner) {
+      const innerMsg = inner?.message || JSON.stringify(inner);
+      // Try to decode if it contains program error info
+      const codeMatch = innerMsg.match(/custom program error: 0x([0-9a-fA-F]+)/i);
+      if (codeMatch) {
+        const code = parseInt(codeMatch[1], 16);
+        if (ANCHOR_ERROR_MAP[code]) return ANCHOR_ERROR_MAP[code];
+      }
+      return innerMsg.length > 200 ? innerMsg.slice(0, 200) + '...' : innerMsg;
+    }
+
+    // If we simulated successfully but wallet still failed → likely a signing/network issue
+    return 'Wallet encountered an unexpected error. This usually means a network timeout — please try again.';
+  }
+
+  // Simulation failed inside wallet preflight
+  if (msg.includes('Simulation failed')) {
+    const logMatch = msg.match(/Program log: (.+?)(?:\n|$)/);
+    if (logMatch) return logMatch[1];
+
+    const codeMatch = msg.match(/custom program error: 0x([0-9a-fA-F]+)/i);
+    if (codeMatch) {
+      const code = parseInt(codeMatch[1], 16);
+      if (ANCHOR_ERROR_MAP[code]) return ANCHOR_ERROR_MAP[code];
+    }
+  }
+
+  return msg.length > 200 ? msg.slice(0, 200) + '...' : msg;
+}
+
+/**
  * Determine if an error should NOT be retried.
  * User rejections, simulation failures, and custom program errors are final.
  */
 function isNonRetryableError(err) {
   const msg = (err?.message || '').toLowerCase();
+
+  // Our own SimulationError is always final
+  if (err instanceof SimulationError) return true;
 
   // User rejected in wallet
   if (msg.includes('user rejected') || msg.includes('user denied') || msg.includes('cancelled')) {
@@ -171,40 +321,52 @@ export async function fetchAccountWithRetry(fetchFn, maxRetries = 3, baseDelayMs
 }
 
 /**
- * Parse Anchor program errors into human-readable messages.
+ * Parse any error (transaction, simulation, wallet) into a human-readable message.
+ * Handles Anchor codes, simulation logs, wallet rejections, and generic failures.
  */
 export function parseTransactionError(err) {
+  // SimulationError already has a decoded message
+  if (err instanceof SimulationError) {
+    return err.message;
+  }
+
   const msg = err?.message || String(err);
 
-  // Anchor error codes (match the on-chain GovFundError enum)
-  const anchorErrors = {
-    6000: 'String exceeds maximum allowed length',
-    6001: 'Budget amount must be greater than zero',
-    6002: 'Milestone count must be between 1 and 20',
-    6003: 'Project is not in Active status',
-    6004: 'Amount exceeds total budget',
-    6005: 'Amount exceeds allocated budget',
-    6006: 'Unauthorized: signer is not the project admin',
-    6007: 'Invalid milestone index',
-  };
-
-  // Try to extract Anchor error code
+  // Try to extract Anchor error code from hex format
   const codeMatch = msg.match(/custom program error: 0x([0-9a-fA-F]+)/);
   if (codeMatch) {
     const code = parseInt(codeMatch[1], 16);
-    if (anchorErrors[code]) return anchorErrors[code];
+    if (ANCHOR_ERROR_MAP[code]) return ANCHOR_ERROR_MAP[code];
+    return `Program error (code ${code})`;
+  }
+
+  // Try decimal error code format (Anchor v0.30+)
+  const decMatch = msg.match(/Error Number: (\d+)/);
+  if (decMatch) {
+    const code = parseInt(decMatch[1], 10);
+    if (ANCHOR_ERROR_MAP[code]) return ANCHOR_ERROR_MAP[code];
+    return `Program error (code ${code})`;
+  }
+
+  // InstructionError JSON in message
+  const instrMatch = msg.match(/"Custom"\s*:\s*(\d+)/);
+  if (instrMatch) {
+    const code = parseInt(instrMatch[1], 10);
+    if (ANCHOR_ERROR_MAP[code]) return ANCHOR_ERROR_MAP[code];
     return `Program error (code ${code})`;
   }
 
   // User rejection
   if (msg.toLowerCase().includes('user rejected') || msg.toLowerCase().includes('user denied')) {
-    return 'Transaction was rejected by the wallet';
+    return 'Transaction was cancelled by the wallet';
   }
 
   // Simulation failure
   if (msg.includes('Simulation failed')) {
     const innerMatch = msg.match(/Error Message: (.+?)(\.|$)/);
     if (innerMatch) return innerMatch[1];
+    // If Phantom's generic "Simulation failed" with no detail
+    return 'Transaction simulation failed — check project status and amounts';
   }
 
   // Insufficient SOL
@@ -220,6 +382,11 @@ export function parseTransactionError(err) {
   // Blockhash expired
   if (msg.includes('block height exceeded') || err instanceof TransactionExpiredBlockheightExceededError) {
     return 'Transaction expired — please try again';
+  }
+
+  // Wallet "Unexpected error"
+  if (msg.includes('Unexpected error')) {
+    return 'Wallet encountered an unexpected error — please try again. If persists, check project status.';
   }
 
   // Fallback: truncate long messages
