@@ -9,6 +9,7 @@ const provinceRoutes = require('./routes/provinces');
 const analyticsRoutes = require('./routes/analytics');
 const adminRoutes = require('./routes/admin');
 const feedbackRoutes = require('./routes/feedback');
+const ipfsRoutes = require('./routes/ipfs');
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -40,6 +41,7 @@ app.get('/api', (req, res) => {
             '/api/analytics',
             '/api/admin',
             '/api/feedback',
+            '/api/ipfs',
             '/api/health',
         ]
     });
@@ -51,6 +53,7 @@ app.use('/api/provinces', provinceRoutes);
 app.use('/api/analytics', analyticsRoutes);
 app.use('/api/admin', adminRoutes);
 app.use('/api/feedback', feedbackRoutes);
+app.use('/api/ipfs', ipfsRoutes);
 
 // Health check
 app.get('/api/health', (req, res) => {

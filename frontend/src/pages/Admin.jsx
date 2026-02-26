@@ -9,6 +9,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import api, { formatNPR, getExplorerUrl } from '../services/api';
 import { PROVINCES, SECTORS, getDistrictsForProvince } from '../data/nepalData';
 import useSolanaProgram from '../hooks/useSolanaProgram';
+import useIPFS, { isValidCID, getIPFSUrl } from '../hooks/useIPFS';
 import LanguageToggle from '../components/LanguageToggle';
 import { sendTransactionWithRetry, fetchAccountWithRetry, parseTransactionError } from '../utils/transactionRetry';
 
@@ -515,6 +516,19 @@ export default function Admin() {
   const [docForm, setDocForm] = useState(() =>
     persistedForm('docForm', { projectId: '', ipfsHash: '', documentName: '' })
   );
+  const [docFile, setDocFile] = useState(null);   // File object for IPFS upload
+  const fileInputRef = useRef(null);
+
+  // IPFS upload hook
+  const {
+    uploadFile: ipfsUpload,
+    cancelUpload: ipfsCancelUpload,
+    uploading: ipfsUploading,
+    progress: ipfsProgress,
+    uploadResult: ipfsResult,
+    error: ipfsError,
+    reset: ipfsReset,
+  } = useIPFS();
   const [closeForm, setCloseForm] = useState(() =>
     persistedForm('closeForm', { projectId: '' })
   );
@@ -1016,11 +1030,42 @@ export default function Admin() {
   const handleDoc = async (e) => {
     e.preventDefault();
     if (!requireProgram()) return;
+
+    const { projectId, documentName } = docForm;
+    let { ipfsHash } = docForm;
+
+    if (!projectId || !documentName) return showMsg(t('fillAllFields'), 'error');
+
+    // If a file is selected, upload to IPFS first (before touching Solana)
+    if (docFile && !ipfsHash) {
+      showMsg('Uploading document to IPFS...', 'info');
+      const result = await ipfsUpload(docFile, { projectId });
+      if (!result) {
+        const errMsg = ipfsError?.message || 'IPFS upload failed';
+        return showMsg(`IPFS Error: ${errMsg}`, 'error');
+      }
+      ipfsHash = result.ipfsHash;
+      setDocForm((f) => ({ ...f, ipfsHash }));
+      showMsg(`File pinned to IPFS: ${ipfsHash.slice(0, 20)}...`, 'info');
+    }
+
+    if (!ipfsHash) {
+      return showMsg('Please upload a file or enter an IPFS hash manually.', 'error');
+    }
+
+    // Validate CID format
+    if (!isValidCID(ipfsHash)) {
+      return showMsg('Invalid IPFS hash format. Must be a valid CIDv0 (Qm...) or CIDv1 (bafy...).', 'error');
+    }
+
+    // On-chain hash length limit is 64 chars
+    if (ipfsHash.length > 64) {
+      return showMsg('IPFS hash exceeds on-chain limit of 64 characters.', 'error');
+    }
+
     setLoading(true);
     setRetryCount(0);
     try {
-      const { projectId, ipfsHash, documentName } = docForm;
-      if (!projectId || !ipfsHash || !documentName) return showMsg(t('fillAllFields'), 'error');
       const [projectPDA] = getProjectPDA(projectId);
 
       // Pre-flight: verify project exists on-chain & get document count
@@ -1032,6 +1077,12 @@ export default function Admin() {
       } catch {
         return showMsg('Project not found on Solana. Only projects created through this admin panel can be managed on-chain.', 'error');
       }
+
+      const statusKey = Object.keys(projectAccount.status)[0];
+      if (statusKey !== 'active') {
+        return showMsg(`Cannot record document — project status is "${statusKey}". Only Active projects accept documents.`, 'error');
+      }
+
       const docIndex = projectAccount.documentCount;
       const [documentPDA] = getDocumentPDA(projectPDA, docIndex);
 
@@ -1053,9 +1104,14 @@ export default function Admin() {
       });
 
       showMsg(`${t('documentRecorded')} ${t('txLabel')}: ${sig.slice(0, 16)}...`, 'success', sig);
-      await syncDocument(docForm.projectId, sig, docForm.ipfsHash, docForm.documentName);
+      await syncDocument(projectId, sig, ipfsHash, documentName);
       await refreshProjects();
+
+      // Reset form + file states
       setDocForm({ projectId: '', ipfsHash: '', documentName: '' });
+      setDocFile(null);
+      ipfsReset();
+      if (fileInputRef.current) fileInputRef.current.value = '';
       try { sessionStorage.removeItem('govfund-docForm'); } catch {}
     } catch (err) {
       showMsg(`${t('error')}: ${parseTransactionError(err)}`, 'error');
@@ -1606,14 +1662,132 @@ export default function Admin() {
                 <form onSubmit={handleDoc} className="space-y-4">
                   <SelectField label={t('selectProject')} value={docForm.projectId} onChange={(e) => setDocForm((f) => ({ ...f, projectId: e.target.value }))} required>
                     <option value="">{t('selectProject')}</option>
-                    {mergedProjects.map((p) => (
+                    {mergedProjects.filter((p) => p.status === 'Active').map((p) => (
                       <option key={p.projectId} value={p.projectId}>{p.name}</option>
                     ))}
                   </SelectField>
-                  <InputField label={t('ipfsHash')} placeholder={t('ipfsHashPlaceholder')} value={docForm.ipfsHash} onChange={(e) => setDocForm((f) => ({ ...f, ipfsHash: e.target.value }))} required />
+
+                  {/* ── File Upload ── */}
+                  <div>
+                    <label className="block text-xs font-medium text-parchment-muted mb-1">Upload Document</label>
+                    <div className="relative">
+                      <input
+                        ref={fileInputRef}
+                        type="file"
+                        accept=".pdf,.doc,.docx,.xls,.xlsx,.jpg,.jpeg,.png,.gif,.webp,.svg,.mp4,.webm,.mov,.zip,.txt,.csv,.json"
+                        onChange={(e) => {
+                          const file = e.target.files?.[0] || null;
+                          setDocFile(file);
+                          ipfsReset();
+                          if (file && !docForm.documentName) {
+                            setDocForm((f) => ({ ...f, documentName: file.name, ipfsHash: '' }));
+                          } else {
+                            setDocForm((f) => ({ ...f, ipfsHash: '' }));
+                          }
+                        }}
+                        className="input-field file:mr-4 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-medium file:bg-golden/20 file:text-golden hover:file:bg-golden/30 file:cursor-pointer"
+                      />
+                    </div>
+                    {docFile && (
+                      <p className="mt-1 text-xs text-parchment-muted">
+                        {docFile.name} &mdash; {(docFile.size / 1024).toFixed(1)} KB
+                      </p>
+                    )}
+                  </div>
+
+                  {/* ── Upload Progress ── */}
+                  {ipfsUploading && (
+                    <div className="space-y-1">
+                      <div className="flex items-center justify-between text-xs text-parchment-muted">
+                        <span>Uploading to IPFS...</span>
+                        <span>{ipfsProgress}%</span>
+                      </div>
+                      <div className="h-2 rounded-full bg-earth-light overflow-hidden">
+                        <motion.div
+                          className="h-full bg-gradient-to-r from-golden to-bronze-light rounded-full"
+                          initial={{ width: 0 }}
+                          animate={{ width: `${ipfsProgress}%` }}
+                          transition={{ ease: 'easeOut', duration: 0.3 }}
+                        />
+                      </div>
+                      <button
+                        type="button"
+                        onClick={ipfsCancelUpload}
+                        className="text-xs text-red-400 hover:text-red-300 underline"
+                      >
+                        Cancel upload
+                      </button>
+                    </div>
+                  )}
+
+                  {/* ── IPFS Result ── */}
+                  {ipfsResult && (
+                    <div className="p-3 rounded-xl bg-emerald-900/20 border border-emerald-500/30 text-xs space-y-1">
+                      <div className="flex items-center gap-2 text-emerald-400 font-medium">
+                        <span>✅</span> File pinned to IPFS
+                      </div>
+                      <p className="text-parchment-muted break-all">
+                        CID: <span className="text-parchment font-mono">{ipfsResult.ipfsHash}</span>
+                      </p>
+                      {ipfsResult.verifiedGateway && (
+                        <a href={ipfsResult.verifiedGateway} target="_blank" rel="noreferrer" className="text-golden hover:underline">
+                          View on gateway ↗
+                        </a>
+                      )}
+                    </div>
+                  )}
+
+                  {/* ── IPFS Error ── */}
+                  {ipfsError && (
+                    <div className="p-3 rounded-xl bg-red-900/20 border border-red-500/30 text-xs text-red-400">
+                      <span className="font-medium">IPFS Error:</span> {ipfsError.message}
+                    </div>
+                  )}
+
+                  {/* ── Manual IPFS Hash (fallback / advanced) ── */}
+                  <details className="text-xs">
+                    <summary className="text-parchment-muted cursor-pointer hover:text-parchment">
+                      Advanced: Enter IPFS hash manually
+                    </summary>
+                    <div className="mt-2">
+                      <InputField
+                        label={t('ipfsHash')}
+                        placeholder="Qm... or bafy..."
+                        value={docForm.ipfsHash}
+                        onChange={(e) => {
+                          setDocForm((f) => ({ ...f, ipfsHash: e.target.value }));
+                          setDocFile(null);
+                          ipfsReset();
+                          if (fileInputRef.current) fileInputRef.current.value = '';
+                        }}
+                      />
+                      {docForm.ipfsHash && !isValidCID(docForm.ipfsHash) && (
+                        <p className="mt-1 text-xs text-amber-400">⚠ This does not look like a valid IPFS CID</p>
+                      )}
+                    </div>
+                  </details>
+
                   <InputField label={t('documentName')} placeholder={t('documentNamePlaceholder')} value={docForm.documentName} onChange={(e) => setDocForm((f) => ({ ...f, documentName: e.target.value }))} required />
-                  <motion.button type="submit" disabled={loading || !programReady} whileHover={programReady ? { scale: 1.02 } : {}} whileTap={programReady ? { scale: 0.98 } : {}} className={`w-full py-3 rounded-xl font-medium text-sm ${programReady ? 'bg-gradient-to-r from-golden to-golden-600 text-basalt hover:shadow-golden-sm' : 'bg-earth-light text-parchment-ghost cursor-not-allowed'}`}>
-                    {loading ? (retryCount > 0 ? `Retrying (${retryCount})...` : t('submitting')) : t('submit')}
+
+                  <motion.button
+                    type="submit"
+                    disabled={loading || ipfsUploading || !programReady || (!docFile && !docForm.ipfsHash)}
+                    whileHover={programReady && !ipfsUploading ? { scale: 1.02 } : {}}
+                    whileTap={programReady && !ipfsUploading ? { scale: 0.98 } : {}}
+                    className={`w-full py-3 rounded-xl font-medium text-sm ${
+                      programReady && !ipfsUploading && (docFile || docForm.ipfsHash)
+                        ? 'bg-gradient-to-r from-golden to-golden-600 text-basalt hover:shadow-golden-sm'
+                        : 'bg-earth-light text-parchment-ghost cursor-not-allowed'
+                    }`}
+                  >
+                    {loading
+                      ? retryCount > 0 ? `Retrying (${retryCount})...` : t('submitting')
+                      : ipfsUploading
+                        ? `Uploading (${ipfsProgress}%)...`
+                        : docFile && !docForm.ipfsHash
+                          ? 'Upload & Record On-Chain'
+                          : t('submit')
+                    }
                   </motion.button>
                 </form>
               </AnimatedCard>

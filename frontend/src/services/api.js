@@ -218,6 +218,27 @@ export async function syncAll() {
 }
 
 // ═════════════════════════════════════════════════════════════════════════════
+// IPFS routes
+// ═════════════════════════════════════════════════════════════════════════════
+
+/** GET /api/ipfs/status — check Pinata configuration & auth health */
+export async function getIPFSStatus() {
+    const data = await safeFetch('/ipfs/status');
+    return data || { configured: false, authenticated: false };
+}
+
+/** POST /api/ipfs/verify — verify an IPFS hash is accessible via gateways */
+export async function verifyIPFSHash(ipfsHash) {
+    return safePost('/ipfs/verify', { ipfsHash });
+}
+
+/** GET /api/ipfs/resolve/:hash — resolve the fastest gateway URL for a hash */
+export async function resolveIPFSUrl(ipfsHash) {
+    const data = await safeFetch(`/ipfs/resolve/${ipfsHash}`);
+    return data?.gatewayUrl || `https://gateway.pinata.cloud/ipfs/${ipfsHash}`;
+}
+
+// ═════════════════════════════════════════════════════════════════════════════
 // Utility formatters  (pure functions — no network calls)
 // ═════════════════════════════════════════════════════════════════════════════
 
