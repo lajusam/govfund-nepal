@@ -249,7 +249,21 @@ export function formatNPR(amount) {
     return `NPR ${amount.toLocaleString()}`;
 }
 
+/**
+ * Checks whether a string looks like a valid Solana transaction signature.
+ * Real Solana signatures are 87-88 characters of base58 (alphanumeric, no 0/O/I/l).
+ * Demo/seed signatures contain '...' or 'demo' and are much shorter.
+ */
+export function isValidSignature(sig) {
+    if (!sig || typeof sig !== 'string') return false;
+    // Demo signatures contain '...' or 'demo'
+    if (sig.includes('...') || sig.includes('demo')) return false;
+    // Valid base58 chars only, and minimum length of 80 characters
+    return /^[1-9A-HJ-NP-Za-km-z]{80,}$/.test(sig);
+}
+
 export function getExplorerUrl(signature) {
+    if (!isValidSignature(signature)) return null;
     return `https://explorer.solana.com/tx/${signature}?cluster=devnet`;
 }
 

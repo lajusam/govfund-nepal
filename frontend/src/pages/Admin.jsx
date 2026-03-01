@@ -6,7 +6,7 @@ import { useLanguage } from '../context/LanguageContext';
 import { PublicKey, SystemProgram } from '@solana/web3.js';
 import { BN } from '@coral-xyz/anchor';
 import { motion, AnimatePresence } from 'framer-motion';
-import api, { formatNPR, getExplorerUrl } from '../services/api';
+import api, { formatNPR, getExplorerUrl, isValidSignature } from '../services/api';
 import { PROVINCES, SECTORS, getDistrictsForProvince } from '../data/nepalData';
 import useSolanaProgram from '../hooks/useSolanaProgram';
 import useIPFS, { isValidCID, getIPFSUrl } from '../hooks/useIPFS';
@@ -364,7 +364,7 @@ function StatusMessage({ message, lastTx }) {
     >
       <span className="text-lg">{message.type === 'success' ? '✅' : '❌'}</span>
       <span className="flex-1">{message.text}</span>
-      {message.type === 'success' && lastTx && (
+      {message.type === 'success' && lastTx && isValidSignature(lastTx) && (
         <a
           href={getExplorerUrl(lastTx)}
           target="_blank"

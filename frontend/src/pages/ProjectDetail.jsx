@@ -1,6 +1,6 @@
 ﻿import React, { useEffect, useState, useMemo } from 'react';
 import { useParams, Link } from 'react-router-dom';
-import { getProject, getFeedback, submitFeedback, formatNPR, getStatusColor, getStatusBg, getExplorerUrl, getAccountExplorerUrl } from '../services/api';
+import { getProject, getFeedback, submitFeedback, formatNPR, getStatusColor, getStatusBg, getExplorerUrl, getAccountExplorerUrl, isValidSignature } from '../services/api';
 import { Chart as ChartJS, CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend, Filler } from 'chart.js';
 import { Line } from 'react-chartjs-2';
 import IPFSDocumentLink from '../components/IPFSDocumentLink';
@@ -279,19 +279,25 @@ export default function ProjectDetail() {
                                             <td className="py-3 text-parchment-muted hidden sm:table-cell">{r.description || '—'}</td>
                                             <td className="py-3">
                                                 {r.txSignature ? (
-                                                    <a
-                                                        href={getExplorerUrl(r.txSignature)}
-                                                        target="_blank"
-                                                        rel="noopener noreferrer"
-                                                        className="inline-flex items-center gap-1 text-xs font-mono text-golden hover:text-amber-glow transition-colors group"
-                                                        title={r.txSignature}
-                                                    >
-                                                        <span className="hidden sm:inline">{r.txSignature.slice(0, 8)}&hellip;{r.txSignature.slice(-6)}</span>
-                                                        <span className="sm:hidden">View</span>
-                                                        <svg className="w-3 h-3 opacity-60 group-hover:opacity-100" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
-                                                        </svg>
-                                                    </a>
+                                                    isValidSignature(r.txSignature) ? (
+                                                        <a
+                                                            href={getExplorerUrl(r.txSignature)}
+                                                            target="_blank"
+                                                            rel="noopener noreferrer"
+                                                            className="inline-flex items-center gap-1 text-xs font-mono text-golden hover:text-amber-glow transition-colors group"
+                                                            title={r.txSignature}
+                                                        >
+                                                            <span className="hidden sm:inline">{r.txSignature.slice(0, 8)}&hellip;{r.txSignature.slice(-6)}</span>
+                                                            <span className="sm:hidden">View</span>
+                                                            <svg className="w-3 h-3 opacity-60 group-hover:opacity-100" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                                                            </svg>
+                                                        </a>
+                                                    ) : (
+                                                        <span className="inline-flex items-center gap-1 text-xs font-mono text-parchment-ghost" title="Demo signature — not a real on-chain transaction">
+                                                            <span className="px-1.5 py-0.5 rounded bg-earth-light text-[10px] text-parchment-ghost/70">DEMO</span>
+                                                        </span>
+                                                    )
                                                 ) : (
                                                     <span className="text-xs text-parchment-ghost">—</span>
                                                 )}
@@ -393,17 +399,23 @@ export default function ProjectDetail() {
                                         </div>
                                         <p className="text-xs text-parchment-muted">{a.description}</p>
                                         {a.txSignature && (
-                                            <a
-                                                href={getExplorerUrl(a.txSignature)}
-                                                target="_blank"
-                                                rel="noopener noreferrer"
-                                                className="inline-flex items-center gap-1 mt-1.5 text-[10px] font-mono text-golden hover:text-amber-glow transition-colors"
-                                            >
-                                                Tx: {a.txSignature.slice(0, 8)}…{a.txSignature.slice(-6)}
-                                                <svg className="w-2.5 h-2.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
-                                                </svg>
-                                            </a>
+                                            isValidSignature(a.txSignature) ? (
+                                                <a
+                                                    href={getExplorerUrl(a.txSignature)}
+                                                    target="_blank"
+                                                    rel="noopener noreferrer"
+                                                    className="inline-flex items-center gap-1 mt-1.5 text-[10px] font-mono text-golden hover:text-amber-glow transition-colors"
+                                                >
+                                                    Tx: {a.txSignature.slice(0, 8)}…{a.txSignature.slice(-6)}
+                                                    <svg className="w-2.5 h-2.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                                                    </svg>
+                                                </a>
+                                            ) : (
+                                                <span className="inline-flex items-center gap-1 mt-1.5 text-[10px] font-mono text-parchment-ghost" title="Demo signature — not a real on-chain transaction">
+                                                    <span className="px-1.5 py-0.5 rounded bg-earth-light text-parchment-ghost/70">DEMO</span>
+                                                </span>
+                                            )
                                         )}
                                     </div>
                                 ))}
@@ -439,16 +451,20 @@ export default function ProjectDetail() {
 
                         {/* Recent on-chain transactions */}
                         {(() => {
-                            const txList = [
+                            const allTxs = [
                                 ...(p.fundReleases || []).filter(r => r.txSignature).map(r => ({ sig: r.txSignature, label: `Released ${formatNPR(r.amount)}`, date: r.date, type: 'release' })),
                                 ...(p.budgetAllocations || []).filter(a => a.txSignature).map(a => ({ sig: a.txSignature, label: `Allocated ${formatNPR(a.amount)}`, date: a.date, type: 'allocate' })),
                             ].sort((a, b) => new Date(b.date) - new Date(a.date)).slice(0, 8);
 
-                            return txList.length > 0 ? (
+                            // Separate real on-chain txs from demo placeholders
+                            const realTxs = allTxs.filter(tx => isValidSignature(tx.sig));
+                            const demoTxs = allTxs.filter(tx => !isValidSignature(tx.sig));
+
+                            return realTxs.length > 0 ? (
                                 <div>
                                     <p className="text-[10px] text-parchment-ghost uppercase tracking-wider mb-3">Recent Transactions</p>
                                     <div className="space-y-2">
-                                        {txList.map((tx, i) => (
+                                        {realTxs.map((tx, i) => (
                                             <a
                                                 key={i}
                                                 href={getExplorerUrl(tx.sig)}
@@ -473,6 +489,37 @@ export default function ProjectDetail() {
                                             </a>
                                         ))}
                                     </div>
+                                    {demoTxs.length > 0 && (
+                                        <p className="text-[10px] text-parchment-ghost/60 mt-2 italic">
+                                            + {demoTxs.length} demo transaction{demoTxs.length > 1 ? 's' : ''} (seed data — not on-chain)
+                                        </p>
+                                    )}
+                                </div>
+                            ) : demoTxs.length > 0 ? (
+                                <div>
+                                    <p className="text-[10px] text-parchment-ghost uppercase tracking-wider mb-3">Transaction History</p>
+                                    <div className="space-y-2">
+                                        {demoTxs.slice(0, 5).map((tx, i) => (
+                                            <div
+                                                key={i}
+                                                className="flex items-center gap-3 p-2 bg-earth rounded-lg opacity-60"
+                                            >
+                                                <div className={`w-6 h-6 rounded-full flex items-center justify-center text-[10px] flex-shrink-0 ${
+                                                    tx.type === 'release' ? 'bg-golden/15 text-golden' : 'bg-amber-glow/10 text-amber-glow'
+                                                }`}>
+                                                    {tx.type === 'release' ? '⇓' : '⇑'}
+                                                </div>
+                                                <div className="flex-1 min-w-0">
+                                                    <p className="text-xs text-parchment font-medium truncate">{tx.label}</p>
+                                                    <p className="text-[10px] font-mono text-parchment-ghost/60">Demo data</p>
+                                                </div>
+                                                <span className="px-1.5 py-0.5 rounded bg-earth-light text-[9px] text-parchment-ghost/50 flex-shrink-0">DEMO</span>
+                                            </div>
+                                        ))}
+                                    </div>
+                                    <p className="text-[10px] text-parchment-ghost/50 mt-3 italic">
+                                        These are demo/seed transactions. Real on-chain transactions will appear here after admin operations.
+                                    </p>
                                 </div>
                             ) : (
                                 <p className="text-xs text-parchment-ghost mb-3">No on-chain transaction records yet.</p>
