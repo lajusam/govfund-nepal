@@ -12,6 +12,12 @@ const nacl = require('tweetnacl');
 const ADMIN_WALLET =
   process.env.ADMIN_WALLET || '4MMhsQ2odgEdAowV3Si6L44jRhTZAepuFjPeWGSgA3h2';
 
+// All authorized admin wallets for serverless functions.
+const ADMIN_WALLETS = [
+  ADMIN_WALLET,
+  process.env.ADMIN_WALLET_2 || '8HACvxLFboKua6ARScPZsqHVCMAQ7MniL8AhNDxomV9Y',
+].filter(Boolean);
+
 /**
  * @param {import('http').IncomingMessage} req
  * @param {import('http').ServerResponse}  res
@@ -27,10 +33,10 @@ function verifyAdmin(req, res) {
     return false;
   }
 
-  if (walletAddress !== ADMIN_WALLET) {
+  if (!ADMIN_WALLETS.includes(walletAddress)) {
     res.status(403).json({
-      error: 'Unauthorized: only the admin wallet can perform this action',
-      expected: ADMIN_WALLET,
+      error: 'Unauthorized: only an authorized admin wallet can perform this action',
+      expected: ADMIN_WALLETS,
       received: walletAddress,
     });
     return false;
@@ -56,4 +62,4 @@ function verifyAdmin(req, res) {
   return true;
 }
 
-module.exports = { verifyAdmin, ADMIN_WALLET };
+module.exports = { verifyAdmin, ADMIN_WALLET, ADMIN_WALLETS };

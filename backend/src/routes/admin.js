@@ -433,10 +433,12 @@ router.get('/sync-all', verifyAdmin, async (req, res) => {
 
 // GET: Admin config (public - returns admin wallet + program ID for frontend)
 router.get('/config', (req, res) => {
+    const solana = require('../services/solana');
     res.json({
         adminWallet: ADMIN_WALLET,
-        programId: require('../services/solana').PROGRAM_ID,
-        rpcUrl: require('../services/solana').RPC_URL,
+        adminWallets: solana.ADMIN_WALLETS,
+        programId: solana.PROGRAM_ID,
+        rpcUrl: solana.RPC_URL,
         network: 'devnet',
     });
 });

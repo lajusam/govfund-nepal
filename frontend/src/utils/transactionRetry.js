@@ -51,16 +51,33 @@ export async function sendTransactionWithRetry({
   onRetry,
   skipSimulation = false,
 }) {
+  // ── Step 0: Validate inputs ───────────────────────────────────────────────
+  if (!transaction) throw new Error('Transaction object is required');
+  if (!connection) throw new Error('Solana connection is required');
+  if (!sendTransaction) throw new Error('sendTransaction function is required');
+
   // ── Step 1: Get a fresh blockhash (done ONCE before signing) ──────────────
   const { blockhash, lastValidBlockHeight } =
     await connection.getLatestBlockhash(commitment);
   transaction.recentBlockhash = blockhash;
   transaction.lastValidBlockHeight = lastValidBlockHeight;
 
+  // Ensure feePayer is set — required before simulation and signing.
+  // wallet-adapter's sendTransaction sets this, but simulation needs it earlier.
+  if (!transaction.feePayer) {
+    // Attempt to extract from wallet-adapter's internal state
+    const signers = transaction.signatures;
+    if (signers && signers.length > 0 && signers[0].publicKey) {
+      transaction.feePayer = signers[0].publicKey;
+    }
+  }
+
+  console.log('[sendTransactionWithRetry] Blockhash:', blockhash.slice(0, 16) + '...',
+    '| lastValidBlockHeight:', lastValidBlockHeight,
+    '| feePayer:', transaction.feePayer?.toBase58()?.slice(0, 8) + '...' || 'not set (wallet will set)');
+
   // ── Step 2: Client-side simulation — catch program errors BEFORE wallet popup ──
-  // This avoids the dreaded "Unexpected error" from Phantom by detecting issues
-  // while we still have access to program logs.
-  if (!skipSimulation) {
+  if (!skipSimulation && transaction.feePayer) {
     try {
       const simResult = await connection.simulateTransaction(transaction, {
         sigVerify: false, // we haven't signed yet
@@ -68,38 +85,41 @@ export async function sendTransactionWithRetry({
       });
 
       if (simResult.value.err) {
-        // Extract the human-readable error from simulation logs
         const decoded = decodeSimulationError(simResult.value.err, simResult.value.logs);
+        console.error('[simulation] Failed:', decoded, '\nLogs:', simResult.value.logs);
         throw new SimulationError(decoded, simResult.value.logs);
       }
 
-      // Log simulation success for debugging
       console.log('[simulation] ✓ Pre-flight passed', {
         unitsConsumed: simResult.value.unitsConsumed,
         logsCount: simResult.value.logs?.length,
       });
     } catch (simErr) {
-      // Re-throw our own SimulationError as-is
       if (simErr instanceof SimulationError) throw simErr;
-
-      // Network error during simulation — warn but continue (wallet will retry preflight)
       console.warn('[simulation] Pre-flight simulation failed (non-fatal):', simErr.message);
     }
+  } else if (!skipSimulation) {
+    console.log('[simulation] Skipped — feePayer not yet set (wallet-adapter will handle preflight)');
   }
 
   // ── Step 3: Sign + send via wallet adapter — triggers Phantom popup ONCE ──
-  // skipPreflight: true because we already simulated above.
-  // This prevents Phantom from running its own preflight which produces generic errors.
   let signature;
   try {
     signature = await sendTransaction(transaction, connection, {
-      skipPreflight: true,           // we already simulated
+      skipPreflight: transaction.feePayer ? true : false,  // only skip if we already simulated
       preflightCommitment: commitment,
-      maxRetries: 0,                 // we handle confirmation retries below
+      maxRetries: 0,
     });
+
+    // Validate signature format (base58, 87-88 chars)
+    if (!signature || typeof signature !== 'string' || signature.length < 80) {
+      console.error('[sendTransaction] Invalid signature returned:', signature);
+      throw new Error('Wallet returned an invalid transaction signature');
+    }
+
+    console.log('[sendTransaction] ✓ Signature:', signature.slice(0, 20) + '...',
+      '| Explorer: https://explorer.solana.com/tx/' + signature + '?cluster=devnet');
   } catch (sendErr) {
-    // Wallet rejected, or Phantom's own preflight failed
-    // Try to extract a meaningful message
     const parsed = parseWalletSendError(sendErr);
     throw new Error(parsed);
   }
@@ -115,10 +135,14 @@ export async function sendTransactionWithRetry({
       );
 
       if (result.value.err) {
+        console.error('[confirmTransaction] On-chain failure:', JSON.stringify(result.value.err));
         throw new Error(
           `Transaction confirmed but failed on-chain: ${JSON.stringify(result.value.err)}`
         );
       }
+
+      console.log('[confirmTransaction] ✓ Confirmed with commitment:', commitment,
+        '| Signature:', signature.slice(0, 20) + '...');
 
       return signature; // success!
     } catch (err) {
@@ -130,6 +154,7 @@ export async function sendTransactionWithRetry({
         (err?.message || '').includes('block height exceeded') ||
         (err?.message || '').includes('BlockheightExceeded')
       ) {
+        console.error('[confirmTransaction] Blockhash expired. Transaction dropped.');
         throw new Error('Transaction expired — the network was congested. Please try submitting again.');
       }
 
@@ -148,6 +173,22 @@ export async function sendTransactionWithRetry({
         await sleep(delay);
       }
     }
+  }
+
+  // Last resort: check signature status one final time before giving up
+  try {
+    const statuses = await connection.getSignatureStatuses([signature]);
+    const status = statuses?.value?.[0];
+    if (status && !status.err) {
+      console.log('[confirmTransaction] ✓ Final status check passed. Confirmed at slot:', status.slot);
+      return signature;
+    }
+    if (status?.err) {
+      throw new Error(`Transaction failed on-chain: ${JSON.stringify(status.err)}`);
+    }
+  } catch (finalErr) {
+    if (finalErr.message?.includes('failed on-chain')) throw finalErr;
+    console.warn('[confirmTransaction] Final status check failed:', finalErr.message);
   }
 
   throw lastError || new Error('Transaction confirmation failed after all retries');

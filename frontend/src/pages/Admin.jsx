@@ -721,6 +721,15 @@ export default function Admin() {
   // Transaction handlers — all use sendTransactionWithRetry
   // ═══════════════════════════════════════════════════════════
 
+  /**
+   * Prepare a transaction for sending: sets feePayer so simulation works
+   * before the wallet-adapter touches it. Must be called on every Anchor tx.
+   */
+  const prepareTx = (tx) => {
+    tx.feePayer = publicKey;
+    return tx;
+  };
+
   const handleCreate = async (e) => {
     e.preventDefault();
     if (!requireProgram()) return;
@@ -747,7 +756,7 @@ export default function Admin() {
         return showMsg('Milestone count must be between 1 and 20', 'error');
       }
 
-      const tx = await program.methods
+      const tx = prepareTx(await program.methods
         .createProject(
           projectId,
           name,
@@ -764,7 +773,7 @@ export default function Admin() {
           admin: publicKey,
           systemProgram: SystemProgram.programId,
         })
-        .transaction();
+        .transaction());
 
       const sig = await sendTransactionWithRetry({
         transaction: tx,
@@ -860,10 +869,10 @@ export default function Admin() {
         return showMsg(`Allocation of ${formatNPR(amountNum)} exceeds remaining budget of ${formatNPR(remaining)} (total: ${formatNPR(totalBudget)}, already allocated: ${formatNPR(currentAllocated)})`, 'error');
       }
 
-      const tx = await program.methods
+      const tx = prepareTx(await program.methods
         .allocateBudget(new BN(amountNum.toString()))
         .accounts({ project: projectPDA, admin: publicKey })
-        .transaction();
+        .transaction());
 
       const sig = await sendTransactionWithRetry({
         transaction: tx,
@@ -932,10 +941,10 @@ export default function Admin() {
         return showMsg(`Release of ${formatNPR(amountNum)} exceeds releasable funds of ${formatNPR(releasable)} (allocated: ${formatNPR(currentAllocated)}, already released: ${formatNPR(currentReleased)})`, 'error');
       }
 
-      const tx = await program.methods
+      const tx = prepareTx(await program.methods
         .releaseFunds(new BN(amountNum.toString()))
         .accounts({ project: projectPDA, admin: publicKey })
-        .transaction();
+        .transaction());
 
       const sig = await sendTransactionWithRetry({
         transaction: tx,
@@ -997,7 +1006,7 @@ export default function Admin() {
 
       const [milestonePDA] = getMilestonePDA(projectPDA, index);
 
-      const tx = await program.methods
+      const tx = prepareTx(await program.methods
         .updateMilestoneStatus(index, description, milestoneStatusToAnchor(status))
         .accounts({
           milestone: milestonePDA,
@@ -1005,7 +1014,7 @@ export default function Admin() {
           admin: publicKey,
           systemProgram: SystemProgram.programId,
         })
-        .transaction();
+        .transaction());
 
       const sig = await sendTransactionWithRetry({
         transaction: tx,
@@ -1086,7 +1095,7 @@ export default function Admin() {
       const docIndex = projectAccount.documentCount;
       const [documentPDA] = getDocumentPDA(projectPDA, docIndex);
 
-      const tx = await program.methods
+      const tx = prepareTx(await program.methods
         .recordDocument(ipfsHash, documentName)
         .accounts({
           document: documentPDA,
@@ -1094,7 +1103,7 @@ export default function Admin() {
           admin: publicKey,
           systemProgram: SystemProgram.programId,
         })
-        .transaction();
+        .transaction());
 
       const sig = await sendTransactionWithRetry({
         transaction: tx,
@@ -1161,10 +1170,10 @@ export default function Admin() {
             return;
           }
 
-          const tx = await program.methods
+          const tx = prepareTx(await program.methods
             .closeProject()
             .accounts({ project: projectPDA, admin: publicKey })
-            .transaction();
+            .transaction());
 
           const sig = await sendTransactionWithRetry({
             transaction: tx,

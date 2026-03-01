@@ -13,8 +13,15 @@ const nacl = require('tweetnacl');
 
 const ADMIN_WALLET = process.env.ADMIN_WALLET || '4MMhsQ2odgEdAowV3Si6L44jRhTZAepuFjPeWGSgA3h2';
 
+// All authorized admin wallets — both the original and the newly added one.
+// Any wallet in this list can perform admin operations via the backend.
+const ADMIN_WALLETS = [
+    ADMIN_WALLET,
+    process.env.ADMIN_WALLET_2 || '8HACvxLFboKua6ARScPZsqHVCMAQ7MniL8AhNDxomV9Y',
+].filter(Boolean);
+
 /**
- * Verifies the connected wallet is the admin wallet.
+ * Verifies the connected wallet is one of the authorized admin wallets.
  * For admin-protected routes (create, allocate, release, etc.)
  */
 const verifyAdmin = (req, res, next) => {
@@ -26,11 +33,11 @@ const verifyAdmin = (req, res, next) => {
         return res.status(401).json({ error: 'Wallet address required in x-wallet-address header' });
     }
 
-    // Check wallet matches admin
-    if (walletAddress !== ADMIN_WALLET) {
+    // Check wallet matches any authorized admin
+    if (!ADMIN_WALLETS.includes(walletAddress)) {
         return res.status(403).json({
-            error: 'Unauthorized: only the admin wallet can perform this action',
-            expected: ADMIN_WALLET,
+            error: 'Unauthorized: only an authorized admin wallet can perform this action',
+            expected: ADMIN_WALLETS,
             received: walletAddress,
         });
     }
@@ -60,8 +67,8 @@ const verifyAdmin = (req, res, next) => {
  */
 const extractWallet = (req, res, next) => {
     req.walletAddress = req.headers['x-wallet-address'] || null;
-    req.isAdmin = req.walletAddress === ADMIN_WALLET;
+    req.isAdmin = ADMIN_WALLETS.includes(req.walletAddress);
     next();
 };
 
-module.exports = { verifyAdmin, extractWallet, ADMIN_WALLET };
+module.exports = { verifyAdmin, extractWallet, ADMIN_WALLET, ADMIN_WALLETS };

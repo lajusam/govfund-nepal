@@ -4,6 +4,8 @@ const { Program, AnchorProvider, BN } = require('@coral-xyz/anchor');
 const RPC_URL = process.env.SOLANA_RPC_URL || 'https://api.devnet.solana.com';
 const PROGRAM_ID = process.env.PROGRAM_ID || 'B6CSWaYtxem8bPEHe3CRCZ52n7kuRrZJbqw3dkFhSZAp';
 const ADMIN_WALLET = process.env.ADMIN_WALLET || '4MMhsQ2odgEdAowV3Si6L44jRhTZAepuFjPeWGSgA3h2';
+const ADMIN_WALLET_2 = process.env.ADMIN_WALLET_2 || '8HACvxLFboKua6ARScPZsqHVCMAQ7MniL8AhNDxomV9Y';
+const ADMIN_WALLETS = [ADMIN_WALLET, ADMIN_WALLET_2].filter(Boolean);
 
 // ============================================================
 // IDL — Anchor v0.30+ format (with discriminators, writable/signer,
@@ -381,6 +383,8 @@ module.exports = {
     getExplorerUrl,
     getAccountExplorerUrl,
     ADMIN_WALLET,
+    ADMIN_WALLET_2,
+    ADMIN_WALLETS,
     PROGRAM_ID,
     RPC_URL,
 };

@@ -12,12 +12,16 @@ import '@solana/wallet-adapter-react-ui/styles.css';
 const NETWORK = 'devnet';
 const ADMIN_WALLET =
   import.meta.env.VITE_ADMIN_WALLET || '4MMhsQ2odgEdAowV3Si6L44jRhTZAepuFjPeWGSgA3h2';
+const ADMIN_WALLET_2 =
+  import.meta.env.VITE_ADMIN_WALLET_2 || '8HACvxLFboKua6ARScPZsqHVCMAQ7MniL8AhNDxomV9Y';
+const ADMIN_WALLETS = [ADMIN_WALLET, ADMIN_WALLET_2].filter(Boolean);
 const PROGRAM_ID =
   import.meta.env.VITE_PROGRAM_ID || 'B6CSWaYtxem8bPEHe3CRCZ52n7kuRrZJbqw3dkFhSZAp';
 
 const SolanaContext = createContext({
     isAdmin: false,
     adminWallet: ADMIN_WALLET,
+    adminWallets: ADMIN_WALLETS,
     programId: PROGRAM_ID,
     network: NETWORK
 });
@@ -29,12 +33,16 @@ export function useSolana() {
 function SolanaContextProvider({ children }) {
     const { publicKey } = useWallet();
 
-    const isAdmin = useMemo(() => publicKey?.toBase58() === ADMIN_WALLET, [publicKey]);
+    const isAdmin = useMemo(
+        () => publicKey ? ADMIN_WALLETS.includes(publicKey.toBase58()) : false,
+        [publicKey]
+    );
 
     const value = useMemo(
         () => ({
             isAdmin,
             adminWallet: ADMIN_WALLET,
+            adminWallets: ADMIN_WALLETS,
             programId: PROGRAM_ID,
             network: NETWORK
         }),

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { useWallet } from '@solana/wallet-adapter-react';
 import { WalletMultiButton } from '@solana/wallet-adapter-react-ui';
@@ -6,12 +6,37 @@ import { useSolana } from '../context/WalletContext';
 import { useLanguage } from '../context/LanguageContext';
 import LanguageToggle from '../components/LanguageToggle';
 
+/**
+ * Generate a deterministic background color from a wallet address.
+ * Uses a simple hash of the first 8 chars to pick from a palette.
+ */
+function walletColor(address) {
+    const palette = [
+        '#6366f1', '#8b5cf6', '#ec4899', '#f43f5e',
+        '#f97316', '#eab308', '#22c55e', '#14b8a6',
+        '#0ea5e9', '#3b82f6',
+    ];
+    let hash = 0;
+    for (let i = 0; i < Math.min(address.length, 8); i++) {
+        hash = address.charCodeAt(i) + ((hash << 5) - hash);
+    }
+    return palette[Math.abs(hash) % palette.length];
+}
+
 export default function Navbar() {
     const location = useLocation();
     const [mobileOpen, setMobileOpen] = useState(false);
     const { publicKey } = useWallet();
     const { isAdmin } = useSolana();
     const { t } = useLanguage();
+
+    const walletAddress = useMemo(() => publicKey?.toBase58() || null, [publicKey]);
+    const walletInitials = useMemo(() => {
+        if (!walletAddress) return null;
+        // Use first and last 2 chars of the base58 address
+        return (walletAddress.slice(0, 2)).toUpperCase();
+    }, [walletAddress]);
+    const avatarBg = useMemo(() => walletAddress ? walletColor(walletAddress) : null, [walletAddress]);
 
     const NAV_LINKS = [
         { to: '/home', label: t('home') },
@@ -76,6 +101,22 @@ export default function Navbar() {
                                 Admin
                             </span>
                         )}
+
+                        {/* User profile avatar / fallback icon */}
+                        <div className="w-10 h-10 rounded-lg bg-gov-slate flex items-center justify-center" title={walletAddress || 'Not connected'}>
+                            {walletAddress ? (
+                                <span
+                                    className="w-6 h-6 rounded-md flex items-center justify-center text-white text-xs font-bold select-none"
+                                    style={{ backgroundColor: avatarBg }}
+                                >
+                                    {walletInitials}
+                                </span>
+                            ) : (
+                                <svg className="w-6 h-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                                </svg>
+                            )}
+                        </div>
 
                         {/* Solana wallet button */}
                         <div className="hidden sm:block">
