@@ -4,6 +4,7 @@ import { getProject, getFeedback, submitFeedback, formatNPR, getStatusColor, get
 import { Chart as ChartJS, CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend, Filler } from 'chart.js';
 import { Line } from 'react-chartjs-2';
 import IPFSDocumentLink from '../components/IPFSDocumentLink';
+import { useLanguage } from '../context/LanguageContext';
 
 ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend, Filler);
 
@@ -56,6 +57,7 @@ export default function ProjectDetail() {
     const [loading, setLoading] = useState(true);
     const [newFeedback, setNewFeedback] = useState({ rating: 5, comment: '' });
     const [submitting, setSubmitting] = useState(false);
+    const { t } = useLanguage();
 
     useEffect(() => {
         Promise.all([getProject(projectId), getFeedback(projectId)])
@@ -104,7 +106,7 @@ export default function ProjectDetail() {
     }
 
     if (!project) {
-        return <div className="text-center py-20 text-parchment-muted text-lg">Project not found</div>;
+        return <div className="text-center py-20 text-parchment-muted text-lg">{t('projectNotFound')}</div>;
     }
 
     const p = project;
@@ -134,10 +136,9 @@ export default function ProjectDetail() {
                         <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
                     </div>
                     <div>
-                        <p className="text-sm font-semibold text-golden mb-0.5">Demonstration Project</p>
+                        <p className="text-sm font-semibold text-golden mb-0.5">{t('demonstrationProject')}</p>
                         <p className="text-xs text-parchment-muted leading-relaxed">
-                            This project uses sample data for demonstration purposes. Transaction records shown here are simulated. 
-                            Live on-chain transactions will appear once the project is registered on Solana devnet via admin operations.
+                            {t('demoProjectDesc')}
                         </p>
                     </div>
                 </div>
@@ -153,7 +154,7 @@ export default function ProjectDetail() {
                                 p.status === 'Completed' ? 'bg-earth text-parchment-ghost border border-parchment-ghost/30' :
                                 p.status === 'Suspended' ? 'bg-red-900/20 text-red-400 border border-red-500/30' :
                                 'badge-completed'
-                            }`}>{p.status === 'Completed' ? '🔒 Closed' : p.status}</span>
+                            }`}>{p.status === 'Completed' ? `🔒 ${t('closed')}` : p.status}</span>
                             <span className="text-sm text-parchment-muted">{p.province} → {p.district} → {p.sector}</span>
                         </div>
                         <h1 className="text-2xl md:text-3xl font-heading font-bold text-parchment">{p.name}</h1>
@@ -166,7 +167,7 @@ export default function ProjectDetail() {
                             </svg>
                         </div>
                         <div>
-                            <p className="text-xs text-parchment-ghost">Contractor</p>
+                            <p className="text-xs text-parchment-ghost">{t('contractorLabel')}</p>
                             <p className="font-semibold text-parchment">{p.contractor}</p>
                         </div>
                     </div>
@@ -175,19 +176,19 @@ export default function ProjectDetail() {
                 {/* Budget overview */}
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
                     <div>
-                        <p className="text-xs text-parchment-ghost mb-1">Total Budget</p>
+                        <p className="text-xs text-parchment-ghost mb-1">{t('totalBudgetLabel')}</p>
                         <p className="text-xl font-heading font-bold text-parchment">{formatNPR(p.totalBudget)}</p>
                     </div>
                     <div>
-                        <p className="text-xs text-parchment-ghost mb-1">Allocated</p>
+                        <p className="text-xs text-parchment-ghost mb-1">{t('allocated')}</p>
                         <p className="text-xl font-heading font-bold text-amber-glow">{formatNPR(p.allocatedBudget)}</p>
                     </div>
                     <div>
-                        <p className="text-xs text-parchment-ghost mb-1">Released</p>
+                        <p className="text-xs text-parchment-ghost mb-1">{t('released')}</p>
                         <p className="text-xl font-heading font-bold text-golden">{formatNPR(p.releasedAmount)}</p>
                     </div>
                     <div>
-                        <p className="text-xs text-parchment-ghost mb-1">Completion</p>
+                        <p className="text-xs text-parchment-ghost mb-1">{t('completion')}</p>
                         <p className="text-xl font-heading font-bold text-bronze-light">{milestonePct}%</p>
                     </div>
                 </div>
@@ -196,7 +197,7 @@ export default function ProjectDetail() {
                 <div className="mt-6 space-y-3">
                     <div>
                         <div className="flex justify-between text-xs mb-1">
-                            <span className="text-parchment-muted">Fund Utilization</span>
+                            <span className="text-parchment-muted">{t('fundUtilization')}</span>
                             <span className="font-semibold">{budgetPct}%</span>
                         </div>
                         <div className="progress-bar">
@@ -205,7 +206,7 @@ export default function ProjectDetail() {
                     </div>
                     <div>
                         <div className="flex justify-between text-xs mb-1">
-                            <span className="text-parchment-muted">Milestones ({p.milestonesCompleted}/{p.milestoneCount})</span>
+                            <span className="text-parchment-muted">{t('milestonesLabel')} ({p.milestonesCompleted}/{p.milestoneCount})</span>
                             <span className="font-semibold">{milestonePct}%</span>
                         </div>
                         <div className="progress-bar">
@@ -215,7 +216,7 @@ export default function ProjectDetail() {
                 </div>
 
                 <div className="mt-4 text-sm text-parchment-muted">
-                    Estimated Completion: <span className="font-medium text-parchment">
+                    {t('estimatedCompletionLabel')}: <span className="font-medium text-parchment">
                         {new Date(p.estimatedCompletion).toLocaleDateString('en-US', { year: 'numeric', month: 'long' })}
                     </span>
                 </div>
@@ -227,12 +228,12 @@ export default function ProjectDetail() {
                     {/* Milestones */}
                     <div className="card p-6">
                         <h3 className="font-heading font-bold text-lg text-parchment mb-6">
-                            Milestone Pipeline
+                            {t('milestonePipeline')}
                         </h3>
                         {p.milestones?.length > 0 ? (
                             <MilestoneTracker milestones={p.milestones} total={p.milestoneCount} />
                         ) : (
-                            <p className="text-parchment-muted text-sm">No milestones recorded yet</p>
+                            <p className="text-parchment-muted text-sm">{t('noMilestones')}</p>
                         )}
                     </div>
 
@@ -240,7 +241,7 @@ export default function ProjectDetail() {
                     {releaseChartData && (
                         <div className="card p-6">
                             <h3 className="font-heading font-bold text-lg text-parchment mb-4">
-                                Fund Release Timeline
+                                {t('fundReleaseTimeline')}
                             </h3>
                             <Line
                                 data={releaseChartData}
@@ -283,14 +284,14 @@ export default function ProjectDetail() {
                     {p.fundReleases?.length > 0 && (
                         <div className="card p-6 overflow-x-auto">
                             <h3 className="font-heading font-bold text-lg text-parchment mb-4">
-                                Fund Release History
+                                {t('fundReleaseHistory')}
                             </h3>
                             <table className="w-full text-sm">
                                 <thead>
                                     <tr className="border-b border-earth-border">
-                                        <th className="text-left py-3 text-parchment-muted font-medium">Date</th>
-                                        <th className="text-left py-3 text-parchment-muted font-medium">Amount</th>
-                                        <th className="text-left py-3 text-parchment-muted font-medium hidden sm:table-cell">Description</th>
+                                        <th className="text-left py-3 text-parchment-muted font-medium">{t('dateLabel')}</th>
+                                        <th className="text-left py-3 text-parchment-muted font-medium">{t('amountLabel')}</th>
+                                        <th className="text-left py-3 text-parchment-muted font-medium hidden sm:table-cell">{t('descriptionLabel')}</th>
                                         <th className="text-left py-3 text-parchment-muted font-medium">Tx</th>
                                     </tr>
                                 </thead>
@@ -338,11 +339,11 @@ export default function ProjectDetail() {
                     {/* Public Feedback */}
                     <div className="card p-6">
                         <h3 className="font-heading font-bold text-lg text-parchment mb-4">
-                            Public Reviews
+                            {t('publicReviews')}
                         </h3>
                         <form onSubmit={handleSubmitFeedback} className="mb-6 p-4 bg-earth rounded-xl">
                             <div className="flex items-center gap-4 mb-3">
-                                <label className="text-sm text-parchment-muted">Rating:</label>
+                                <label className="text-sm text-parchment-muted">{t('ratingLabel')}</label>
                                 <div className="flex gap-1">
                                     {[1, 2, 3, 4, 5].map(star => (
                                         <button
@@ -357,14 +358,14 @@ export default function ProjectDetail() {
                             <textarea
                                 className="input-field mb-3"
                                 rows={3}
-                                placeholder="Share your feedback on this project..."
+                                placeholder={t('feedbackPlaceholder')}
                                 value={newFeedback.comment}
                                 onChange={e => setNewFeedback(f => ({ ...f, comment: e.target.value }))}
                                 maxLength={500}
                                 required
                             />
                             <button type="submit" disabled={submitting} className="btn-primary text-sm">
-                                {submitting ? 'Submitting...' : 'Submit Review'}
+                                {submitting ? t('submittingFeedback') : t('submitReview')}
                             </button>
                         </form>
 
@@ -383,7 +384,7 @@ export default function ProjectDetail() {
                                 ))}
                             </div>
                         ) : (
-                            <p className="text-sm text-parchment-muted">No reviews yet. Be the first!</p>
+                            <p className="text-sm text-parchment-muted">{t('noReviews')}</p>
                         )}
                     </div>
                 </div>
@@ -393,7 +394,7 @@ export default function ProjectDetail() {
                     {/* Documents */}
                     <div className="card p-6">
                         <h3 className="font-heading font-bold text-lg text-parchment mb-4">
-                            📄 Documents (IPFS)
+                            📄 {t('documentsIPFS')}
                         </h3>
                         {p.documents?.length > 0 ? (
                             <div className="space-y-3">
@@ -406,7 +407,7 @@ export default function ProjectDetail() {
                                 ))}
                             </div>
                         ) : (
-                            <p className="text-sm text-parchment-muted">No documents uploaded yet</p>
+                            <p className="text-sm text-parchment-muted">{t('noDocuments')}</p>
                         )}
                     </div>
 
@@ -414,7 +415,7 @@ export default function ProjectDetail() {
                     {p.budgetAllocations?.length > 0 && (
                         <div className="card p-6">
                             <h3 className="font-heading font-bold text-lg text-parchment mb-4">
-                                💰 Budget Allocations
+                                💰 {t('budgetAllocationsTitle')}
                             </h3>
                             <div className="space-y-3">
                                 {p.budgetAllocations.map((a, i) => (
@@ -455,13 +456,13 @@ export default function ProjectDetail() {
                     {/* Solana On-Chain Info */}
                     <div className="card p-6">
                         <h3 className="font-heading font-bold text-lg text-parchment mb-4">
-                            ⛓️ On-Chain Data
+                            ⛓️ {t('onChainData')}
                         </h3>
 
                         {/* Project PDA */}
                         {p.pda && (
                             <div className="mb-4 p-3 bg-earth rounded-xl">
-                                <p className="text-[10px] text-parchment-ghost uppercase tracking-wider mb-1">Project PDA (Devnet)</p>
+                                <p className="text-[10px] text-parchment-ghost uppercase tracking-wider mb-1">{t('projectPDA')}</p>
                                 <a
                                     href={getAccountExplorerUrl(p.pda)}
                                     target="_blank"
@@ -492,7 +493,7 @@ export default function ProjectDetail() {
 
                             return realTxs.length > 0 ? (
                                 <div>
-                                    <p className="text-[10px] text-parchment-ghost uppercase tracking-wider mb-3">Recent Transactions</p>
+                                    <p className="text-[10px] text-parchment-ghost uppercase tracking-wider mb-3">{t('recentTransactions')}</p>
                                     <div className="space-y-2">
                                         {realTxs.map((tx, i) => (
                                             <a
@@ -528,10 +529,10 @@ export default function ProjectDetail() {
                             ) : demoTxs.length > 0 ? (
                                 <div>
                                     <div className="flex items-center gap-2 mb-3">
-                                        <p className="text-[10px] text-parchment-ghost uppercase tracking-wider">Transaction History</p>
+                                        <p className="text-[10px] text-parchment-ghost uppercase tracking-wider">{t('transactionHistory')}</p>
                                         <span className="flex items-center gap-1 px-1.5 py-0.5 rounded-full bg-golden/10 border border-golden/20 text-[9px] text-golden/80 font-medium">
                                             <svg className="w-2 h-2" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
-                                            Sample Data
+                                            {t('sampleData')}
                                         </span>
                                     </div>
                                     <div className="space-y-2">
@@ -565,12 +566,12 @@ export default function ProjectDetail() {
                                     )}
                                     <div className="mt-3 p-2.5 rounded-lg bg-golden/5 border border-golden/15">
                                         <p className="text-[10px] text-parchment-muted leading-relaxed">
-                                            <span className="text-golden/80 font-medium">Note:</span> This project uses sample transaction data for demonstration. Live on-chain transactions will appear here once recorded via admin operations on Solana devnet.
+                                            <span className="text-golden/80 font-medium">Note:</span> {t('sampleTxNote')}
                                         </p>
                                     </div>
                                 </div>
                             ) : (
-                                <p className="text-xs text-parchment-ghost mb-3">No on-chain transaction records yet.</p>
+                                <p className="text-xs text-parchment-ghost mb-3">{t('noOnChainTx')}</p>
                             );
                         })()}
 
@@ -584,8 +585,8 @@ export default function ProjectDetail() {
                             >
                                 <div className="w-8 h-8 rounded-lg bg-golden/10 border border-golden/20 flex items-center justify-center text-golden text-sm">⛓</div>
                                 <div>
-                                    <p className="text-sm font-medium text-parchment group-hover:text-golden transition-colors">Solana Explorer</p>
-                                    <p className="text-xs text-parchment-muted">Devnet Cluster</p>
+                                    <p className="text-sm font-medium text-parchment group-hover:text-golden transition-colors">{t('solanaExplorer')}</p>
+                                    <p className="text-xs text-parchment-muted">{t('devnetCluster')}</p>
                                 </div>
                                 <svg className="w-4 h-4 ml-auto text-parchment-ghost group-hover:text-golden transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />

@@ -1,6 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useLanguage } from '../context/LanguageContext';
 
 // ─── Particle Canvas ─────────────────────────────────────────────────────────
 function ParticleCanvas() {
@@ -165,6 +166,7 @@ export default function Welcome() {
     const navigate = useNavigate();
     const [btnHovered, setBtnHovered] = useState(false);
     const [entered, setEntered] = useState(false);
+    const { t } = useLanguage();
 
     const handleEnter = () => {
         setEntered(true);
@@ -333,7 +335,7 @@ export default function Welcome() {
                                     lineHeight: 1.25,
                                 }}
                             >
-                                Transparent Governance,
+                                {t('welcomeTagline1')}
                             </p>
                         </motion.div>
                         <motion.div
@@ -351,7 +353,7 @@ export default function Welcome() {
                                     lineHeight: 1.25,
                                 }}
                             >
-                                On-Chain.{' '}
+                                {t('welcomeTagline2')}{' '}
                                 <span
                                     style={{
                                         background: 'linear-gradient(90deg, #FFB81C, #E09500)',
@@ -360,7 +362,7 @@ export default function Welcome() {
                                         backgroundClip: 'text',
                                     }}
                                 >
-                                    For All.
+                                    {t('welcomeTagline3')}
                                 </span>
                             </p>
                         </motion.div>
@@ -378,8 +380,7 @@ export default function Welcome() {
                                 marginBottom: '2.5rem',
                             }}
                         >
-                            A decentralized DApp tracking every rupee of government spending —
-                            immutable, verifiable, and open to every Nepali citizen.
+                            {t('welcomeSubtitle')}
                         </motion.p>
 
                         {/* Primary CTA */}
@@ -420,7 +421,7 @@ export default function Welcome() {
                                     transition={{ duration: 0.55, ease: 'easeIn' }}
                                 />
                                 <span className="relative z-10 flex items-center gap-3">
-                                    Let&apos;s Explore
+                                    {t('letsExplore')}
                                     <motion.svg
                                         width="18" height="18" viewBox="0 0 24 24"
                                         fill="none" stroke="currentColor"
@@ -442,9 +443,9 @@ export default function Welcome() {
                             transition={{ duration: 0.8, delay: 1.75 }}
                             className="flex flex-wrap justify-center gap-2"
                         >
-                            <TrustBadge icon="⛓️" label="Solana Blockchain"  delay={1.80} />
-                            <TrustBadge icon="🔐" label="Immutable Records"  delay={1.90} />
-                            <TrustBadge icon="🇳🇵" label="Built for Nepal"   delay={2.00} />
+                            <TrustBadge icon="⛓️" label={t('solanaBlockchainBadge')}  delay={1.80} />
+                            <TrustBadge icon="🔐" label={t('immutableRecordsBadge')}  delay={1.90} />
+                            <TrustBadge icon="🇳🇵" label={t('builtForNepal')}   delay={2.00} />
                         </motion.div>
                     </div>
 
@@ -457,7 +458,7 @@ export default function Welcome() {
                         style={{ zIndex: 5 }}
                     >
                         <span style={{ color: 'rgba(255,255,255,0.35)', fontSize: '0.7rem', letterSpacing: '0.20em', fontFamily: 'JetBrains Mono, monospace' }}>
-                            DECENTRALIZED · TRANSPARENT · TRUSTLESS
+                            {t('decentralizedStrip')}
                         </span>
                     </motion.div>
 

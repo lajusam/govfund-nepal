@@ -98,7 +98,7 @@ export default function Navbar() {
                         {/* Admin badge */}
                         {isAdmin && (
                             <span className="hidden sm:inline-flex items-center px-2 py-1 rounded-full text-xs font-semibold bg-gov-amber/20 text-gov-amber border border-gov-amber/35">
-                                Admin
+                                {t('adminBadge')}
                             </span>
                         )}
 

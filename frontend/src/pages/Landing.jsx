@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { motion, useScroll, useTransform, AnimatePresence } from 'framer-motion';
 import { getAnalytics, formatNPR } from '../services/api';
+import { useLanguage } from '../context/LanguageContext';
 
 // ── Animation variants ──
 const fadeUp = {
@@ -105,27 +106,14 @@ function FloatingOrb({ className, delay = 0 }) {
     );
 }
 
-// ── Nepal flag SVG animated ──
-function NepalFlagDecor() {
-    return (
-        <motion.svg
-            viewBox="0 0 100 120"
-            className="w-28 h-32 opacity-60 drop-shadow-[0_0_12px_rgba(220,20,60,0.7)]"
-            initial={{ rotate: -5, scale: 0.9 }}
-            animate={{ rotate: 5, scale: 1 }}
-            transition={{ duration: 4, repeat: Infinity, repeatType: 'reverse', ease: 'easeInOut' }}
-        >
-            <polygon points="0,0 100,30 0,60" fill="#DC143C" stroke="#003893" strokeWidth="4" />
-            <polygon points="0,60 100,90 0,120" fill="#DC143C" stroke="#003893" strokeWidth="4" />
-        </motion.svg>
-    );
-}
+
 
 export default function Landing() {
     const [analytics, setAnalytics] = useState(null);
     const { scrollYProgress } = useScroll();
     const heroY = useTransform(scrollYProgress, [0, 0.3], [0, -80]);
     const heroOpacity = useTransform(scrollYProgress, [0, 0.25], [1, 0]);
+    const { t } = useLanguage();
 
     useEffect(() => {
         getAnalytics().then(setAnalytics);
@@ -139,14 +127,14 @@ export default function Landing() {
                 HERO SECTION — Kinetic Typography + Parallax
                ══════════════════════════════════════════ */}
             <section className="relative min-h-screen flex items-center overflow-hidden" style={{ minHeight: '100svh' }}>
-                {/* ── Hero background image ── place file at frontend/public/hero-bg.jpg */}
+                {/* ── Hero background image ── place file at frontend/public/home.png */}
                 <div className="absolute inset-0 z-0">
                     <div
                         className="absolute inset-0 bg-basalt"
                         style={{
-                            backgroundImage: `url('/hero-bg.jpg')`,
+                            backgroundImage: `url('/home.png')`,
                             backgroundSize: 'cover',
-                            backgroundPosition: 'center center',
+                            backgroundPosition: 'right center',
                             backgroundRepeat: 'no-repeat',
                             /* Avoid iOS fixed-attachment scroll jank */
                             backgroundAttachment: 'local',
@@ -178,13 +166,14 @@ export default function Landing() {
 
                 <motion.div
                     style={{ y: heroY, opacity: heroOpacity }}
-                    className="relative z-[5] max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24 sm:py-28 grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-16 items-center"
+                    className="relative z-[5] max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24 sm:py-28 flex items-center justify-start w-full"
                 >
-                    {/* Left: Text content */}
+                    {/* Left-aligned text content */}
                     <motion.div
                         variants={staggerContainer}
                         initial="hidden"
                         animate="visible"
+                        className="text-left max-w-2xl"
                     >
                         {/* Badge */}
                         <motion.div variants={fadeUp} custom={0}>
@@ -205,21 +194,27 @@ export default function Landing() {
                                 custom={1}
                                 className="block text-white on-image-text"
                             >
-                                Transparent
+                                {t('transparentTitle')}
                             </motion.span>
                             <motion.span
                                 variants={fadeUp}
                                 custom={2}
-                                className="block bg-gradient-to-r from-golden via-amber-glow to-golden-600 bg-clip-text text-transparent on-image-text"
+                                className="block"
+                                style={{
+                                    color: '#FFB81C',
+                                    WebkitTextStroke: '1.5px rgba(0,0,0,0.7)',
+                                    paintOrder: 'stroke fill',
+                                    textShadow: '0 2px 8px rgba(0,0,0,0.6), 0 0 20px rgba(0,0,0,0.3)',
+                                }}
                             >
-                                Government Funds
+                                {t('governmentFunds')}
                             </motion.span>
                             <motion.span
                                 variants={fadeUp}
                                 custom={3}
                                 className="block text-white on-image-text"
                             >
-                                For Nepal
+                                {t('forNepal')}
                             </motion.span>
                         </motion.h1>
 
@@ -229,9 +224,9 @@ export default function Landing() {
                             custom={4}
                             className="text-lg md:text-xl text-white/80 max-w-lg mb-10 leading-relaxed on-image-text-sm"
                         >
-                            Every rupee tracked. Every project verifiable. Corruption is
-                                <span className="font-semibold text-gov-amber"> technically restricted </span>
-                            by blockchain rules — not empty promises.
+                            {t('heroSubtitle')}
+                                <span className="font-semibold text-gov-amber">{t('technicallyRestricted')}</span>
+                            {t('heroSubtitleEnd')}
                         </motion.p>
 
                         {/* CTA buttons */}
@@ -242,7 +237,7 @@ export default function Landing() {
                                     whileTap={{ scale: 0.97 }}
                                     className="btn-primary text-lg px-8 py-3"
                                 >
-                                    View Dashboard →
+                                    {t('viewDashboard')}
                                 </motion.button>
                             </Link>
                             <Link to="/projects">
@@ -251,14 +246,14 @@ export default function Landing() {
                                     whileTap={{ scale: 0.97 }}
                                     className="inline-flex items-center gap-2 px-8 py-3 rounded-lg text-white border-2 border-white/40 hover:bg-white/10 hover:border-white/70 transition-all font-semibold text-lg"
                                 >
-                                    Explore Projects
+                                    {t('exploreProjectsBtn')}
                                 </motion.button>
                             </Link>
                         </motion.div>
 
                         {/* Trust badges */}
                         <motion.div variants={fadeUp} custom={6} className="flex flex-wrap items-center gap-6 text-sm text-white/65">
-                            {['Immutable Records', 'Public Verification', 'No Tampering'].map((text, i) => (
+                            {[t('immutableRecords'), t('publicVerification'), t('noTampering')].map((text, i) => (
                                 <motion.div
                                     key={text}
                                     className="flex items-center gap-2"
@@ -274,74 +269,7 @@ export default function Landing() {
                         </motion.div>
                     </motion.div>
 
-                    {/* Right: Animated visual */}
-                    <motion.div
-                        variants={slideInRight}
-                        initial="hidden"
-                        animate="visible"
-                        className="hidden lg:flex justify-center items-center"
-                    >
-                        <div className="relative">
-                            {/* Glow ring — more visible for dark bg */}
-                            <motion.div
-                                className="absolute inset-0 scale-150 rounded-full bg-gradient-to-br from-golden/35 to-bronze/25 blur-3xl"
-                                animate={{ scale: [1.4, 1.65, 1.4], rotate: [0, 180, 360] }}
-                                transition={{ duration: 20, repeat: Infinity, ease: 'linear' }}
-                            />
 
-                            {/* Main visual: Animated blockchain blocks */}
-                            <motion.div
-                                className="relative z-10 w-80 h-80 flex items-center justify-center"
-                                animate={{ rotate: 360 }}
-                                transition={{ duration: 60, repeat: Infinity, ease: 'linear' }}
-                            >
-                                {[0, 1, 2, 3, 4, 5].map((i) => (
-                                    <motion.div
-                                        key={i}
-                                        className="absolute"
-                                        style={{
-                                            transform: `rotate(${i * 60}deg) translateY(-120px)`,
-                                        }}
-                                        animate={{ rotate: -360 }}
-                                        transition={{ duration: 60, repeat: Infinity, ease: 'linear' }}
-                                    >
-                                        <motion.div
-                                            className={`w-14 h-14 rounded-xl border-2 flex items-center justify-center text-lg shadow-lg ${
-                                                i % 2 === 0
-                                                    ? 'bg-golden/10 border-golden/30 text-golden'
-                                                    : 'bg-bronze/10 border-bronze/30 text-amber-glow'
-                                            }`}
-                                            whileHover={{ scale: 1.3 }}
-                                        >
-                                            {['🏗️', '💰', '📋', '🔐', '✅', '📊'][i]}
-                                        </motion.div>
-                                    </motion.div>
-                                ))}
-
-                                {/* Center logo — counter-rotates to stay upright while orbit spins */}
-                                <motion.img
-                                    src="/logo.png"
-                                    alt="GovFund Nepal"
-                                    className="absolute z-10 rounded-full object-contain"
-                                    style={{
-                                        width: 96,
-                                        height: 96,
-                                        filter: 'drop-shadow(0 0 16px rgba(255,184,28,0.60))',
-                                    }}
-                                    animate={{ rotate: -360 }}
-                                    transition={{ duration: 60, repeat: Infinity, ease: 'linear' }}
-                                />
-                            </motion.div>
-
-                            {/* Nepal flag decorations */}
-                            <div className="absolute -top-8 -right-8">
-                                <NepalFlagDecor />
-                            </div>
-                            <div className="absolute -bottom-8 -left-8 rotate-180">
-                                <NepalFlagDecor />
-                            </div>
-                        </div>
-                    </motion.div>
                 </motion.div>
 
                 {/* Scroll indicator */}
@@ -382,10 +310,10 @@ export default function Landing() {
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                     <motion.div variants={fadeUp} className="text-center mb-16">
                         <h2 className="text-3xl md:text-4xl font-heading font-bold text-parchment mb-3">
-                            Transparency at a Glance
+                            {t('transparencyGlance')}
                         </h2>
                         <p className="text-parchment-muted text-lg">
-                            Real-time data from the Solana blockchain
+                            {t('realtimeBlockchainData')}
                         </p>
                     </motion.div>
 
@@ -393,10 +321,10 @@ export default function Landing() {
                         variants={staggerContainer}
                         className="grid grid-cols-2 md:grid-cols-4 gap-6"
                     >
-                        <AnimatedCounter label="Total Budget" value={stats.totalBudget ? formatNPR(stats.totalBudget).replace('NPR ', '') : '0'} icon="💰" />
-                        <AnimatedCounter label="Funds Released" value={stats.totalReleased ? formatNPR(stats.totalReleased).replace('NPR ', '') : '0'} icon="📤" />
-                        <AnimatedCounter label="Active Projects" value={stats.activeProjects || 0} icon="🏗️" />
-                        <AnimatedCounter label="Utilization Rate" value={stats.utilizationRate || '0'} icon="📊" suffix="%" />
+                        <AnimatedCounter label={t('totalBudgetLabel')} value={stats.totalBudget ? formatNPR(stats.totalBudget).replace('NPR ', '') : '0'} icon="💰" />
+                        <AnimatedCounter label={t('fundsReleasedLabel')} value={stats.totalReleased ? formatNPR(stats.totalReleased).replace('NPR ', '') : '0'} icon="📤" />
+                        <AnimatedCounter label={t('activeProjectsLabel')} value={stats.activeProjects || 0} icon="🏗️" />
+                        <AnimatedCounter label={t('utilizationRateLabel')} value={stats.utilizationRate || '0'} icon="📊" suffix="%" />
                     </motion.div>
                 </div>
             </motion.section>
@@ -414,33 +342,33 @@ export default function Landing() {
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                     <motion.div variants={fadeUp} className="text-center mb-16">
                         <h2 className="text-3xl md:text-4xl font-heading font-bold text-white mb-3">
-                            How It Works
+                            {t('howItWorks')}
                         </h2>
                         <p className="text-white/70 text-lg">
-                            Blockchain-enforced transparency in 4 steps
+                            {t('blockchainSteps')}
                         </p>
                     </motion.div>
 
                     <motion.div variants={staggerContainer} className="grid grid-cols-1 md:grid-cols-4 gap-8">
                         {[
                             {
-                                step: '01', title: 'Project Created',
-                                desc: 'Government creates a public project on the blockchain with full budget details.',
+                                step: '01', title: t('stepProjectCreated'),
+                                desc: t('stepProjectCreatedDesc'),
                                 icon: '📋', color: 'from-golden/5 to-earth',
                             },
                             {
-                                step: '02', title: 'Budget Allocated',
-                                desc: 'Funds allocated from treasury. Cannot exceed declared total budget — enforced by smart contract.',
+                                step: '02', title: t('stepBudgetAllocated'),
+                                desc: t('stepBudgetAllocatedDesc'),
                                 icon: '💵', color: 'from-bronze/8 to-earth',
                             },
                             {
-                                step: '03', title: 'Funds Released',
-                                desc: 'Every release recorded on-chain. Cannot exceed allocated amount. Tamper-proof history.',
+                                step: '03', title: t('stepFundsReleased'),
+                                desc: t('stepFundsReleasedDesc'),
                                 icon: '🔓', color: 'from-earth-raised to-earth',
                             },
                             {
-                                step: '04', title: 'Public Verification',
-                                desc: 'Any citizen verifies transactions on Solana Explorer. Complete transparency, zero trust needed.',
+                                step: '04', title: t('stepPublicVerification'),
+                                desc: t('stepPublicVerificationDesc'),
                                 icon: '✅', color: 'from-earth to-earth-light',
                             },
                         ].map((item, i) => (
@@ -489,22 +417,20 @@ export default function Landing() {
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
                     <motion.div variants={slideInLeft}>
                         <span className="text-sm font-semibold text-golden uppercase tracking-wider mb-3 block">
-                            Why Blockchain?
+                            {t('whyBlockchain')}
                         </span>
                         <h2 className="text-3xl md:text-4xl font-heading font-bold text-parchment mb-6">
-                            Corruption Cannot Survive On-Chain
+                            {t('corruptionTitle')}
                         </h2>
                         <p className="text-parchment-dim mb-8 leading-relaxed text-lg">
-                            Traditional government budget tracking relies on centralized databases that can be
-                            manipulated. Our system stores every financial transaction on the Solana blockchain —
-                            immutable, transparent, and verifiable by any citizen.
+                            {t('corruptionDesc')}
                         </p>
 
                         <div className="space-y-4">
                             {[
-                                { title: 'Immutable Ledger', desc: 'Once recorded, transactions cannot be altered or deleted' },
-                                { title: 'Smart Contract Rules', desc: 'Budget limits enforced by code, not administrators' },
-                                { title: 'Real-time Auditing', desc: 'Anyone can verify via Solana Explorer — no FOIA needed' },
+                                { title: t('immutableLedger'), desc: t('immutableLedgerDesc') },
+                                { title: t('smartContractRules'), desc: t('smartContractRulesDesc') },
+                                { title: t('realtimeAuditing'), desc: t('realtimeAuditingDesc') },
                             ].map((item, i) => (
                                 <motion.div
                                     key={i}
@@ -637,10 +563,10 @@ export default function Landing() {
                         custom={0}
                         className="text-3xl md:text-5xl font-heading font-bold text-white mb-6"
                     >
-                        Ready to explore
+                        {t('readyToExplore')}
                         <br />
                         <span className="bg-gradient-to-r from-golden to-amber-glow bg-clip-text text-transparent">
-                            transparent governance?
+                            {t('transparentGovernance')}
                         </span>
                     </motion.h2>
 
@@ -649,8 +575,7 @@ export default function Landing() {
                         custom={1}
                         className="text-white/75 text-lg mb-10 max-w-2xl mx-auto"
                     >
-                        Connect your Solana wallet and start verifying government spending in real-time.
-                        Every transaction is on-chain and publicly auditable.
+                        {t('connectWalletCTA')}
                     </motion.p>
 
                     <motion.div variants={fadeUp} custom={2}>
@@ -660,7 +585,7 @@ export default function Landing() {
                                 whileTap={{ scale: 0.97 }}
                                 className="btn-primary text-lg px-10 py-4"
                             >
-                                Explore All Projects →
+                                {t('exploreAllProjects')}
                             </motion.button>
                         </Link>
                     </motion.div>

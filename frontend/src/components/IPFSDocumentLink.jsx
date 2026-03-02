@@ -1,4 +1,5 @@
 import React, { useState, useCallback } from 'react';
+import { useLanguage } from '../context/LanguageContext';
 
 /**
  * IPFSDocumentLink — opens IPFS documents using gateway fallback.
@@ -24,6 +25,7 @@ export function getIPFSGatewayUrl(hash, gatewayIndex = 0) {
 export default function IPFSDocumentLink({ ipfsHash, name, children }) {
     const [checking, setChecking] = useState(false);
     const [error, setError] = useState(false);
+    const { t } = useLanguage();
 
     const openDocument = useCallback(async (e) => {
         e.preventDefault();
@@ -81,7 +83,7 @@ export default function IPFSDocumentLink({ ipfsHash, name, children }) {
                 {checking ? (
                     <span className="flex items-center gap-2">
                         <span className="w-3 h-3 border-2 border-golden/40 border-t-golden rounded-full animate-spin" />
-                        Connecting to IPFS…
+                        {t('connectingIPFS')}
                     </span>
                 ) : children}
             </a>
@@ -102,24 +104,24 @@ export default function IPFSDocumentLink({ ipfsHash, name, children }) {
                 {checking ? (
                     <>
                         <p className="text-sm font-medium text-golden animate-pulse truncate">
-                            Connecting to IPFS gateway…
+                            {t('connectingGateway')}
                         </p>
-                        <p className="text-[10px] text-parchment-muted">Checking multiple gateways</p>
+                        <p className="text-[10px] text-parchment-muted">{t('checkingGateways')}</p>
                     </>
                 ) : error ? (
                     <>
-                        <p className="text-sm font-medium text-red-400 truncate">Gateway unavailable</p>
+                        <p className="text-sm font-medium text-red-400 truncate">{t('gatewayUnavailable')}</p>
                         <button
                             onClick={openDirect}
                             className="text-[10px] text-golden hover:text-amber-glow underline"
                         >
-                            Try opening directly →
+                            {t('tryDirectly')}
                         </button>
                     </>
                 ) : (
                     <>
                         <p className="text-sm font-medium text-parchment group-hover:text-golden transition-colors truncate">
-                            {name || 'IPFS Document'}
+                            {name || t('ipfsDocumentLabel')}
                         </p>
                         <p className="text-[10px] text-parchment-muted font-mono truncate">{ipfsHash}</p>
                     </>
