@@ -6,7 +6,7 @@ import { useLanguage } from '../context/LanguageContext';
 import { PublicKey, SystemProgram } from '@solana/web3.js';
 import { BN } from '@coral-xyz/anchor';
 import { motion, AnimatePresence } from 'framer-motion';
-import api, { formatNPR, getExplorerUrl, isValidSignature } from '../services/api';
+import api, { formatNPR, getExplorerUrl, isValidSignature, setAdminHeaders } from '../services/api';
 import { PROVINCES, SECTORS, getDistrictsForProvince } from '../data/nepalData';
 import useSolanaProgram from '../hooks/useSolanaProgram';
 import useIPFS, { isValidCID, getIPFSUrl } from '../hooks/useIPFS';
@@ -472,6 +472,15 @@ export default function Admin() {
   const { connection } = useConnection();
   const { isAdmin } = useSolana();
   const { t, lang } = useLanguage();
+
+  // Set admin headers globally whenever wallet connects/disconnects
+  useEffect(() => {
+    if (connected && publicKey) {
+      setAdminHeaders(publicKey.toBase58());
+    } else {
+      setAdminHeaders(null);
+    }
+  }, [connected, publicKey]);
 
   // Initialize Anchor program via custom hook (only when wallet connected)
   const { program, programReady, programError, programStatus, reinitialize } = useSolanaProgram(IDL, PROGRAM_ID_STR);
@@ -1048,7 +1057,7 @@ export default function Admin() {
     // If a file is selected, upload to IPFS first (before touching Solana)
     if (docFile && !ipfsHash) {
       showMsg('Uploading document to IPFS...', 'info');
-      const result = await ipfsUpload(docFile, { projectId });
+      const result = await ipfsUpload(docFile, { projectId, walletAddress: publicKey?.toBase58() });
       if (!result) {
         const errMsg = ipfsError?.message || 'IPFS upload failed';
         return showMsg(`IPFS Error: ${errMsg}`, 'error');

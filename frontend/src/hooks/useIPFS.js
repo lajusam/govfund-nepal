@@ -77,12 +77,13 @@ export default function useIPFS() {
      *
      * @param {File}   file       - Browser File object from <input type="file">
      * @param {object} [options]
-     * @param {string} [options.projectId]  - Tag the pin with a project ID
-     * @param {number} [options.maxRetries] - Upload retries (default 2)
+     * @param {string} [options.projectId]     - Tag the pin with a project ID
+     * @param {string} [options.walletAddress] - Admin wallet address (required by backend)
+     * @param {number} [options.maxRetries]    - Upload retries (default 2)
      * @returns {Promise<{ ipfsHash, gatewayUrl, size, fileName } | null>}
      */
     const uploadFile = useCallback(async (file, options = {}) => {
-        const { projectId = '', maxRetries = 2 } = options;
+        const { projectId = '', walletAddress = '', maxRetries = 2 } = options;
 
         // Reset state
         setError(null);
@@ -115,8 +116,13 @@ export default function useIPFS() {
                 const controller = new AbortController();
                 abortRef.current = controller;
 
+                const headers = { 'Content-Type': 'multipart/form-data' };
+                if (walletAddress) {
+                    headers['x-wallet-address'] = walletAddress;
+                }
+
                 const res = await api.post('/ipfs/upload', formData, {
-                    headers: { 'Content-Type': 'multipart/form-data' },
+                    headers,
                     timeout: 180_000, // 3 min for large files
                     signal: controller.signal,
                     onUploadProgress: (e) => {
