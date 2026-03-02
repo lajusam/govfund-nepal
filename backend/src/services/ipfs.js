@@ -74,9 +74,9 @@ const GATEWAYS = [
 // ── Helpers ───────────────────────────────────────────────────────────────────
 
 function getPinataKeys() {
-    const apiKey = process.env.PINATA_API_KEY;
-    const secretKey = process.env.PINATA_SECRET_KEY;
-    const jwt = process.env.PINATA_JWT; // optional — newer Pinata auth
+    const apiKey = (process.env.PINATA_API_KEY || '').trim();
+    const secretKey = (process.env.PINATA_SECRET_KEY || '').trim();
+    const jwt = (process.env.PINATA_JWT || '').trim();
 
     if (jwt && jwt !== 'your_pinata_jwt') return { jwt };
     if (apiKey && secretKey && apiKey !== 'your_pinata_api_key') return { apiKey, secretKey };
