@@ -111,6 +111,13 @@ export default function ProjectDetail() {
     const budgetPct = p.allocatedBudget > 0 ? ((p.releasedAmount / p.allocatedBudget) * 100).toFixed(1) : 0;
     const milestonePct = p.milestoneCount > 0 ? ((p.milestonesCompleted / p.milestoneCount) * 100).toFixed(0) : 0;
 
+    // Determine if this is a demo/sample project (no real on-chain transactions)
+    const allSignatures = [
+        ...(p.fundReleases || []).map(r => r.txSignature),
+        ...(p.budgetAllocations || []).map(a => a.txSignature),
+    ].filter(Boolean);
+    const isDemoProject = allSignatures.length > 0 && !allSignatures.some(sig => isValidSignature(sig)) && !p.onChain;
+
     return (
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
             {/* Breadcrumb */}
@@ -119,6 +126,22 @@ export default function ProjectDetail() {
                 <span>/</span>
                 <span className="text-parchment font-medium">{p.name}</span>
             </div>
+
+            {/* Demo project banner */}
+            {isDemoProject && (
+                <div className="mb-6 p-4 rounded-xl bg-golden/8 border border-golden/20 flex items-start gap-3">
+                    <div className="w-8 h-8 rounded-lg bg-golden/15 border border-golden/25 flex items-center justify-center text-golden text-sm flex-shrink-0 mt-0.5">
+                        <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                    </div>
+                    <div>
+                        <p className="text-sm font-semibold text-golden mb-0.5">Demonstration Project</p>
+                        <p className="text-xs text-parchment-muted leading-relaxed">
+                            This project uses sample data for demonstration purposes. Transaction records shown here are simulated. 
+                            Live on-chain transactions will appear once the project is registered on Solana devnet via admin operations.
+                        </p>
+                    </div>
+                </div>
+            )}
 
             {/* Header */}
             <div className="card p-8 mb-8">
@@ -294,8 +317,11 @@ export default function ProjectDetail() {
                                                             </svg>
                                                         </a>
                                                     ) : (
-                                                        <span className="inline-flex items-center gap-1 text-xs font-mono text-parchment-ghost" title="Demo signature — not a real on-chain transaction">
-                                                            <span className="px-1.5 py-0.5 rounded bg-earth-light text-[10px] text-parchment-ghost/70">DEMO</span>
+                                                        <span className="inline-flex items-center gap-1.5 text-xs text-parchment-muted" title="Simulated transaction for demonstration purposes">
+                                                            <span className="flex items-center gap-1 px-2 py-0.5 rounded-full bg-golden/10 border border-golden/20 text-[10px] text-golden/80 font-medium">
+                                                                <svg className="w-2.5 h-2.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                                                                Sample
+                                                            </span>
                                                         </span>
                                                     )
                                                 ) : (
@@ -412,8 +438,11 @@ export default function ProjectDetail() {
                                                     </svg>
                                                 </a>
                                             ) : (
-                                                <span className="inline-flex items-center gap-1 mt-1.5 text-[10px] font-mono text-parchment-ghost" title="Demo signature — not a real on-chain transaction">
-                                                    <span className="px-1.5 py-0.5 rounded bg-earth-light text-parchment-ghost/70">DEMO</span>
+                                                <span className="inline-flex items-center gap-1 mt-1.5 text-[10px] text-parchment-muted" title="Simulated transaction for demonstration purposes">
+                                                    <span className="flex items-center gap-1 px-1.5 py-0.5 rounded-full bg-golden/10 border border-golden/20 text-golden/80 font-medium">
+                                                        <svg className="w-2 h-2" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                                                        Sample Tx
+                                                    </span>
                                                 </span>
                                             )
                                         )}
@@ -456,9 +485,10 @@ export default function ProjectDetail() {
                                 ...(p.budgetAllocations || []).filter(a => a.txSignature).map(a => ({ sig: a.txSignature, label: `Allocated ${formatNPR(a.amount)}`, date: a.date, type: 'allocate' })),
                             ].sort((a, b) => new Date(b.date) - new Date(a.date)).slice(0, 8);
 
-                            // Separate real on-chain txs from demo placeholders
+                            // Separate real on-chain txs from demo/sample placeholders
                             const realTxs = allTxs.filter(tx => isValidSignature(tx.sig));
                             const demoTxs = allTxs.filter(tx => !isValidSignature(tx.sig));
+                            const isDemoProject = realTxs.length === 0 && demoTxs.length > 0;
 
                             return realTxs.length > 0 ? (
                                 <div>
@@ -491,18 +521,24 @@ export default function ProjectDetail() {
                                     </div>
                                     {demoTxs.length > 0 && (
                                         <p className="text-[10px] text-parchment-ghost/60 mt-2 italic">
-                                            + {demoTxs.length} demo transaction{demoTxs.length > 1 ? 's' : ''} (seed data — not on-chain)
+                                            + {demoTxs.length} sample transaction{demoTxs.length > 1 ? 's' : ''} (demonstration data)
                                         </p>
                                     )}
                                 </div>
                             ) : demoTxs.length > 0 ? (
                                 <div>
-                                    <p className="text-[10px] text-parchment-ghost uppercase tracking-wider mb-3">Transaction History</p>
+                                    <div className="flex items-center gap-2 mb-3">
+                                        <p className="text-[10px] text-parchment-ghost uppercase tracking-wider">Transaction History</p>
+                                        <span className="flex items-center gap-1 px-1.5 py-0.5 rounded-full bg-golden/10 border border-golden/20 text-[9px] text-golden/80 font-medium">
+                                            <svg className="w-2 h-2" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                                            Sample Data
+                                        </span>
+                                    </div>
                                     <div className="space-y-2">
                                         {demoTxs.slice(0, 5).map((tx, i) => (
                                             <div
                                                 key={i}
-                                                className="flex items-center gap-3 p-2 bg-earth rounded-lg opacity-60"
+                                                className="flex items-center gap-3 p-2 bg-earth rounded-lg hover:bg-earth-light/50 transition-colors"
                                             >
                                                 <div className={`w-6 h-6 rounded-full flex items-center justify-center text-[10px] flex-shrink-0 ${
                                                     tx.type === 'release' ? 'bg-golden/15 text-golden' : 'bg-amber-glow/10 text-amber-glow'
@@ -511,15 +547,27 @@ export default function ProjectDetail() {
                                                 </div>
                                                 <div className="flex-1 min-w-0">
                                                     <p className="text-xs text-parchment font-medium truncate">{tx.label}</p>
-                                                    <p className="text-[10px] font-mono text-parchment-ghost/60">Demo data</p>
+                                                    <p className="text-[10px] text-parchment-muted">
+                                                        {new Date(tx.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
+                                                    </p>
                                                 </div>
-                                                <span className="px-1.5 py-0.5 rounded bg-earth-light text-[9px] text-parchment-ghost/50 flex-shrink-0">DEMO</span>
+                                                <span className="flex items-center gap-1 px-1.5 py-0.5 rounded-full bg-golden/10 border border-golden/20 text-[9px] text-golden/70 font-medium flex-shrink-0">
+                                                    <svg className="w-2 h-2" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                                                    Sample
+                                                </span>
                                             </div>
                                         ))}
                                     </div>
-                                    <p className="text-[10px] text-parchment-ghost/50 mt-3 italic">
-                                        These are demo/seed transactions. Real on-chain transactions will appear here after admin operations.
-                                    </p>
+                                    {demoTxs.length > 5 && (
+                                        <p className="text-[10px] text-parchment-ghost/60 mt-2">
+                                            + {demoTxs.length - 5} more transaction{demoTxs.length - 5 > 1 ? 's' : ''}
+                                        </p>
+                                    )}
+                                    <div className="mt-3 p-2.5 rounded-lg bg-golden/5 border border-golden/15">
+                                        <p className="text-[10px] text-parchment-muted leading-relaxed">
+                                            <span className="text-golden/80 font-medium">Note:</span> This project uses sample transaction data for demonstration. Live on-chain transactions will appear here once recorded via admin operations on Solana devnet.
+                                        </p>
+                                    </div>
                                 </div>
                             ) : (
                                 <p className="text-xs text-parchment-ghost mb-3">No on-chain transaction records yet.</p>
