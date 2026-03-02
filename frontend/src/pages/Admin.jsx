@@ -1073,12 +1073,12 @@ export default function Admin() {
 
     // Validate CID format
     if (!isValidCID(ipfsHash)) {
-      return showMsg('Invalid IPFS hash format. Must be a valid CIDv0 (Qm...) or CIDv1 (bafy...).', 'error');
+      return showMsg('Invalid IPFS hash format. Must be a valid CIDv0 (Qm...) or CIDv1 (bafy/bafk...).', 'error');
     }
 
-    // On-chain hash length limit is 64 chars
+    // On-chain hash length limit is 64 chars — CIDv0 (Qm) is 46 chars, CIDv1 can be 59+
     if (ipfsHash.length > 64) {
-      return showMsg('IPFS hash exceeds on-chain limit of 64 characters.', 'error');
+      return showMsg(`IPFS hash is ${ipfsHash.length} chars — exceeds Solana on-chain limit of 64. Use a CIDv0 (Qm...) hash instead.`, 'error');
     }
 
     setLoading(true);

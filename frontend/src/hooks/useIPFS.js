@@ -35,10 +35,16 @@ const PUBLIC_GATEWAYS = [
 
 /**
  * Validate a CID (CIDv0 or CIDv1).
+ *   CIDv0: Qm…  (46 chars, base58btc)
+ *   CIDv1: b…   (50+ chars, base32) — bafy, bafk, bafkrei, bafybei, etc.
  */
 export function isValidCID(hash) {
     if (!hash || typeof hash !== 'string') return false;
-    return /^Qm[1-9A-HJ-NP-Za-km-z]{44}$/.test(hash) || /^bafy[a-z2-7]{55,}$/.test(hash);
+    // CIDv0: Qm + 44 base58 chars
+    if (/^Qm[1-9A-HJ-NP-Za-km-z]{44}$/.test(hash)) return true;
+    // CIDv1: starts with 'b', base32 encoded, at least 50 chars
+    if (/^b[a-z2-7]{49,}$/.test(hash)) return true;
+    return false;
 }
 
 /**
@@ -116,9 +122,14 @@ export default function useIPFS() {
                 const controller = new AbortController();
                 abortRef.current = controller;
 
+                // Build headers: wallet address from explicit param, or from
+                // globally-set admin headers on the axios instance (setAdminHeaders).
+                const resolvedWallet = walletAddress
+                    || api.defaults.headers.common['x-wallet-address']
+                    || '';
                 const headers = { 'Content-Type': 'multipart/form-data' };
-                if (walletAddress) {
-                    headers['x-wallet-address'] = walletAddress;
+                if (resolvedWallet) {
+                    headers['x-wallet-address'] = resolvedWallet;
                 }
 
                 const res = await api.post('/ipfs/upload', formData, {

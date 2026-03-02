@@ -90,11 +90,15 @@ function isPinataConfigured() {
 /**
  * Validate a CID looks like a real IPFS hash (CIDv0 or CIDv1).
  *   CIDv0: Qm…  (46 chars, base58btc)
- *   CIDv1: bafy… (59+ chars, base32)
+ *   CIDv1: baf… (59+ chars, base32) — includes bafy, bafk, bafkrei, bafybei, etc.
  */
 function isValidCID(hash) {
     if (!hash || typeof hash !== 'string') return false;
-    return /^Qm[1-9A-HJ-NP-Za-km-z]{44}$/.test(hash) || /^bafy[a-z2-7]{55,}$/.test(hash);
+    // CIDv0: Qm + 44 base58 chars = 46 total
+    if (/^Qm[1-9A-HJ-NP-Za-km-z]{44}$/.test(hash)) return true;
+    // CIDv1: starts with 'b' and is base32 encoded (at least 50 chars)
+    if (/^b[a-z2-7]{49,}$/.test(hash)) return true;
+    return false;
 }
 
 /**
@@ -195,8 +199,8 @@ async function uploadToIPFS(fileBuffer, fileName, options = {}) {
     };
     formData.append('pinataMetadata', JSON.stringify(pinataMetadata));
 
-    // Pin options — ensure the file stays pinned permanently
-    const pinataOptions = { cidVersion: 1 };
+    // Pin options — use CIDv0 (Qm..., 46 chars) to stay within Solana on-chain 64-char limit
+    const pinataOptions = { cidVersion: 0 };
     formData.append('pinataOptions', JSON.stringify(pinataOptions));
 
     // 4. Upload with retry
