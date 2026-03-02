@@ -1,7 +1,9 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
+import { useLanguage } from '../context/LanguageContext';
 
 export default function Footer() {
+    const { t } = useLanguage();
     return (
         <footer className="bg-basalt border-t border-white/10">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
@@ -15,19 +17,18 @@ export default function Footer() {
                             <span className="font-heading font-bold text-xl text-white">GovFund Nepal</span>
                         </div>
                         <p className="text-white/60 text-sm max-w-md leading-relaxed">
-                            A decentralized government fund transparency system built on Solana blockchain.
-                            Making public spending transparent, immutable, and verifiable for every citizen of Nepal.
+                            {t('footerDesc')}
                         </p>
                     </div>
 
                     {/* Quick Links */}
                     <div>
-                        <h3 className="text-white font-semibold mb-4 text-sm uppercase tracking-wider">Quick Links</h3>
+                        <h3 className="text-white font-semibold mb-4 text-sm uppercase tracking-wider">{t('quickLinks')}</h3>
                         <ul className="space-y-2">
                             {[
-                                { to: '/dashboard', label: 'Dashboard' },
-                                { to: '/projects', label: 'Projects' },
-                                { to: '/admin', label: 'Admin Panel' },
+                                { to: '/dashboard', label: t('dashboard') },
+                                { to: '/projects', label: t('projects') },
+                                { to: '/admin', label: t('adminPanel') },
                             ].map(link => (
                                 <li key={link.to}>
                                     <Link to={link.to} className="text-white/60 hover:text-white text-sm transition-colors">
@@ -40,12 +41,12 @@ export default function Footer() {
 
                     {/* Blockchain */}
                     <div>
-                        <h3 className="text-white font-semibold mb-4 text-sm uppercase tracking-wider">Blockchain</h3>
+                        <h3 className="text-white font-semibold mb-4 text-sm uppercase tracking-wider">{t('blockchainLabel')}</h3>
                         <ul className="space-y-2">
                             <li>
                                 <a href="https://explorer.solana.com/?cluster=devnet" target="_blank" rel="noopener noreferrer"
                                     className="text-white/60 hover:text-white text-sm transition-colors">
-                                    Solana Explorer
+                                    {t('solanaExplorer')}
                                 </a>
                             </li>
                             <li>
@@ -57,7 +58,7 @@ export default function Footer() {
                             <li>
                                 <span className="inline-flex items-center gap-2 text-gov-amber text-xs mt-2">
                                     <span className="w-2 h-2 rounded-full bg-gov-green animate-pulse"></span>
-                                    Devnet Connected
+                                    {t('devnetConnected')}
                                 </span>
                             </li>
                         </ul>
@@ -66,10 +67,10 @@ export default function Footer() {
 
                 <div className="border-t border-white/10 mt-8 pt-8 flex flex-col sm:flex-row justify-between items-center gap-4">
                     <p className="text-white/40 text-xs">
-                        © 2026 GovFund Nepal. Built on Solana Blockchain. All transactions are publicly verifiable.
+                        {t('copyright')}
                     </p>
                     <p className="text-white/40 text-xs">
-                        🇳🇵 For a transparent Nepal
+                        🇳🇵 {t('forTransparentNepal')}
                     </p>
                 </div>
             </div>

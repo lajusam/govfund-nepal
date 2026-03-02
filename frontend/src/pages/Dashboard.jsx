@@ -1,6 +1,7 @@
 import React, { useEffect, useState, useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import { getAnalytics, formatNPR } from '../services/api';
+import { useLanguage } from '../context/LanguageContext';
 import {
     Chart as ChartJS, CategoryScale, LinearScale, BarElement, ArcElement,
     Title, Tooltip, Legend,
@@ -12,6 +13,7 @@ ChartJS.register(CategoryScale, LinearScale, BarElement, ArcElement, Title, Tool
 export default function Dashboard() {
     const [analytics, setAnalytics] = useState(null);
     const [loading, setLoading] = useState(true);
+    const { t } = useLanguage();
 
     useEffect(() => {
         getAnalytics().then(data => { setAnalytics(data); setLoading(false); });
@@ -102,19 +104,19 @@ export default function Dashboard() {
             {/* Header with subtle golden radial backdrop */}
             <div className="mb-10 relative">
                 <div className="absolute -top-20 left-1/2 -translate-x-1/2 w-[600px] h-[300px] bg-golden-radial opacity-40 pointer-events-none" />
-                <h1 className="section-title text-parchment relative z-10">Public Dashboard</h1>
-                <p className="section-subtitle relative z-10">Real-time government spending transparency</p>
+                <h1 className="section-title text-parchment relative z-10">{t('dashboardTitle')}</h1>
+                <p className="section-subtitle relative z-10">{t('dashboardSubtitle')}</p>
             </div>
 
             {/* Overview Cards — glass-card style with semantic top-border colors */}
             <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4 mb-12">
                 {[
-                    { label: 'Total Budget', value: formatNPR(overview.totalBudget), borderColor: 'border-t-golden', icon: '💰' },
-                    { label: 'Allocated', value: formatNPR(overview.totalAllocated), borderColor: 'border-t-bronze', icon: '📊' },
-                    { label: 'Released', value: formatNPR(overview.totalReleased), borderColor: 'border-t-gov-green', icon: '💵' },
-                    { label: 'Projects', value: overview.totalProjects, borderColor: 'border-t-amber-glow', icon: '🏗️' },
-                    { label: 'Active', value: overview.activeProjects, borderColor: 'border-t-gov-green', icon: '✅' },
-                    { label: 'Utilization', value: `${overview.utilizationRate}%`, borderColor: 'border-t-golden', icon: '📈' },
+                    { label: t('totalBudgetLabel'), value: formatNPR(overview.totalBudget), borderColor: 'border-t-golden', icon: '💰' },
+                    { label: t('allocated'), value: formatNPR(overview.totalAllocated), borderColor: 'border-t-bronze', icon: '📊' },
+                    { label: t('released'), value: formatNPR(overview.totalReleased), borderColor: 'border-t-gov-green', icon: '💵' },
+                    { label: t('projectsLabel'), value: overview.totalProjects, borderColor: 'border-t-amber-glow', icon: '🏗️' },
+                    { label: t('active'), value: overview.activeProjects, borderColor: 'border-t-gov-green', icon: '✅' },
+                    { label: t('utilization'), value: `${overview.utilizationRate}%`, borderColor: 'border-t-golden', icon: '📈' },
                 ].map((stat, i) => (
                     <div
                         key={i}
@@ -135,7 +137,7 @@ export default function Dashboard() {
                 <div className="lg:col-span-2 glass-card p-6">
                     <h3 className="font-heading font-bold text-lg mb-4 text-parchment flex items-center gap-2">
                         <span className="w-1 h-5 rounded bg-golden inline-block"></span>
-                        Province-wise Spending
+                        {t('provinceSpending')}
                     </h3>
                     {provinceChartData && (
                         <Bar
@@ -181,7 +183,7 @@ export default function Dashboard() {
                 <div className="glass-card p-6">
                     <h3 className="font-heading font-bold text-lg mb-4 text-parchment flex items-center gap-2">
                         <span className="w-1 h-5 rounded bg-bronze inline-block"></span>
-                        Sector Distribution
+                        {t('sectorDistribution')}
                     </h3>
                     {sectorChartData && (
                         <Doughnut
@@ -219,13 +221,13 @@ export default function Dashboard() {
             <div className="glass-card p-6 mb-12">
                 <h3 className="font-heading font-bold text-lg mb-6 text-parchment flex items-center gap-2">
                     <span className="w-1 h-5 rounded bg-golden inline-block"></span>
-                    Overall Budget Utilization
+                    {t('overallBudgetUtilization')}
                 </h3>
                 <div className="space-y-6">
                     {/* Allocated vs Total — bronze→golden gradient */}
                     <div>
                         <div className="flex justify-between text-sm mb-2">
-                            <span className="text-parchment-muted">Allocated / Total Budget</span>
+                            <span className="text-parchment-muted">{t('allocatedTotalBudget')}</span>
                             <span className="font-bold tabular-nums text-golden">
                                 {allocPct}%
                             </span>
@@ -240,15 +242,15 @@ export default function Dashboard() {
                             ></div>
                         </div>
                         <div className="flex justify-between text-xs text-parchment-ghost mt-1">
-                            <span>{formatNPR(overview.totalAllocated)} allocated</span>
-                            <span>{formatNPR(overview.totalBudget)} total</span>
+                            <span>{formatNPR(overview.totalAllocated)} {t('allocatedSuffix')}</span>
+                            <span>{formatNPR(overview.totalBudget)} {t('totalSuffix')}</span>
                         </div>
                     </div>
 
                     {/* Released vs Allocated — green gradient for spent funds */}
                     <div>
                         <div className="flex justify-between text-sm mb-2">
-                            <span className="text-parchment-muted">Released / Allocated</span>
+                            <span className="text-parchment-muted">{t('releasedAllocated')}</span>
                             <span className={`font-bold tabular-nums ${
                                 Number(releasePct) >= 80 ? 'text-gov-green' :
                                 Number(releasePct) >= 50 ? 'text-golden' :
@@ -271,8 +273,8 @@ export default function Dashboard() {
                             ></div>
                         </div>
                         <div className="flex justify-between text-xs text-parchment-ghost mt-1">
-                            <span>{formatNPR(overview.totalReleased)} released</span>
-                            <span>{formatNPR(overview.totalAllocated)} allocated</span>
+                            <span>{formatNPR(overview.totalReleased)} {t('releasedSuffix')}</span>
+                            <span>{formatNPR(overview.totalAllocated)} {t('allocatedSuffix')}</span>
                         </div>
                     </div>
 
@@ -280,7 +282,7 @@ export default function Dashboard() {
                     {overview.totalBudget > overview.totalAllocated && (
                         <div className="pt-2 border-t border-earth-border">
                             <div className="flex items-center justify-between text-sm">
-                                <span className="text-parchment-ghost">Unallocated Funds</span>
+                                <span className="text-parchment-ghost">{t('unallocatedFunds')}</span>
                                 <span className="font-semibold text-parchment-muted tabular-nums">
                                     {formatNPR(overview.totalBudget - overview.totalAllocated)}
                                 </span>
@@ -293,7 +295,7 @@ export default function Dashboard() {
             {/* Explore link */}
             <div className="text-center">
                 <Link to="/projects" className="btn-primary">
-                    Explore All Projects →
+                    {t('exploreAllProjects')}
                 </Link>
             </div>
         </div>

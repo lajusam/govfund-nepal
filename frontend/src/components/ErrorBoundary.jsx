@@ -1,4 +1,5 @@
 import React from 'react';
+import { LanguageContext } from '../context/LanguageContext';
 
 /**
  * React Error Boundary — catches render-time errors in the component tree
@@ -7,6 +8,8 @@ import React from 'react';
  * Wrap around <Routes /> or any subtree that might throw during render.
  */
 export default class ErrorBoundary extends React.Component {
+  static contextType = LanguageContext;
+
   constructor(props) {
     super(props);
     this.state = { hasError: false, error: null, errorInfo: null };
@@ -31,6 +34,7 @@ export default class ErrorBoundary extends React.Component {
 
   render() {
     if (this.state.hasError) {
+      const t = this.context?.t || ((key) => key);
       return (
         <div className="min-h-[60vh] flex items-center justify-center px-4">
           <div className="max-w-lg w-full bg-earth rounded-2xl shadow-basalt-xl border border-golden/20 p-8 text-center">
@@ -39,16 +43,16 @@ export default class ErrorBoundary extends React.Component {
 
             {/* Title */}
             <h2 className="text-2xl font-bold text-parchment mb-2">
-              Something went wrong
+              {t('somethingWrong')}
             </h2>
             <p className="text-parchment-muted text-sm mb-6">
-              An unexpected error occurred. This might be a temporary issue.
+              {t('unexpectedError')}
             </p>
 
             {/* Error details (collapsible) */}
             <details className="mb-6 text-left">
               <summary className="cursor-pointer text-sm font-medium text-red-400 hover:underline">
-                Show error details
+                {t('showErrorDetails')}
               </summary>
               <div className="mt-2 p-3 bg-earth rounded-xl border border-red-500/30 overflow-auto max-h-40">
                 <p className="text-xs font-mono text-red-400 break-all">
@@ -68,20 +72,19 @@ export default class ErrorBoundary extends React.Component {
                 onClick={this.handleReset}
                 className="px-5 py-2.5 rounded-xl text-sm font-medium border border-earth-border text-parchment-muted hover:bg-earth-light hover:text-amber-glow transition-colors"
               >
-                Try Again
+                {t('tryAgain')}
               </button>
               <button
                 onClick={this.handleReload}
                 className="px-5 py-2.5 rounded-xl text-sm font-medium bg-gradient-to-r from-golden to-golden-600 text-basalt font-bold hover:shadow-golden-md transition-all"
               >
-                Reload Page
+                {t('reloadPage')}
               </button>
             </div>
 
             {/* Help text */}
             <p className="text-xs text-parchment-ghost mt-6">
-              If this keeps happening, check your wallet connection and ensure the
-              Solana program is deployed to Devnet.
+              {t('errorHelp')}
             </p>
           </div>
         </div>
