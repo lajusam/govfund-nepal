@@ -31,6 +31,7 @@ const provinceRoutes = require('../backend/src/routes/provinces');
 const analyticsRoutes= require('../backend/src/routes/analytics');
 const adminRoutes    = require('../backend/src/routes/admin');
 const feedbackRoutes = require('../backend/src/routes/feedback');
+const ipfsRoutes     = require('../backend/src/routes/ipfs');
 const Project        = require('../backend/src/models/Project');
 
 // ── MongoDB connection cache ────────────────────────────────────────────────
@@ -113,6 +114,7 @@ app.get('/api', (req, res) => {
       '/api/admin/config',
       '/api/feedback',
       '/api/health',
+      '/api/ipfs',
       '/api/demo-projects',
     ],
   });
@@ -143,6 +145,7 @@ app.use('/api/provinces', provinceRoutes);
 app.use('/api/analytics', analyticsRoutes);
 app.use('/api/admin',     adminRoutes);
 app.use('/api/feedback',  feedbackRoutes);
+app.use('/api/ipfs',      ipfsRoutes);
 
 // Global error handler
 app.use((err, req, res, _next) => {
