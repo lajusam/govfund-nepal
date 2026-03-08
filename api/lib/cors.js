@@ -23,10 +23,12 @@ function handleCors(req, res) {
 
   if (!origin || ALLOWED_ORIGINS.includes(origin)) {
     res.setHeader('Access-Control-Allow-Origin', origin || '*');
-  } else {
+  } else if (process.env.FRONTEND_URL) {
     // Production: only allow the deployed frontend
-    res.setHeader('Access-Control-Allow-Origin', process.env.FRONTEND_URL || '*');
+    res.setHeader('Access-Control-Allow-Origin', process.env.FRONTEND_URL);
   }
+  // If origin is unknown and FRONTEND_URL is not set, no Access-Control-Allow-Origin
+  // header is set — the browser will block the request (deny by default).
 
   res.setHeader('Access-Control-Allow-Methods', 'GET,POST,PUT,DELETE,OPTIONS');
   res.setHeader(

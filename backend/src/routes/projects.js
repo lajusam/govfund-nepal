@@ -120,7 +120,8 @@ router.get('/', async (req, res) => {
 
         res.json(projects);
     } catch (err) {
-        res.status(500).json({ error: err.message });
+        console.error('[projects] Error:', err.message);
+        res.status(500).json({ error: 'Failed to fetch projects' });
     }
 });
 
@@ -159,7 +160,8 @@ router.get('/:projectId', async (req, res) => {
 
         res.status(404).json({ error: 'Project not found on-chain or in cache' });
     } catch (err) {
-        res.status(500).json({ error: err.message });
+        console.error('[projects] Error:', err.message);
+        res.status(500).json({ error: 'Failed to fetch project' });
     }
 });
 
@@ -183,7 +185,8 @@ router.get('/:projectId/milestones', async (req, res) => {
         const cached = await Project.findOne({ projectId });
         res.json(cached?.milestones || []);
     } catch (err) {
-        res.status(500).json({ error: err.message });
+        console.error('[projects] Error:', err.message);
+        res.status(500).json({ error: 'Failed to fetch milestones' });
     }
 });
 
@@ -205,7 +208,8 @@ router.get('/:projectId/documents', async (req, res) => {
         const cached = await Project.findOne({ projectId });
         res.json(cached?.documents || []);
     } catch (err) {
-        res.status(500).json({ error: err.message });
+        console.error('[projects] Error:', err.message);
+        res.status(500).json({ error: 'Failed to fetch documents' });
     }
 });
 
@@ -216,7 +220,8 @@ router.get('/:projectId/releases', async (req, res) => {
         if (!project) return res.status(404).json({ error: 'Project not found' });
         res.json(project.fundReleases || []);
     } catch (err) {
-        res.status(500).json({ error: err.message });
+        console.error('[projects] Error:', err.message);
+        res.status(500).json({ error: 'Failed to fetch releases' });
     }
 });
 

@@ -87,7 +87,7 @@ app.use(express.json({ limit: '10mb' }));
 // Rate limiting — generous for Vercel edge (per function instance)
 app.use(rateLimit({
   windowMs: 15 * 60 * 1000,
-  max:      200,
+  max:      100,
   message:  { error: 'Too many requests, please try again later.' },
 }));
 
@@ -98,7 +98,8 @@ app.use(async (req, res, next) => {
     next();
   } catch (err) {
     console.error('MongoDB connection failed:', err.message);
-    res.status(503).json({ error: 'Database unavailable', message: err.message });
+    console.error('MongoDB error:', err.message);
+    res.status(503).json({ error: 'Database unavailable' });
   }
 });
 
@@ -136,7 +137,8 @@ app.get('/api/demo-projects', async (req, res) => {
     const projects = await Project.find();
     res.json(projects);
   } catch (err) {
-    res.status(500).json({ error: 'Failed to fetch projects', message: err.message });
+    console.error('Demo projects error:', err.message);
+    res.status(500).json({ error: 'Failed to fetch projects' });
   }
 });
 
@@ -151,7 +153,7 @@ app.use('/api/ipfs',      ipfsRoutes);
 // Global error handler
 app.use((err, req, res, _next) => {
   console.error('Unhandled error:', err);
-  res.status(500).json({ error: 'Internal server error', message: err.message });
+  res.status(500).json({ error: 'Internal server error' });
 });
 
 // ── Export for Vercel (no app.listen!) ──────────────────────────────────────

@@ -37,7 +37,8 @@ router.get('/:projectId', feedbackReadLimiter, async (req, res) => {
             .limit(50);
         res.json(feedback);
     } catch (err) {
-        res.status(500).json({ error: err.message });
+        console.error('[feedback] Error:', err.message);
+        res.status(500).json({ error: 'Failed to fetch feedback' });
     }
 });
 
