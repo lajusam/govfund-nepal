@@ -35,28 +35,29 @@ function verifyAdmin(req, res) {
 
   if (!ADMIN_WALLETS.includes(walletAddress)) {
     res.status(403).json({
-      error: 'Unauthorized: only an authorized admin wallet can perform this action',
-      expected: ADMIN_WALLETS,
-      received: walletAddress,
+      error: 'Unauthorized: wallet is not an authorized admin',
     });
     return false;
   }
 
-  // Cryptographic signature verification (optional but strongly recommended)
-  if (signature && message) {
-    try {
-      const messageBytes = new TextEncoder().encode(message);
-      const signatureBytes = bs58.decode(signature);
-      const publicKeyBytes = bs58.decode(walletAddress);
-      const verified = nacl.sign.detached.verify(messageBytes, signatureBytes, publicKeyBytes);
-      if (!verified) {
-        res.status(403).json({ error: 'Invalid wallet signature' });
-        return false;
-      }
-    } catch (err) {
-      res.status(403).json({ error: 'Signature verification failed', message: err.message });
+  // SECURITY FIX: Signature verification is now MANDATORY.
+  if (!signature || !message) {
+    res.status(401).json({ error: 'Wallet signature and message are required for admin authentication' });
+    return false;
+  }
+
+  try {
+    const messageBytes = new TextEncoder().encode(message);
+    const signatureBytes = bs58.decode(signature);
+    const publicKeyBytes = bs58.decode(walletAddress);
+    const verified = nacl.sign.detached.verify(messageBytes, signatureBytes, publicKeyBytes);
+    if (!verified) {
+      res.status(403).json({ error: 'Invalid wallet signature' });
       return false;
     }
+  } catch (err) {
+    res.status(403).json({ error: 'Signature verification failed' });
+    return false;
   }
 
   return true;

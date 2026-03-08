@@ -431,12 +431,12 @@ router.get('/sync-all', verifyAdmin, async (req, res) => {
     }
 });
 
-// GET: Admin config (public - returns admin wallet + program ID for frontend)
+// GET: Admin config (public — safe subset only, no wallet addresses)
+// SECURITY FIX: Do NOT expose admin wallet addresses publicly.
+// The frontend already knows the program ID and RPC URL from its own env vars.
 router.get('/config', (req, res) => {
     const solana = require('../services/solana');
     res.json({
-        adminWallet: ADMIN_WALLET,
-        adminWallets: solana.ADMIN_WALLETS,
         programId: solana.PROGRAM_ID,
         rpcUrl: solana.RPC_URL,
         network: 'devnet',

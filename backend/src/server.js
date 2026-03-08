@@ -24,7 +24,9 @@ app.use(express.json({ limit: '10mb' }));
 
 const limiter = rateLimit({
     windowMs: 15 * 60 * 1000,
-    max: 200,
+    max: 100,                  // Reduced from 200 — stricter global limit
+    standardHeaders: true,
+    legacyHeaders: false,
     message: { error: 'Too many requests, please try again later.' },
 });
 app.use(limiter);
