@@ -68,9 +68,10 @@ const allowedOrigins = [
 
 app.use(cors({
   origin: (origin, cb) => {
-    // Allow requests with no origin (curl, Postman, same-origin Vercel calls)
+    // Allow requests with no origin (same-origin Vercel calls)
     if (!origin || allowedOrigins.includes(origin)) return cb(null, true);
-    cb(null, true); // open during development — tighten for production
+    // SECURITY FIX: Reject unknown origins instead of allowing all
+    cb(new Error('CORS: origin not allowed'), false);
   },
   credentials: true,
   allowedHeaders: [
