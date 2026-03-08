@@ -115,7 +115,8 @@ router.post('/projects/sync', verifyAdmin, async (req, res) => {
             explorerUrl: txSignature ? getExplorerUrl(txSignature) : null,
         });
     } catch (err) {
-        res.status(500).json({ error: err.message });
+        console.error('[sync] Error:', err.message);
+        res.status(500).json({ error: 'Failed to sync project' });
     }
 });
 
@@ -186,7 +187,8 @@ router.post('/projects/:projectId/sync-allocate', verifyAdmin, async (req, res) 
             explorerUrl: txSignature ? getExplorerUrl(txSignature) : null,
         });
     } catch (err) {
-        res.status(500).json({ error: err.message });
+        console.error('[sync-allocate] Error:', err.message);
+        res.status(500).json({ error: 'Failed to sync budget allocation' });
     }
 });
 
@@ -253,7 +255,8 @@ router.post('/projects/:projectId/sync-release', verifyAdmin, async (req, res) =
             explorerUrl: txSignature ? getExplorerUrl(txSignature) : null,
         });
     } catch (err) {
-        res.status(500).json({ error: err.message });
+        console.error('[sync-release] Error:', err.message);
+        res.status(500).json({ error: 'Failed to sync fund release' });
     }
 });
 
@@ -300,7 +303,8 @@ router.post('/projects/:projectId/sync-milestone', verifyAdmin, async (req, res)
             explorerUrl: txSignature ? getExplorerUrl(txSignature) : null,
         });
     } catch (err) {
-        res.status(500).json({ error: err.message });
+        console.error('[sync-milestone] Error:', err.message);
+        res.status(500).json({ error: 'Failed to sync milestone' });
     }
 });
 
@@ -341,7 +345,8 @@ router.post('/projects/:projectId/sync-document', verifyAdmin, async (req, res) 
             explorerUrl: txSignature ? getExplorerUrl(txSignature) : null,
         });
     } catch (err) {
-        res.status(500).json({ error: err.message });
+        console.error('[sync-document] Error:', err.message);
+        res.status(500).json({ error: 'Failed to sync document' });
     }
 });
 
@@ -389,7 +394,8 @@ router.post('/projects/:projectId/sync-close', verifyAdmin, async (req, res) => 
             explorerUrl: txSignature ? getExplorerUrl(txSignature) : null,
         });
     } catch (err) {
-        res.status(500).json({ error: err.message });
+        console.error('[sync-close] Error:', err.message);
+        res.status(500).json({ error: 'Failed to sync project close' });
     }
 });
 
@@ -427,7 +433,8 @@ router.get('/sync-all', verifyAdmin, async (req, res) => {
 
         res.json({ message: `Synced ${synced} projects from blockchain`, count: synced });
     } catch (err) {
-        res.status(500).json({ error: err.message });
+        console.error('[sync-all] Error:', err.message);
+        res.status(500).json({ error: 'Failed to sync projects' });
     }
 });
 

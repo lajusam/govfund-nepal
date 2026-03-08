@@ -102,7 +102,8 @@ router.get('/', async (req, res) => {
             sectorStats,
         });
     } catch (err) {
-        res.status(500).json({ error: err.message });
+        console.error('[analytics] Error:', err.message);
+        res.status(500).json({ error: 'Failed to fetch analytics' });
     }
 });
 

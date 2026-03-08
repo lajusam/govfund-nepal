@@ -65,7 +65,7 @@ app.get('/api/health', (req, res) => {
 // Error handler
 app.use((err, req, res, next) => {
     console.error('Server error:', err);
-    res.status(500).json({ error: 'Internal server error', message: err.message });
+    res.status(500).json({ error: 'Internal server error' });
 });
 
 // Connect to MongoDB Atlas and start server

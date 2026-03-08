@@ -96,7 +96,8 @@ router.post('/verify', async (req, res) => {
             gatewayUrl: verifiedUrl || `${GATEWAYS[0]}${ipfsHash}`,
         });
     } catch (err) {
-        res.status(500).json({ error: err.message });
+        console.error('[ipfs] Error:', err.message);
+        res.status(500).json({ error: 'Failed to verify IPFS hash' });
     }
 });
 
@@ -115,7 +116,8 @@ router.get('/resolve/:hash', async (req, res) => {
         const url = await resolveGatewayUrl(hash);
         res.json({ ipfsHash: hash, gatewayUrl: url });
     } catch (err) {
-        res.status(500).json({ error: err.message });
+        console.error('[ipfs] Error:', err.message);
+        res.status(500).json({ error: 'Failed to resolve IPFS hash' });
     }
 });
 

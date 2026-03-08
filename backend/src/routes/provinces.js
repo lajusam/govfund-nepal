@@ -8,7 +8,8 @@ router.get('/', async (req, res) => {
         const provinces = await Province.find().sort({ number: 1 });
         res.json(provinces);
     } catch (err) {
-        res.status(500).json({ error: err.message });
+        console.error('[provinces] Error:', err.message);
+        res.status(500).json({ error: 'Failed to fetch provinces' });
     }
 });
 
@@ -19,7 +20,8 @@ router.get('/:name', async (req, res) => {
         if (!province) return res.status(404).json({ error: 'Province not found' });
         res.json(province);
     } catch (err) {
-        res.status(500).json({ error: err.message });
+        console.error('[provinces] Error:', err.message);
+        res.status(500).json({ error: 'Failed to fetch province' });
     }
 });
 
