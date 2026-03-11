@@ -4,8 +4,9 @@ import { ThemeProvider } from './context/ThemeContext';
 import WalletContextProvider from './context/WalletContext';
 import LanguageProvider from './context/LanguageContext';
 import ErrorBoundary from './components/ErrorBoundary';
-import Navbar from './components/Navbar';
 import Footer from './components/Footer';
+import { NavBar as TubelightNavbar } from './components/ui/tubelight-navbar';
+import { Home, LayoutDashboard, FolderKanban, ShieldCheck } from 'lucide-react';
 
 const Welcome     = lazy(() => import('./pages/Welcome'));
 const Landing     = lazy(() => import('./pages/Landing'));
@@ -28,12 +29,19 @@ function LoadingSpinner() {
 }
 
 // Hides chrome (Navbar + Footer) on the welcome splash screen
+const tubelightItems = [
+    { name: 'Home',      url: '/home',      icon: Home },
+    { name: 'Dashboard', url: '/dashboard', icon: LayoutDashboard },
+    { name: 'Projects',  url: '/projects',  icon: FolderKanban },
+    { name: 'Admin',     url: '/admin',     icon: ShieldCheck },
+];
+
 function AppShell() {
     const location = useLocation();
     const isWelcome = location.pathname === '/';
     return (
         <div className="min-h-screen flex flex-col">
-            {!isWelcome && <Navbar />}
+            {!isWelcome && <TubelightNavbar items={tubelightItems} />}
             <main className="flex-1">
                 <ErrorBoundary>
                 <Suspense fallback={<LoadingSpinner />}>
