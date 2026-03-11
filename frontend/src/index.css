@@ -88,6 +88,13 @@
 
   --btn-ghost-color:      #8E6F3E;
   --btn-ghost-hover-bg:   rgba(142,111,62,0.12);
+
+  /* ─ shadcn/ui compat tokens ─ */
+  --background:     26 22 15;      /* #1A160F */
+  --foreground:     245 241 230;   /* #F5F1E6 */
+  --primary:        255 184 28;    /* #FFB81C */
+  --muted:          45 37 24;      /* #2D2518 */
+  --border:         142 111 62;    /* #8E6F3E */
   --btn-ghost-hover-color:#FAD980;
 
   /* ─ Link ─ */

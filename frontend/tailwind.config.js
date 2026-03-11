@@ -5,6 +5,13 @@ export default {
     theme: {
         extend: {
             colors: {
+                // shadcn/ui compat tokens
+                background: 'rgb(var(--background) / <alpha-value>)',
+                foreground: 'rgb(var(--foreground) / <alpha-value>)',
+                primary:    'rgb(var(--primary) / <alpha-value>)',
+                muted:      'rgb(var(--muted) / <alpha-value>)',
+                border:     'rgb(var(--border) / <alpha-value>)',
+
                 // ══════════════════════════════════════════════════════════════
                 // GOVFUND NEPAL — DARK CINEMATIC COLOR SYSTEM
                 // Deep Basalt × Earth Brown × Parchment × Golden Sun × Bronze
