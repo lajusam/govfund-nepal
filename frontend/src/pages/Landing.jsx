@@ -1,8 +1,10 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, lazy, Suspense } from 'react';
 import { Link } from 'react-router-dom';
 import { motion, useScroll, useTransform, AnimatePresence } from 'framer-motion';
 import { getAnalytics, formatNPR } from '../services/api';
 import { useLanguage } from '../context/LanguageContext';
+
+const NepalMap = lazy(() => import('../components/NepalMap'));
 
 // ── Animation variants ──
 const fadeUp = {
@@ -127,25 +129,14 @@ export default function Landing() {
                 HERO SECTION — Kinetic Typography + Parallax
                ══════════════════════════════════════════ */}
             <section className="relative min-h-screen flex items-center overflow-hidden" style={{ minHeight: '100svh' }}>
-                {/* ── Hero background image ── place file at frontend/public/home.png */}
+                {/* ── Interactive Nepal Map background ── */}
                 <div className="absolute inset-0 z-0">
-                    <div
-                        className="absolute inset-0 bg-basalt"
-                        style={{
-                            backgroundImage: `url('/home.png')`,
-                            backgroundSize: 'cover',
-                            backgroundPosition: 'right center',
-                            backgroundRepeat: 'no-repeat',
-                            /* Avoid iOS fixed-attachment scroll jank */
-                            backgroundAttachment: 'local',
-                            willChange: 'transform',
-                        }}
-                    />
-                    {/* Cinematic gradient overlays — slightly lighter to let bg image show */}
-                    <div className="absolute inset-0 bg-gradient-to-b from-basalt/88 via-basalt/55 to-basalt" />
-                    <div className="absolute inset-0 bg-gradient-to-r from-basalt/70 via-transparent to-basalt/40" />
-                    {/* Dhaka pattern grain */}
-                    <div className="absolute inset-0 bg-dhaka-pattern opacity-[0.05]" />
+                    <Suspense fallback={<div className="absolute inset-0 bg-basalt" />}>
+                        <NepalMap />
+                    </Suspense>
+                    {/* Gradient overlays — keep text readable over the map */}
+                    <div className="absolute inset-0 bg-gradient-to-b from-basalt/80 via-basalt/40 to-basalt pointer-events-none" />
+                    <div className="absolute inset-0 bg-gradient-to-r from-basalt/60 via-transparent to-basalt/30 pointer-events-none" />
                 </div>
 
                 {/* Floating orbs — increased opacity for clarity; z-[2] sits above bg overlays */}
