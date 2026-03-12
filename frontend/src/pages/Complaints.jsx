@@ -13,6 +13,7 @@ export default function Complaints() {
     const [loading, setLoading] = useState(true);
     const [reacting, setReacting] = useState(false);
     const [filter, setFilter] = useState('all'); // all | mine | investigation
+    const [typeFilter, setTypeFilter] = useState('all');
 
     const walletAddress = publicKey?.toBase58() || null;
 
@@ -64,8 +65,9 @@ export default function Complaints() {
     }, [publicKey, signMessage]);
 
     const filtered = complaints.filter(c => {
-        if (filter === 'mine') return c.walletAddress === walletAddress;
-        if (filter === 'investigation') return (c.reactions?.support || 0) > 50;
+        if (filter === 'mine') { if (c.walletAddress !== walletAddress) return false; }
+        if (filter === 'investigation') { if (!((c.reactions?.support || 0) > 50)) return false; }
+        if (typeFilter !== 'all') { if (c.complaintType !== typeFilter) return false; }
         return true;
     });
 
@@ -114,7 +116,7 @@ export default function Complaints() {
             </div>
 
             {/* Filters */}
-            <div className="flex items-center gap-3 mb-6 flex-wrap">
+            <div className="flex items-center gap-3 mb-4 flex-wrap">
                 {[
                     { key: 'all', label: 'All Complaints' },
                     { key: 'investigation', label: 'Public Investigation' },
@@ -130,6 +132,24 @@ export default function Complaints() {
                         }`}
                     >
                         {f.label}
+                    </button>
+                ))}
+            </div>
+
+            {/* Type Filter */}
+            <div className="flex items-center gap-2 mb-6 flex-wrap">
+                <span className="text-xs text-parchment-ghost mr-1">Type:</span>
+                {['all', 'Budget Misuse', 'Project Delay', 'Fake Progress Report', 'Contractor Corruption', 'Environmental Damage', 'Other'].map(t => (
+                    <button
+                        key={t}
+                        onClick={() => setTypeFilter(t)}
+                        className={`px-3 py-1 rounded-lg text-xs font-medium transition-all ${
+                            typeFilter === t
+                                ? 'bg-red-900/20 border border-red-500/30 text-red-400'
+                                : 'bg-earth border border-earth-border text-parchment-muted hover:text-parchment'
+                        }`}
+                    >
+                        {t === 'all' ? 'All Types' : t}
                     </button>
                 ))}
             </div>

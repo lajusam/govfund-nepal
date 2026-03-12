@@ -26,13 +26,14 @@ const rateLimit  = require('express-rate-limit');
 const mongoose   = require('mongoose');
 
 // ── Route handlers (re-used from the existing backend) ─────────────────────
-const projectRoutes  = require('../backend/src/routes/projects');
-const provinceRoutes = require('../backend/src/routes/provinces');
-const analyticsRoutes= require('../backend/src/routes/analytics');
-const adminRoutes    = require('../backend/src/routes/admin');
-const feedbackRoutes = require('../backend/src/routes/feedback');
-const ipfsRoutes     = require('../backend/src/routes/ipfs');
-const Project        = require('../backend/src/models/Project');
+const projectRoutes   = require('../backend/src/routes/projects');
+const provinceRoutes  = require('../backend/src/routes/provinces');
+const analyticsRoutes = require('../backend/src/routes/analytics');
+const adminRoutes     = require('../backend/src/routes/admin');
+const feedbackRoutes  = require('../backend/src/routes/feedback');
+const ipfsRoutes      = require('../backend/src/routes/ipfs');
+const complaintRoutes = require('../backend/src/routes/complaints');
+const Project         = require('../backend/src/models/Project');
 
 // ── MongoDB connection cache ────────────────────────────────────────────────
 let cachedConnection = global._mongooseConnection || null;
@@ -117,6 +118,7 @@ app.get('/api', (req, res) => {
       '/api/feedback',
       '/api/health',
       '/api/ipfs',
+      '/api/complaints',
       '/api/demo-projects',
     ],
   });
@@ -149,6 +151,7 @@ app.use('/api/analytics', analyticsRoutes);
 app.use('/api/admin',     adminRoutes);
 app.use('/api/feedback',  feedbackRoutes);
 app.use('/api/ipfs',      ipfsRoutes);
+app.use('/api/complaints', complaintRoutes);
 
 // Global error handler
 app.use((err, req, res, _next) => {

@@ -3,17 +3,31 @@ import { useWallet } from '@solana/wallet-adapter-react';
 import bs58 from 'bs58';
 import api from '../services/api';
 
-export default function ComplaintForm({ projectId, onSuccess, existingComplaint }) {
+const COMPLAINT_TYPES = [
+    { value: 'Budget Misuse',          icon: '💰', desc: 'Misallocation or embezzlement of funds' },
+    { value: 'Project Delay',          icon: '⏳', desc: 'Unreasonable delays in project completion' },
+    { value: 'Fake Progress Report',   icon: '📊', desc: 'Fabricated or exaggerated progress claims' },
+    { value: 'Contractor Corruption',  icon: '🏗️', desc: 'Kickbacks, bribery, or nepotism' },
+    { value: 'Environmental Damage',   icon: '🌿', desc: 'Ecological harm from project activities' },
+    { value: 'Other',                  icon: '📋', desc: 'Other irregularities not listed above' },
+];
+
+export default function ComplaintForm({ projectId, onSuccess, onCancel }) {
     const { publicKey, signMessage } = useWallet();
-    const [title, setTitle] = useState(existingComplaint?.title || '');
-    const [description, setDescription] = useState(existingComplaint?.description || '');
-    const [evidence, setEvidence] = useState(existingComplaint?.evidence || []);
+    const [step, setStep] = useState('type'); // 'type' | 'form'
+    const [complaintType, setComplaintType] = useState('');
+    const [title, setTitle] = useState('');
+    const [description, setDescription] = useState('');
+    const [evidence, setEvidence] = useState([]);
     const [uploading, setUploading] = useState(false);
     const [submitting, setSubmitting] = useState(false);
     const [error, setError] = useState('');
     const fileInputRef = useRef(null);
 
-    const isEditing = !!existingComplaint;
+    const handleSelectType = (type) => {
+        setComplaintType(type);
+        setStep('form');
+    };
 
     const handleFileUpload = async (e) => {
         const files = e.target.files;
@@ -33,7 +47,6 @@ export default function ComplaintForm({ projectId, onSuccess, existingComplaint 
             }
 
             try {
-                // Sign message for auth
                 const message = `GovFund Evidence Upload: ${Date.now()}`;
                 const messageBytes = new TextEncoder().encode(message);
                 const signatureBytes = await signMessage(messageBytes);
@@ -43,7 +56,7 @@ export default function ComplaintForm({ projectId, onSuccess, existingComplaint 
                 formData.append('file', file);
                 formData.append('projectId', projectId);
 
-                const res = await api.post('/ipfs/upload', formData, {
+                const res = await api.post('/ipfs/citizen-upload', formData, {
                     headers: {
                         'Content-Type': 'multipart/form-data',
                         'x-wallet-address': publicKey.toBase58(),
@@ -78,7 +91,10 @@ export default function ComplaintForm({ projectId, onSuccess, existingComplaint 
             setError('Please connect your wallet to submit a complaint');
             return;
         }
-
+        if (!complaintType) {
+            setError('Please select a complaint type');
+            return;
+        }
         if (title.length < 5) {
             setError('Title must be at least 5 characters');
             return;
@@ -103,21 +119,15 @@ export default function ComplaintForm({ projectId, onSuccess, existingComplaint 
                 'x-wallet-message': message,
             };
 
-            const payload = { projectId, title, description, evidence };
-            let result;
-
-            if (isEditing) {
-                const res = await api.put(`/complaints/edit/${existingComplaint._id}`, payload, { headers });
-                result = res.data;
-            } else {
-                const res = await api.post('/complaints/create', payload, { headers });
-                result = res.data;
-            }
+            const payload = { projectId, complaintType, title, description, evidence };
+            const res = await api.post('/complaints/create', payload, { headers });
 
             setTitle('');
             setDescription('');
             setEvidence([]);
-            if (onSuccess) onSuccess(result);
+            setComplaintType('');
+            setStep('type');
+            if (onSuccess) onSuccess(res.data);
         } catch (err) {
             const msg = err.response?.data?.error || err.message;
             setError(msg);
@@ -126,11 +136,48 @@ export default function ComplaintForm({ projectId, onSuccess, existingComplaint 
         }
     };
 
+    // ── Step 1: Type Selector ────────────────────────────────────────────────
+    if (step === 'type') {
+        return (
+            <div className="space-y-4">
+                <div className="flex items-center justify-between">
+                    <h3 className="font-heading font-bold text-lg text-parchment">Select Complaint Type</h3>
+                    {onCancel && (
+                        <button onClick={onCancel} className="text-parchment-ghost hover:text-parchment-muted text-sm transition-colors">
+                            ✕
+                        </button>
+                    )}
+                </div>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    {COMPLAINT_TYPES.map(ct => (
+                        <button
+                            key={ct.value}
+                            onClick={() => handleSelectType(ct.value)}
+                            className="flex items-start gap-3 p-4 bg-earth rounded-xl border border-earth-border hover:border-golden/30 hover:bg-earth-light transition-all text-left group"
+                        >
+                            <span className="text-2xl flex-shrink-0 mt-0.5">{ct.icon}</span>
+                            <div>
+                                <p className="text-sm font-semibold text-parchment group-hover:text-golden transition-colors">{ct.value}</p>
+                                <p className="text-xs text-parchment-muted mt-0.5">{ct.desc}</p>
+                            </div>
+                        </button>
+                    ))}
+                </div>
+            </div>
+        );
+    }
+
+    // ── Step 2: Complaint Form ───────────────────────────────────────────────
     return (
-        <form onSubmit={handleSubmit} className="card p-6 space-y-4">
-            <h3 className="font-heading font-bold text-lg text-parchment">
-                {isEditing ? 'Edit Complaint' : 'File a Complaint'}
-            </h3>
+        <form onSubmit={handleSubmit} className="space-y-4">
+            <div className="flex items-center justify-between">
+                <h3 className="font-heading font-bold text-lg text-parchment">File a Complaint</h3>
+                {onCancel && (
+                    <button type="button" onClick={onCancel} className="text-parchment-ghost hover:text-parchment-muted text-sm transition-colors">
+                        ✕
+                    </button>
+                )}
+            </div>
 
             {!publicKey && (
                 <div className="p-3 rounded-xl bg-amber-900/20 border border-amber-500/30 text-amber-400 text-sm">
@@ -143,6 +190,23 @@ export default function ComplaintForm({ projectId, onSuccess, existingComplaint 
                     {error}
                 </div>
             )}
+
+            {/* Selected Type */}
+            <div>
+                <label className="block text-sm text-parchment-muted mb-1">Complaint Type</label>
+                <div className="flex items-center gap-3">
+                    <span className="px-3 py-1.5 rounded-lg bg-red-900/20 border border-red-500/25 text-red-400 text-sm font-semibold">
+                        {COMPLAINT_TYPES.find(t => t.value === complaintType)?.icon} {complaintType}
+                    </span>
+                    <button
+                        type="button"
+                        onClick={() => setStep('type')}
+                        className="text-xs text-golden hover:text-amber-glow transition-colors"
+                    >
+                        Change
+                    </button>
+                </div>
+            </div>
 
             <div>
                 <label className="block text-sm text-parchment-muted mb-1">Title</label>
@@ -241,10 +305,10 @@ export default function ComplaintForm({ projectId, onSuccess, existingComplaint 
                 {submitting ? (
                     <span className="flex items-center justify-center gap-2">
                         <span className="w-4 h-4 border-2 border-basalt/40 border-t-basalt rounded-full animate-spin" />
-                        {isEditing ? 'Updating...' : 'Submitting...'}
+                        Submitting...
                     </span>
                 ) : (
-                    isEditing ? 'Update Complaint' : 'Submit Complaint'
+                    'Submit Complaint'
                 )}
             </button>
         </form>

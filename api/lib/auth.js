@@ -6,7 +6,7 @@
  * sent a 401/403 response so the handler should return immediately.
  */
 
-const bs58 = require('bs58');
+const bs58 = require('bs58').default || require('bs58');
 const nacl = require('tweetnacl');
 
 const ADMIN_WALLET =
@@ -47,15 +47,28 @@ function verifyAdmin(req, res) {
   }
 
   try {
-    const messageBytes = new TextEncoder().encode(message);
-    const signatureBytes = bs58.decode(signature);
-    const publicKeyBytes = bs58.decode(walletAddress);
+    // Encode message to UTF-8 bytes (must match frontend TextEncoder output)
+    const messageBytes = new Uint8Array(new TextEncoder().encode(message));
+    // Decode ed25519 signature from base58 (64 bytes)
+    const signatureBytes = new Uint8Array(bs58.decode(signature));
+    if (signatureBytes.length !== 64) {
+      res.status(403).json({ error: 'Invalid signature format' });
+      return false;
+    }
+    // Decode Solana public key from base58 (32 bytes)
+    const publicKeyBytes = new Uint8Array(bs58.decode(walletAddress));
+    if (publicKeyBytes.length !== 32) {
+      res.status(403).json({ error: 'Invalid wallet address format' });
+      return false;
+    }
+    // Verify ed25519 detached signature
     const verified = nacl.sign.detached.verify(messageBytes, signatureBytes, publicKeyBytes);
     if (!verified) {
       res.status(403).json({ error: 'Invalid wallet signature' });
       return false;
     }
   } catch (err) {
+    console.error('[auth] Admin signature verification error:', err.message);
     res.status(403).json({ error: 'Signature verification failed' });
     return false;
   }

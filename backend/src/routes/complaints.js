@@ -1,9 +1,10 @@
 const express = require('express');
 const rateLimit = require('express-rate-limit');
 const router = express.Router();
-const bs58 = require('bs58');
+const bs58 = require('bs58').default || require('bs58');
 const nacl = require('tweetnacl');
 const Complaint = require('../models/Complaint');
+const { COMPLAINT_TYPES } = require('../models/Complaint');
 const Project = require('../models/Project');
 
 // ── Rate limiters ────────────────────────────────────────────────────────────
@@ -27,7 +28,7 @@ const readLimiter = rateLimit({
 function sanitize(str) {
     if (typeof str !== 'string') return '';
     return str.replace(/[\${}]/g, '').trim();
-}
+}~
 
 function verifyWalletSignature(req, res, next) {
     const walletAddress = req.headers['x-wallet-address'];
@@ -42,14 +43,29 @@ function verifyWalletSignature(req, res, next) {
     }
 
     try {
-        const messageBytes = new TextEncoder().encode(message);
-        const signatureBytes = bs58.decode(signature);
-        const publicKeyBytes = bs58.decode(walletAddress);
+        // Encode the original message string to UTF-8 bytes
+        // Must match: new TextEncoder().encode(message) on the frontend
+        const messageBytes = new Uint8Array(new TextEncoder().encode(message));
+
+        // Decode ed25519 signature from base58 (64 bytes expected)
+        const signatureBytes = new Uint8Array(bs58.decode(signature));
+        if (signatureBytes.length !== 64) {
+            return res.status(403).json({ error: 'Invalid signature format' });
+        }
+
+        // Decode Solana public key from base58 (32 bytes expected)
+        const publicKeyBytes = new Uint8Array(bs58.decode(walletAddress));
+        if (publicKeyBytes.length !== 32) {
+            return res.status(403).json({ error: 'Invalid wallet address format' });
+        }
+
+        // Verify ed25519 detached signature with tweetnacl
         const verified = nacl.sign.detached.verify(messageBytes, signatureBytes, publicKeyBytes);
         if (!verified) {
             return res.status(403).json({ error: 'Invalid wallet signature' });
         }
     } catch (err) {
+        console.error('[complaints] Signature verification error:', err.message);
         return res.status(403).json({ error: 'Signature verification failed' });
     }
 
@@ -62,10 +78,14 @@ function verifyWalletSignature(req, res, next) {
 // ═════════════════════════════════════════════════════════════════════════════
 router.post('/create', writeLimiter, verifyWalletSignature, async (req, res) => {
     try {
-        const { projectId, title, description, evidence } = req.body;
+        const { projectId, complaintType, title, description, evidence } = req.body;
 
-        if (!projectId || !title || !description) {
-            return res.status(400).json({ error: 'projectId, title, and description are required' });
+        if (!projectId || !complaintType || !title || !description) {
+            return res.status(400).json({ error: 'projectId, complaintType, title, and description are required' });
+        }
+
+        if (!COMPLAINT_TYPES.includes(complaintType)) {
+            return res.status(400).json({ error: `complaintType must be one of: ${COMPLAINT_TYPES.join(', ')}` });
         }
 
         const cleanProjectId = sanitize(projectId);
@@ -103,6 +123,7 @@ router.post('/create', writeLimiter, verifyWalletSignature, async (req, res) => 
             province: project.province || '',
             district: project.district || '',
             walletAddress: req.walletAddress,
+            complaintType,
             title: cleanTitle,
             description: cleanDescription,
             evidence: cleanEvidence,
@@ -250,6 +271,13 @@ router.post('/react', writeLimiter, verifyWalletSignature, async (req, res) => {
         console.error('[complaints] React error:', err.message);
         res.status(500).json({ error: 'Failed to submit reaction' });
     }
+});
+
+// ═════════════════════════════════════════════════════════════════════════════
+// GET /api/complaints/types
+// ═════════════════════════════════════════════════════════════════════════════
+router.get('/types', (req, res) => {
+    res.json(COMPLAINT_TYPES);
 });
 
 // ═════════════════════════════════════════════════════════════════════════════
