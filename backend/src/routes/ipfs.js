@@ -1,7 +1,7 @@
 const express = require('express');
 const multer = require('multer');
 const router = express.Router();
-const { verifyAdmin } = require('../middleware/auth');
+const { verifyAdmin, verifyWallet } = require('../middleware/auth');
 const {
     uploadToIPFS,
     validateFile,
@@ -79,6 +79,53 @@ router.post('/upload', verifyAdmin, upload.single('file'), async (req, res) => {
 // Verify an existing IPFS hash is accessible via public gateways.
 // Body: { ipfsHash }
 // ═══════════════════════════════════════════════════════════════════════════════
+
+// ── Citizen evidence upload (any authenticated wallet) ───────────────────────
+const citizenUploadLimiter = require('express-rate-limit')({
+    windowMs: 60 * 60 * 1000,
+    max: 10,
+    message: { error: 'Too many uploads. Please try again later.' },
+});
+
+router.post('/citizen-upload', citizenUploadLimiter, verifyWallet, upload.single('file'), async (req, res) => {
+    try {
+        if (!req.file) {
+            return res.status(400).json({ error: 'No file provided', code: 'NO_FILE' });
+        }
+
+        const { originalname, buffer, mimetype } = req.file;
+        const projectId = req.body.projectId || '';
+
+        const validation = validateFile(buffer, originalname, mimetype);
+        if (!validation.valid) {
+            return res.status(400).json({ error: validation.error, code: 'VALIDATION_FAILED' });
+        }
+
+        console.log(`[IPFS Route] Citizen upload: ${originalname} (${(buffer.length / 1024).toFixed(1)} KB) by ${req.walletAddress.slice(0, 8)}...`);
+
+        const result = await uploadToIPFS(buffer, originalname, {
+            mimeType: mimetype,
+            metadata: { projectId, uploadedBy: req.walletAddress },
+            verifyGateway: true,
+        });
+
+        res.json({
+            ipfsHash: result.ipfsHash,
+            gatewayUrl: result.gatewayUrl,
+            size: result.size,
+            verifiedGateway: result.verifiedGateway,
+            fileName: originalname,
+        });
+    } catch (err) {
+        console.error('[IPFS Route] Citizen upload error:', err.message);
+        const status = err.code === 'AUTH_FAILED' ? 401
+            : err.code === 'PINATA_NOT_CONFIGURED' ? 503
+            : err.code === 'VALIDATION_FAILED' ? 400
+            : 500;
+        res.status(status).json({ error: err.message, code: err.code || 'UPLOAD_ERROR' });
+    }
+});
+
 router.post('/verify', async (req, res) => {
     try {
         const { ipfsHash } = req.body;

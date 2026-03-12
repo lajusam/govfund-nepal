@@ -1,10 +1,14 @@
-﻿import React, { useEffect, useState, useMemo } from 'react';
+﻿import React, { useEffect, useState, useMemo, useCallback } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { getProject, getFeedback, submitFeedback, formatNPR, getStatusColor, getStatusBg, getExplorerUrl, getAccountExplorerUrl, isValidSignature } from '../services/api';
 import { Chart as ChartJS, CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend, Filler } from 'chart.js';
 import { Line } from 'react-chartjs-2';
 import IPFSDocumentLink from '../components/IPFSDocumentLink';
+import ComplaintForm from '../components/ComplaintForm';
+import ComplaintCard from '../components/ComplaintCard';
 import { useLanguage } from '../context/LanguageContext';
+import { useWallet } from '@solana/wallet-adapter-react';
+import bs58 from 'bs58';
 import api from '../services/api';
 
 ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend, Filler);
@@ -53,19 +57,58 @@ function MilestoneTracker({ milestones, total }) {
 
 export default function ProjectDetail() {
     const { projectId } = useParams();
+    const { publicKey, signMessage } = useWallet();
     const [project, setProject] = useState(null);
     const [feedback, setFeedback] = useState([]);
     const [loading, setLoading] = useState(true);
     const [newFeedback, setNewFeedback] = useState({ rating: 5, comment: '' });
     const [submitting, setSubmitting] = useState(false);
-    const [complaintCount, setComplaintCount] = useState(0);
+    const [activeTab, setActiveTab] = useState('overview');
+    // Complaints state
+    const [complaints, setComplaints] = useState([]);
+    const [complaintsLoading, setComplaintsLoading] = useState(false);
+    const [showComplaintForm, setShowComplaintForm] = useState(false);
+    const [hasSubmittedComplaint, setHasSubmittedComplaint] = useState(false);
+    const [complaintSort, setComplaintSort] = useState('newest');
     const { t } = useLanguage();
 
     useEffect(() => {
         Promise.all([getProject(projectId), getFeedback(projectId)])
             .then(([p, f]) => { setProject(p); setFeedback(f); setLoading(false); });
-        api.get(`/complaints/project/${projectId}`).then(r => setComplaintCount(r.data?.length || 0)).catch(() => {});
     }, [projectId]);
+
+    // Fetch complaints when tab is active or on mount
+    const fetchComplaints = useCallback(async () => {
+        setComplaintsLoading(true);
+        try {
+            const res = await api.get(`/complaints/project/${projectId}`);
+            const data = res.data || [];
+            setComplaints(data);
+            // Check if current wallet already submitted
+            if (publicKey) {
+                const walletAddr = publicKey.toBase58();
+                setHasSubmittedComplaint(data.some(c => c.walletAddress === walletAddr));
+            }
+        } catch {
+            setComplaints([]);
+        } finally {
+            setComplaintsLoading(false);
+        }
+    }, [projectId, publicKey]);
+
+    useEffect(() => {
+        fetchComplaints();
+    }, [fetchComplaints]);
+
+    // Update hasSubmittedComplaint when wallet changes
+    useEffect(() => {
+        if (publicKey && complaints.length > 0) {
+            const walletAddr = publicKey.toBase58();
+            setHasSubmittedComplaint(complaints.some(c => c.walletAddress === walletAddr));
+        } else {
+            setHasSubmittedComplaint(false);
+        }
+    }, [publicKey, complaints]);
 
     const releaseChartData = useMemo(() => {
         if (!project?.fundReleases?.length) return null;
@@ -99,6 +142,53 @@ export default function ProjectDetail() {
         setNewFeedback({ rating: 5, comment: '' });
         setSubmitting(false);
     };
+
+    const sortedComplaints = useMemo(() => {
+        const sorted = [...complaints];
+        switch (complaintSort) {
+            case 'popular':
+                return sorted.sort((a, b) => {
+                    const scoreA = (a.reactions?.support || 0) + (a.reactions?.investigation || 0) - (a.reactions?.disagree || 0);
+                    const scoreB = (b.reactions?.support || 0) + (b.reactions?.investigation || 0) - (b.reactions?.disagree || 0);
+                    return scoreB - scoreA;
+                });
+            case 'oldest':
+                return sorted.sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt));
+            default: // newest
+                return sorted.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+        }
+    }, [complaints, complaintSort]);
+
+    const handleComplaintSuccess = () => {
+        setShowComplaintForm(false);
+        fetchComplaints();
+    };
+
+    const [reactingComplaint, setReactingComplaint] = useState(false);
+    const handleComplaintReact = useCallback(async (complaintId, reaction) => {
+        if (!publicKey || !signMessage) return;
+        setReactingComplaint(true);
+        try {
+            const message = `GovFund React: ${complaintId}:${Date.now()}`;
+            const messageBytes = new TextEncoder().encode(message);
+            const signatureBytes = await signMessage(messageBytes);
+            const signature = bs58.encode(signatureBytes);
+
+            const res = await api.post('/complaints/react', { complaintId, reaction }, {
+                headers: {
+                    'x-wallet-address': publicKey.toBase58(),
+                    'x-wallet-signature': signature,
+                    'x-wallet-message': message,
+                },
+            });
+
+            setComplaints(prev => prev.map(c => c._id === complaintId ? res.data : c));
+        } catch (err) {
+            console.error('React failed:', err);
+        } finally {
+            setReactingComplaint(false);
+        }
+    }, [publicKey, signMessage]);
 
     if (loading) {
         return (
@@ -225,6 +315,28 @@ export default function ProjectDetail() {
                 </div>
             </div>
 
+            {/* Tab Navigation */}
+            <div className="flex items-center gap-1 mb-8 border-b border-earth-border overflow-x-auto">
+                {[
+                    { key: 'overview', label: 'Overview', icon: '📋' },
+                    { key: 'complaints', label: `Complaints (${complaints.length})`, icon: '🚨' },
+                ].map(tab => (
+                    <button
+                        key={tab.key}
+                        onClick={() => setActiveTab(tab.key)}
+                        className={`flex items-center gap-2 px-4 py-3 text-sm font-medium whitespace-nowrap border-b-2 transition-all ${
+                            activeTab === tab.key
+                                ? 'border-golden text-golden'
+                                : 'border-transparent text-parchment-muted hover:text-parchment hover:border-earth-border'
+                        }`}
+                    >
+                        <span>{tab.icon}</span>
+                        {tab.label}
+                    </button>
+                ))}
+            </div>
+
+            {activeTab === 'overview' ? (
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
                 {/* Left: Milestones + Documents */}
                 <div className="lg:col-span-2 space-y-8">
@@ -414,33 +526,6 @@ export default function ProjectDetail() {
                         )}
                     </div>
 
-                    {/* Citizen Complaints */}
-                    <div className="card p-6">
-                        <h3 className="font-heading font-bold text-lg text-parchment mb-3">
-                            🚨 Citizen Complaints
-                        </h3>
-                        <p className="text-sm text-parchment-muted mb-4">
-                            {complaintCount} complaint{complaintCount !== 1 ? 's' : ''} filed
-                        </p>
-                        <Link
-                            to={`/project/${projectId}/complaints`}
-                            className="flex items-center gap-3 p-3 bg-earth rounded-xl hover:bg-earth-light transition-colors group"
-                        >
-                            <div className="w-8 h-8 rounded-lg bg-red-900/20 border border-red-500/20 flex items-center justify-center text-red-400 text-sm">
-                                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.082 16.5c-.77.833.192 2.5 1.732 2.5z" />
-                                </svg>
-                            </div>
-                            <div className="flex-1">
-                                <p className="text-sm font-medium text-parchment group-hover:text-golden transition-colors">View Complaints</p>
-                                <p className="text-xs text-parchment-muted">Report or review issues</p>
-                            </div>
-                            <svg className="w-4 h-4 text-parchment-ghost group-hover:text-golden transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                            </svg>
-                        </Link>
-                    </div>
-
                     {/* Budget Allocations */}
                     {p.budgetAllocations?.length > 0 && (
                         <div className="card p-6">
@@ -626,6 +711,104 @@ export default function ProjectDetail() {
                     </div>
                 </div>
             </div>
+            ) : (
+            /* ── Complaints Tab ─────────────────────────────────────────────── */
+            <div className="max-w-4xl space-y-6">
+                {/* Header + Add button */}
+                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+                    <div>
+                        <h3 className="font-heading font-bold text-xl text-parchment">
+                            Citizen Complaints
+                        </h3>
+                        <p className="text-sm text-parchment-muted mt-1">
+                            {complaints.length} complaint{complaints.length !== 1 ? 's' : ''} filed for this project
+                        </p>
+                    </div>
+                    <div className="flex items-center gap-3">
+                        {/* Sort */}
+                        <select
+                            value={complaintSort}
+                            onChange={e => setComplaintSort(e.target.value)}
+                            className="input-field text-sm py-1.5 px-3"
+                        >
+                            <option value="newest">Newest First</option>
+                            <option value="oldest">Oldest First</option>
+                            <option value="popular">Most Popular</option>
+                        </select>
+                        {/* Add Complaint Button */}
+                        {publicKey && !hasSubmittedComplaint && !showComplaintForm && (
+                            <button
+                                onClick={() => setShowComplaintForm(true)}
+                                className="btn-primary text-sm flex items-center gap-2"
+                            >
+                                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                                </svg>
+                                Add Complaint
+                            </button>
+                        )}
+                    </div>
+                </div>
+
+                {/* Already submitted notice */}
+                {publicKey && hasSubmittedComplaint && (
+                    <div className="p-4 rounded-xl bg-amber-900/15 border border-amber-500/25 flex items-start gap-3">
+                        <span className="text-amber-400 text-lg mt-0.5">⚠️</span>
+                        <div>
+                            <p className="text-sm font-semibold text-amber-400">You have already submitted a complaint</p>
+                            <p className="text-xs text-parchment-muted mt-0.5">Each wallet can submit one complaint per project.</p>
+                        </div>
+                    </div>
+                )}
+
+                {/* Not connected notice */}
+                {!publicKey && (
+                    <div className="p-4 rounded-xl bg-earth border border-earth-border flex items-start gap-3">
+                        <span className="text-parchment-ghost text-lg mt-0.5">🔗</span>
+                        <div>
+                            <p className="text-sm font-semibold text-parchment">Connect your wallet to file a complaint</p>
+                            <p className="text-xs text-parchment-muted mt-0.5">A Solana wallet signature is required for verification.</p>
+                        </div>
+                    </div>
+                )}
+
+                {/* Complaint Form Modal */}
+                {showComplaintForm && (
+                    <div className="card p-6">
+                        <ComplaintForm
+                            projectId={projectId}
+                            onSuccess={handleComplaintSuccess}
+                            onCancel={() => setShowComplaintForm(false)}
+                        />
+                    </div>
+                )}
+
+                {/* Complaints List */}
+                {complaintsLoading ? (
+                    <div className="flex items-center justify-center py-12">
+                        <div className="w-8 h-8 border-3 border-golden/25 border-t-golden rounded-full animate-spin"></div>
+                    </div>
+                ) : sortedComplaints.length > 0 ? (
+                    <div className="space-y-4">
+                        {sortedComplaints.map(complaint => (
+                            <ComplaintCard
+                                key={complaint._id}
+                                complaint={complaint}
+                                walletAddress={publicKey?.toBase58() || null}
+                                onReact={handleComplaintReact}
+                                reacting={reactingComplaint}
+                            />
+                        ))}
+                    </div>
+                ) : (
+                    <div className="card p-12 text-center">
+                        <p className="text-4xl mb-3">📭</p>
+                        <p className="text-lg font-heading font-bold text-parchment mb-1">No complaints yet</p>
+                        <p className="text-sm text-parchment-muted">Be the first to report an issue with this project.</p>
+                    </div>
+                )}
+            </div>
+            )}
         </div>
     );
 }

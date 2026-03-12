@@ -8,7 +8,7 @@
  *   x-wallet-signature: base58 signature of the message
  *   x-wallet-message: the original message that was signed
  */
-const bs58 = require('bs58');
+const bs58 = require('bs58').default || require('bs58');
 const nacl = require('tweetnacl');
 
 const ADMIN_WALLET = process.env.ADMIN_WALLET || '4MMhsQ2odgEdAowV3Si6L44jRhTZAepuFjPeWGSgA3h2';
@@ -48,14 +48,25 @@ const verifyAdmin = (req, res, next) => {
     }
 
     try {
-        const messageBytes = new TextEncoder().encode(message);
-        const signatureBytes = bs58.decode(signature);
-        const publicKeyBytes = bs58.decode(walletAddress);
+        // Encode message to UTF-8 bytes (must match frontend TextEncoder output)
+        const messageBytes = new Uint8Array(new TextEncoder().encode(message));
+        // Decode ed25519 signature from base58 (64 bytes)
+        const signatureBytes = new Uint8Array(bs58.decode(signature));
+        if (signatureBytes.length !== 64) {
+            return res.status(403).json({ error: 'Invalid signature format' });
+        }
+        // Decode Solana public key from base58 (32 bytes)
+        const publicKeyBytes = new Uint8Array(bs58.decode(walletAddress));
+        if (publicKeyBytes.length !== 32) {
+            return res.status(403).json({ error: 'Invalid wallet address format' });
+        }
+        // Verify ed25519 detached signature
         const verified = nacl.sign.detached.verify(messageBytes, signatureBytes, publicKeyBytes);
         if (!verified) {
             return res.status(403).json({ error: 'Invalid wallet signature' });
         }
     } catch (err) {
+        console.error('[auth] Admin signature verification error:', err.message);
         return res.status(403).json({ error: 'Signature verification failed' });
     }
 
@@ -73,4 +84,48 @@ const extractWallet = (req, res, next) => {
     next();
 };
 
-module.exports = { verifyAdmin, extractWallet, ADMIN_WALLET, ADMIN_WALLETS };
+/**
+ * Verifies any wallet signature (not limited to admins).
+ * Used for citizen-facing routes that need wallet authentication.
+ */
+const verifyWallet = (req, res, next) => {
+    const walletAddress = req.headers['x-wallet-address'];
+    const signature = req.headers['x-wallet-signature'];
+    const message = req.headers['x-wallet-message'];
+
+    if (!walletAddress) {
+        return res.status(401).json({ error: 'Wallet address required' });
+    }
+    if (!signature || !message) {
+        return res.status(401).json({ error: 'Wallet signature and message are required' });
+    }
+
+    try {
+        // Encode message to UTF-8 bytes (must match frontend TextEncoder output)
+        const messageBytes = new Uint8Array(new TextEncoder().encode(message));
+        // Decode ed25519 signature from base58 (64 bytes)
+        const signatureBytes = new Uint8Array(bs58.decode(signature));
+        if (signatureBytes.length !== 64) {
+            return res.status(403).json({ error: 'Invalid signature format' });
+        }
+        // Decode Solana public key from base58 (32 bytes)
+        const publicKeyBytes = new Uint8Array(bs58.decode(walletAddress));
+        if (publicKeyBytes.length !== 32) {
+            return res.status(403).json({ error: 'Invalid wallet address format' });
+        }
+        // Verify ed25519 detached signature
+        const verified = nacl.sign.detached.verify(messageBytes, signatureBytes, publicKeyBytes);
+        if (!verified) {
+            return res.status(403).json({ error: 'Invalid wallet signature' });
+        }
+    } catch (err) {
+        console.error('[auth] Wallet signature verification error:', err.message);
+        return res.status(403).json({ error: 'Signature verification failed' });
+    }
+
+    req.walletAddress = walletAddress;
+    req.isAdmin = ADMIN_WALLETS.includes(walletAddress);
+    next();
+};
+
+module.exports = { verifyAdmin, extractWallet, verifyWallet, ADMIN_WALLET, ADMIN_WALLETS };

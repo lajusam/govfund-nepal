@@ -1,6 +1,15 @@
 import React from 'react';
 import EvidenceViewer from './EvidenceViewer';
 
+const TYPE_COLORS = {
+    'Budget Misuse':          'bg-red-900/25 border-red-500/30 text-red-400',
+    'Project Delay':          'bg-amber-900/25 border-amber-500/30 text-amber-400',
+    'Fake Progress Report':   'bg-orange-900/25 border-orange-500/30 text-orange-400',
+    'Contractor Corruption':  'bg-rose-900/25 border-rose-500/30 text-rose-400',
+    'Environmental Damage':   'bg-emerald-900/25 border-emerald-500/30 text-emerald-400',
+    'Other':                  'bg-slate-900/25 border-slate-500/30 text-slate-400',
+};
+
 export default function ComplaintCard({ complaint, walletAddress, onReact, reacting }) {
     const score = (complaint.reactions?.support || 0) - (complaint.reactions?.disagree || 0);
     const isOwner = walletAddress && complaint.walletAddress === walletAddress;
@@ -13,6 +22,8 @@ export default function ComplaintCard({ complaint, walletAddress, onReact, react
     const shortWallet = complaint.walletAddress
         ? `${complaint.walletAddress.slice(0, 4)}...${complaint.walletAddress.slice(-4)}`
         : 'Anonymous';
+
+    const typeColor = TYPE_COLORS[complaint.complaintType] || TYPE_COLORS['Other'];
 
     return (
         <div className="card p-6 relative">
@@ -27,8 +38,14 @@ export default function ComplaintCard({ complaint, walletAddress, onReact, react
             )}
 
             {/* Header */}
-            <div className="flex items-start justify-between mb-4">
+            <div className="flex items-start justify-between mb-3">
                 <div className="flex-1 min-w-0">
+                    {/* Complaint Type Badge */}
+                    {complaint.complaintType && (
+                        <span className={`inline-block text-[11px] font-semibold px-2.5 py-0.5 rounded-full border mb-2 ${typeColor}`}>
+                            {complaint.complaintType}
+                        </span>
+                    )}
                     <div className="flex items-center gap-2 mb-1 flex-wrap">
                         <span className="text-[10px] font-mono bg-earth px-2 py-0.5 rounded text-parchment-ghost">
                             {shortWallet}
