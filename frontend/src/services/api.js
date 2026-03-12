@@ -239,6 +239,22 @@ export async function resolveIPFSUrl(ipfsHash) {
 }
 
 // ═════════════════════════════════════════════════════════════════════════════
+// Complaint routes
+// ═════════════════════════════════════════════════════════════════════════════
+
+/** GET /api/complaints/project/:projectId */
+export async function getComplaints(projectId) {
+    const data = await safeFetch(`/complaints/project/${projectId}`);
+    return data || [];
+}
+
+/** GET /api/complaints/top */
+export async function getTopComplaints(limit = 20) {
+    const data = await safeFetch(`/complaints/top?limit=${limit}`);
+    return data || [];
+}
+
+// ═════════════════════════════════════════════════════════════════════════════
 // Utility formatters  (pure functions — no network calls)
 // ═════════════════════════════════════════════════════════════════════════════
 

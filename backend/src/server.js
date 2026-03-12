@@ -10,6 +10,7 @@ const analyticsRoutes = require('./routes/analytics');
 const adminRoutes = require('./routes/admin');
 const feedbackRoutes = require('./routes/feedback');
 const ipfsRoutes = require('./routes/ipfs');
+const complaintRoutes = require('./routes/complaints');
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -44,6 +45,7 @@ app.get('/api', (req, res) => {
             '/api/admin',
             '/api/feedback',
             '/api/ipfs',
+            '/api/complaints',
             '/api/health',
         ]
     });
@@ -56,6 +58,7 @@ app.use('/api/analytics', analyticsRoutes);
 app.use('/api/admin', adminRoutes);
 app.use('/api/feedback', feedbackRoutes);
 app.use('/api/ipfs', ipfsRoutes);
+app.use('/api/complaints', complaintRoutes);
 
 // Health check
 app.get('/api/health', (req, res) => {

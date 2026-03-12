@@ -1007,3 +1007,59 @@
   .card { border: 1px solid #000 !important; box-shadow: none !important; }
   .badge { border: 1px solid currentColor !important; }
 }
+
+/* ── Leaflet Map Overrides ─────────────────────────────────────────────────── */
+.nepal-map-container .leaflet-container {
+  background: #0a0e17 !important;
+  font-family: inherit;
+}
+
+.nepal-tooltip {
+  background: rgba(13, 17, 23, 0.92) !important;
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.1) !important;
+  border-radius: 10px !important;
+  padding: 0 !important;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4) !important;
+}
+.nepal-tooltip::before {
+  border-top-color: rgba(13, 17, 23, 0.92) !important;
+}
+.map-tooltip {
+  padding: 8px 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.map-tooltip strong {
+  color: #fff;
+  font-size: 13px;
+  font-weight: 600;
+}
+.map-tooltip span {
+  color: rgba(255, 255, 255, 0.5);
+  font-size: 11px;
+}
+
+.province-label {
+  background: none !important;
+  border: none !important;
+  box-shadow: none !important;
+  pointer-events: none !important;
+}
+.province-label span {
+  color: rgba(255, 255, 255, 0.55);
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  text-shadow: 0 1px 4px rgba(0, 0, 0, 0.8);
+  white-space: nowrap;
+  text-align: center;
+  display: block;
+}
+
+/* Hide default Leaflet attribution */
+.nepal-map-container .leaflet-control-attribution {
+  display: none !important;
+}
