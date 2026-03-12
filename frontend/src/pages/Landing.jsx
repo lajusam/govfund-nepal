@@ -157,14 +157,14 @@ export default function Landing() {
 
                 <motion.div
                     style={{ y: heroY, opacity: heroOpacity }}
-                    className="relative z-[5] max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24 sm:py-28 flex items-center justify-start w-full"
+                    className="relative z-[5] max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24 sm:py-28 flex items-center justify-start w-full pointer-events-none"
                 >
                     {/* Left-aligned text content */}
                     <motion.div
                         variants={staggerContainer}
                         initial="hidden"
                         animate="visible"
-                        className="text-left max-w-2xl"
+                        className="text-left max-w-2xl pointer-events-auto"
                     >
                         {/* Badge */}
                         <motion.div variants={fadeUp} custom={0}>
@@ -265,7 +265,7 @@ export default function Landing() {
 
                 {/* Scroll indicator */}
                 <motion.div
-                    className="absolute bottom-8 left-1/2 -translate-x-1/2 z-[5]"
+                    className="absolute bottom-8 left-1/2 -translate-x-1/2 z-[5] pointer-events-none"
                     animate={{ y: [0, 10, 0] }}
                     transition={{ duration: 2, repeat: Infinity }}
                 >
