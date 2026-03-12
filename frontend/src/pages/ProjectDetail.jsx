@@ -5,6 +5,7 @@ import { Chart as ChartJS, CategoryScale, LinearScale, PointElement, LineElement
 import { Line } from 'react-chartjs-2';
 import IPFSDocumentLink from '../components/IPFSDocumentLink';
 import { useLanguage } from '../context/LanguageContext';
+import api from '../services/api';
 
 ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend, Filler);
 
@@ -57,11 +58,13 @@ export default function ProjectDetail() {
     const [loading, setLoading] = useState(true);
     const [newFeedback, setNewFeedback] = useState({ rating: 5, comment: '' });
     const [submitting, setSubmitting] = useState(false);
+    const [complaintCount, setComplaintCount] = useState(0);
     const { t } = useLanguage();
 
     useEffect(() => {
         Promise.all([getProject(projectId), getFeedback(projectId)])
             .then(([p, f]) => { setProject(p); setFeedback(f); setLoading(false); });
+        api.get(`/complaints/project/${projectId}`).then(r => setComplaintCount(r.data?.length || 0)).catch(() => {});
     }, [projectId]);
 
     const releaseChartData = useMemo(() => {
@@ -409,6 +412,33 @@ export default function ProjectDetail() {
                         ) : (
                             <p className="text-sm text-parchment-muted">{t('noDocuments')}</p>
                         )}
+                    </div>
+
+                    {/* Citizen Complaints */}
+                    <div className="card p-6">
+                        <h3 className="font-heading font-bold text-lg text-parchment mb-3">
+                            🚨 Citizen Complaints
+                        </h3>
+                        <p className="text-sm text-parchment-muted mb-4">
+                            {complaintCount} complaint{complaintCount !== 1 ? 's' : ''} filed
+                        </p>
+                        <Link
+                            to={`/project/${projectId}/complaints`}
+                            className="flex items-center gap-3 p-3 bg-earth rounded-xl hover:bg-earth-light transition-colors group"
+                        >
+                            <div className="w-8 h-8 rounded-lg bg-red-900/20 border border-red-500/20 flex items-center justify-center text-red-400 text-sm">
+                                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.082 16.5c-.77.833.192 2.5 1.732 2.5z" />
+                                </svg>
+                            </div>
+                            <div className="flex-1">
+                                <p className="text-sm font-medium text-parchment group-hover:text-golden transition-colors">View Complaints</p>
+                                <p className="text-xs text-parchment-muted">Report or review issues</p>
+                            </div>
+                            <svg className="w-4 h-4 text-parchment-ghost group-hover:text-golden transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                            </svg>
+                        </Link>
                     </div>
 
                     {/* Budget Allocations */}
