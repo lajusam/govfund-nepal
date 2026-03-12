@@ -65,13 +65,17 @@ const allowedOrigins = [
   'http://localhost:5173',
   'http://localhost:3000',
   process.env.FRONTEND_URL,
+  // Vercel sets VERCEL_URL automatically (e.g. "my-app-abc123.vercel.app")
+  process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : null,
 ].filter(Boolean);
 
 app.use(cors({
   origin: (origin, cb) => {
-    // Allow requests with no origin (same-origin Vercel calls)
-    if (!origin || allowedOrigins.includes(origin)) return cb(null, true);
-    // SECURITY FIX: Reject unknown origins instead of allowing all
+    // Allow requests with no origin (mobile apps, same-origin in some browsers)
+    if (!origin) return cb(null, true);
+    if (allowedOrigins.includes(origin)) return cb(null, true);
+    // Allow any Vercel preview/production deployment for this project
+    if (/^https:\/\/govfund[.-].*\.vercel\.app$/.test(origin)) return cb(null, true);
     cb(new Error('CORS: origin not allowed'), false);
   },
   credentials: true,
@@ -155,6 +159,10 @@ app.use('/api/complaints', complaintRoutes);
 
 // Global error handler
 app.use((err, req, res, _next) => {
+  // CORS rejections throw an Error from the origin callback
+  if (err.message && err.message.startsWith('CORS:')) {
+    return res.status(403).json({ error: 'Origin not allowed' });
+  }
   console.error('Unhandled error:', err);
   res.status(500).json({ error: 'Internal server error' });
 });
