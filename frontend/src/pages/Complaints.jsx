@@ -1,10 +1,11 @@
-import React, { useEffect, useState, useCallback } from 'react';
+import React, { useEffect, useState, useCallback, useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import { useWallet } from '@solana/wallet-adapter-react';
 import bs58 from 'bs58';
 import api from '../services/api';
 import { getProjects } from '../services/api';
 import ComplaintCard from '../components/ComplaintCard';
+import { PROVINCES } from '../data/nepalData';
 
 export default function Complaints() {
     const { publicKey, signMessage } = useWallet();
@@ -14,6 +15,9 @@ export default function Complaints() {
     const [reacting, setReacting] = useState(false);
     const [filter, setFilter] = useState('all'); // all | mine | investigation
     const [typeFilter, setTypeFilter] = useState('all');
+    const [provinceFilter, setProvinceFilter] = useState('all');
+    const [districtFilter, setDistrictFilter] = useState('all');
+    const [projectFilter, setProjectFilter] = useState('all');
 
     const walletAddress = publicKey?.toBase58() || null;
 
@@ -68,8 +72,54 @@ export default function Complaints() {
         if (filter === 'mine') { if (c.walletAddress !== walletAddress) return false; }
         if (filter === 'investigation') { if (!((c.reactions?.support || 0) > 50)) return false; }
         if (typeFilter !== 'all') { if (c.complaintType !== typeFilter) return false; }
+        if (provinceFilter !== 'all') {
+            const proj = projects[c.projectId];
+            if ((proj?.province || c.province) !== provinceFilter) return false;
+        }
+        if (districtFilter !== 'all') {
+            const proj = projects[c.projectId];
+            if ((proj?.district || c.district) !== districtFilter) return false;
+        }
+        if (projectFilter !== 'all') { if (c.projectId !== projectFilter) return false; }
         return true;
     });
+
+    // Derive available districts based on selected province
+    const availableDistricts = useMemo(() => {
+        if (provinceFilter === 'all') {
+            // All unique districts from complaints and projects
+            const set = new Set();
+            complaints.forEach(c => {
+                const proj = projects[c.projectId];
+                const d = proj?.district || c.district;
+                if (d) set.add(d);
+            });
+            return [...set].sort();
+        }
+        const prov = PROVINCES.find(p => p.name === provinceFilter);
+        return prov ? prov.districts : [];
+    }, [provinceFilter, complaints, projects]);
+
+    // Derive available projects based on province/district selection
+    const availableProjects = useMemo(() => {
+        const projIds = new Set(complaints.map(c => c.projectId));
+        return Object.values(projects)
+            .filter(p => projIds.has(p.projectId))
+            .filter(p => provinceFilter === 'all' || p.province === provinceFilter)
+            .filter(p => districtFilter === 'all' || p.district === districtFilter)
+            .sort((a, b) => a.name.localeCompare(b.name));
+    }, [projects, complaints, provinceFilter, districtFilter]);
+
+    // Reset dependent filters when parent changes
+    const handleProvinceChange = (val) => {
+        setProvinceFilter(val);
+        setDistrictFilter('all');
+        setProjectFilter('all');
+    };
+    const handleDistrictChange = (val) => {
+        setDistrictFilter(val);
+        setProjectFilter('all');
+    };
 
     if (loading) {
         return (
@@ -137,7 +187,7 @@ export default function Complaints() {
             </div>
 
             {/* Type Filter */}
-            <div className="flex items-center gap-2 mb-6 flex-wrap">
+            <div className="flex items-center gap-2 mb-4 flex-wrap">
                 <span className="text-xs text-parchment-ghost mr-1">Type:</span>
                 {['all', 'Budget Misuse', 'Project Delay', 'Fake Progress Report', 'Contractor Corruption', 'Environmental Damage', 'Other'].map(t => (
                     <button
@@ -152,6 +202,64 @@ export default function Complaints() {
                         {t === 'all' ? 'All Types' : t}
                     </button>
                 ))}
+            </div>
+
+            {/* Location & Project Filters */}
+            <div className="flex items-end gap-3 mb-6 flex-wrap">
+                {/* Province */}
+                <div className="flex flex-col gap-1">
+                    <label className="text-[10px] text-parchment-ghost uppercase tracking-wider">Province</label>
+                    <select
+                        value={provinceFilter}
+                        onChange={e => handleProvinceChange(e.target.value)}
+                        className="bg-earth border border-earth-border text-parchment text-sm rounded-lg px-3 py-2 focus:border-golden/40 focus:outline-none min-w-[160px]"
+                    >
+                        <option value="all">All Provinces</option>
+                        {PROVINCES.map(p => (
+                            <option key={p.id} value={p.name}>{p.name}</option>
+                        ))}
+                    </select>
+                </div>
+
+                {/* District */}
+                <div className="flex flex-col gap-1">
+                    <label className="text-[10px] text-parchment-ghost uppercase tracking-wider">District</label>
+                    <select
+                        value={districtFilter}
+                        onChange={e => handleDistrictChange(e.target.value)}
+                        className="bg-earth border border-earth-border text-parchment text-sm rounded-lg px-3 py-2 focus:border-golden/40 focus:outline-none min-w-[160px]"
+                    >
+                        <option value="all">All Districts</option>
+                        {availableDistricts.map(d => (
+                            <option key={d} value={d}>{d}</option>
+                        ))}
+                    </select>
+                </div>
+
+                {/* Project */}
+                <div className="flex flex-col gap-1">
+                    <label className="text-[10px] text-parchment-ghost uppercase tracking-wider">Project</label>
+                    <select
+                        value={projectFilter}
+                        onChange={e => setProjectFilter(e.target.value)}
+                        className="bg-earth border border-earth-border text-parchment text-sm rounded-lg px-3 py-2 focus:border-golden/40 focus:outline-none min-w-[200px] max-w-[300px]"
+                    >
+                        <option value="all">All Projects</option>
+                        {availableProjects.map(p => (
+                            <option key={p.projectId} value={p.projectId}>{p.name}</option>
+                        ))}
+                    </select>
+                </div>
+
+                {/* Reset */}
+                {(provinceFilter !== 'all' || districtFilter !== 'all' || projectFilter !== 'all' || typeFilter !== 'all') && (
+                    <button
+                        onClick={() => { setProvinceFilter('all'); setDistrictFilter('all'); setProjectFilter('all'); setTypeFilter('all'); }}
+                        className="px-3 py-2 rounded-lg text-xs font-medium bg-earth border border-earth-border text-parchment-ghost hover:text-red-400 hover:border-red-500/30 transition-all"
+                    >
+                        Clear Filters
+                    </button>
+                )}
             </div>
 
             {/* Complaints List */}
