@@ -266,9 +266,13 @@ router.post('/projects/:projectId/sync-milestone', verifyAdmin, async (req, res)
         const { txSignature, index, title, description, status } = req.body;
         const { projectId } = req.params;
 
-        const onChainProject = await fetchProjectFromChain(projectId);
-        if (!onChainProject) {
-            return res.status(404).json({ error: 'Project not found on-chain' });
+        // Try chain fetch but do not fail hard if RPC is briefly unavailable.
+        // Allocation/release routes already use this fallback pattern.
+        let onChainProject = null;
+        try {
+            onChainProject = await fetchProjectFromChain(projectId);
+        } catch (err) {
+            console.warn(`[sync-milestone] Chain fetch failed for ${projectId}:`, err.message);
         }
 
         const project = await Project.findOne({ projectId });
@@ -277,27 +281,45 @@ router.post('/projects/:projectId/sync-milestone', verifyAdmin, async (req, res)
         }
 
         // Update milestones array
-        const milestoneIndex = parseInt(index);
-        const existingIdx = project.milestones.findIndex(m => m.index === milestoneIndex);
+        const milestoneIndex = Number.parseInt(index, 10);
+        if (!Number.isInteger(milestoneIndex) || milestoneIndex < 0) {
+            return res.status(400).json({ error: 'Invalid milestone index' });
+        }
+
+        const normalizedStatus = ['Pending', 'InProgress', 'Completed', 'Delayed'].includes(status)
+            ? status
+            : 'Pending';
+
+        const existingIdx = project.milestones.findIndex(m => Number(m.index) === milestoneIndex);
         const milestoneData = {
             index: milestoneIndex,
             title: title || `Milestone ${milestoneIndex + 1}`,
             description: description || '',
-            status: status || 'Pending',
+            status: normalizedStatus,
             updatedAt: new Date(),
         };
 
         if (existingIdx >= 0) {
-            project.milestones[existingIdx] = milestoneData;
+            project.milestones[existingIdx].set(milestoneData);
         } else {
             project.milestones.push(milestoneData);
         }
 
-        project.milestonesCompleted = onChainProject.milestonesCompleted;
+        // Prefer chain value when available; otherwise compute from local milestone states.
+        if (onChainProject) {
+            project.milestonesCompleted = onChainProject.milestonesCompleted;
+        } else {
+            project.milestonesCompleted = project.milestones.filter(m => m.status === 'Completed').length;
+        }
+
         await project.save();
 
+        console.log(`[sync-milestone] ${projectId}: index=${milestoneIndex}, status=${normalizedStatus} (source: ${onChainProject ? 'chain' : 'fallback'})`);
+
         res.json({
-            message: 'Milestone synced from blockchain',
+            message: onChainProject
+                ? 'Milestone synced from blockchain'
+                : 'Milestone synced using fallback cache update',
             project,
             onChain: onChainProject,
             explorerUrl: txSignature ? getExplorerUrl(txSignature) : null,
