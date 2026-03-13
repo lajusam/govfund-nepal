@@ -7,6 +7,7 @@ import { PublicKey, SystemProgram } from '@solana/web3.js';
 import { BN } from '@coral-xyz/anchor';
 import { motion, AnimatePresence } from 'framer-motion';
 import api, { formatNPR, getExplorerUrl, isValidSignature, setAdminHeaders } from '../services/api';
+import bs58 from 'bs58';
 import { PROVINCES, SECTORS, getDistrictsForProvince } from '../data/nepalData';
 import useSolanaProgram from '../hooks/useSolanaProgram';
 import useIPFS, { isValidCID, getIPFSUrl } from '../hooks/useIPFS';
@@ -468,10 +469,11 @@ function SelectField({ label, value, onChange, required, disabled, children, cla
 // Main Admin Dashboard
 // ═══════════════════════════════════════════════════════════════
 export default function Admin() {
-  const { publicKey, sendTransaction, connected } = useWallet();
+  const { publicKey, sendTransaction, connected, signMessage } = useWallet();
   const { connection } = useConnection();
   const { isAdmin } = useSolana();
   const { t, lang } = useLanguage();
+  const adminAuthRef = useRef({ address: '', signature: '', message: '' });
 
   // Set admin headers globally whenever wallet connects/disconnects
   useEffect(() => {
@@ -479,6 +481,7 @@ export default function Admin() {
       setAdminHeaders(publicKey.toBase58());
     } else {
       setAdminHeaders(null);
+      adminAuthRef.current = { address: '', signature: '', message: '' };
     }
   }, [connected, publicKey]);
 
@@ -681,11 +684,44 @@ export default function Admin() {
     return true;
   };
 
+  const getSignedAdminHeaders = useCallback(async () => {
+    if (!publicKey) throw new Error('Wallet not connected');
+
+    const walletAddress = publicKey.toBase58();
+    const cached = adminAuthRef.current;
+    if (cached.address === walletAddress && cached.signature && cached.message) {
+      return {
+        'x-wallet-address': cached.address,
+        'x-wallet-signature': cached.signature,
+        'x-wallet-message': cached.message,
+      };
+    }
+
+    if (!signMessage) {
+      throw new Error('Wallet does not support message signing, required for secure admin sync');
+    }
+
+    const message = `GovFund Admin Sync:${Date.now()}`;
+    const messageBytes = new TextEncoder().encode(message);
+    const signatureBytes = await signMessage(messageBytes);
+    const signature = bs58.encode(signatureBytes);
+
+    adminAuthRef.current = { address: walletAddress, signature, message };
+    setAdminHeaders(walletAddress, signature, message);
+
+    return {
+      'x-wallet-address': walletAddress,
+      'x-wallet-signature': signature,
+      'x-wallet-message': message,
+    };
+  }, [publicKey, signMessage]);
+
   // Base helper: call any admin sync endpoint (no artificial delay — backend has retries)
   const syncAction = async (endpoint, payload) => {
     try {
+      const headers = await getSignedAdminHeaders();
       await api.post(endpoint, payload, {
-        headers: { 'x-wallet-address': publicKey.toBase58() },
+        headers,
       });
     } catch (err) {
       console.warn('Backend sync failed (non-fatal):', err.message);
