@@ -112,6 +112,44 @@ export async function getProjectReleases(projectId) {
     return data || [];
 }
 
+// ── Project Dashboard Analytics ───────────────────────────────────────────
+
+/** GET /api/projects/stats — total/active/delayed/completed counts */
+export async function getProjectStats() {
+    const data = await safeFetch('/projects/stats');
+    return data || { total: 0, active: 0, delayed: 0, completed: 0 };
+}
+
+/** GET /api/projects/by-province — count per province */
+export async function getProjectsByProvince() {
+    const data = await safeFetch('/projects/by-province');
+    return data || [];
+}
+
+/** GET /api/projects/by-sector — count per sector */
+export async function getProjectsBySector() {
+    const data = await safeFetch('/projects/by-sector');
+    return data || [];
+}
+
+/** GET /api/projects/milestones-summary — milestone progress per active project */
+export async function getMilestonesSummary() {
+    const data = await safeFetch('/projects/milestones-summary');
+    return data || [];
+}
+
+/** GET /api/projects/recent-releases — latest fund releases across all projects */
+export async function getRecentReleases() {
+    const data = await safeFetch('/projects/recent-releases');
+    return data || [];
+}
+
+/** GET /api/projects/recently-updated — last 4 updated projects */
+export async function getRecentlyUpdatedProjects() {
+    const data = await safeFetch('/projects/recently-updated');
+    return data || [];
+}
+
 // ── Analytics ─────────────────────────────────────────────────────────────────
 
 /** GET /api/analytics */

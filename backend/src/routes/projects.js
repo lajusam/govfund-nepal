@@ -125,6 +125,118 @@ router.get('/', async (req, res) => {
     }
 });
 
+// ── Dashboard analytics endpoints ─────────────────────────────────────────
+
+// GET /api/projects/stats — total / active / delayed / completed counts
+router.get('/stats', async (req, res) => {
+    try {
+        const [total, active, delayed, completed] = await Promise.all([
+            Project.countDocuments(),
+            Project.countDocuments({ status: 'Active' }),
+            Project.countDocuments({ status: 'Delayed' }),
+            Project.countDocuments({ status: 'Completed' }),
+        ]);
+        res.json({ total, active, delayed, completed });
+    } catch (err) {
+        console.error('[projects/stats] Error:', err.message);
+        res.status(500).json({ error: 'Failed to fetch project stats' });
+    }
+});
+
+// GET /api/projects/by-province — project count per province
+router.get('/by-province', async (req, res) => {
+    try {
+        const result = await Project.aggregate([
+            { $group: { _id: '$province', count: { $sum: 1 } } },
+            { $sort: { count: -1 } },
+            { $project: { province: '$_id', count: 1, _id: 0 } },
+        ]);
+        res.json(result);
+    } catch (err) {
+        console.error('[projects/by-province] Error:', err.message);
+        res.status(500).json({ error: 'Failed to fetch province stats' });
+    }
+});
+
+// GET /api/projects/by-sector — project count per sector
+router.get('/by-sector', async (req, res) => {
+    try {
+        const result = await Project.aggregate([
+            { $group: { _id: '$sector', count: { $sum: 1 } } },
+            { $sort: { count: -1 } },
+            { $project: { sector: '$_id', count: 1, _id: 0 } },
+        ]);
+        res.json(result);
+    } catch (err) {
+        console.error('[projects/by-sector] Error:', err.message);
+        res.status(500).json({ error: 'Failed to fetch sector stats' });
+    }
+});
+
+// GET /api/projects/milestones-summary — milestone progress per active project
+router.get('/milestones-summary', async (req, res) => {
+    try {
+        const projects = await Project.find({ status: 'Active' })
+            .select('projectId name province milestoneCount milestonesCompleted')
+            .sort({ name: 1 })
+            .lean();
+
+        const summary = projects.map(p => ({
+            projectId: p.projectId,
+            name: p.name,
+            province: p.province,
+            totalMilestones: p.milestoneCount || 0,
+            completedMilestones: p.milestonesCompleted || 0,
+            progress: p.milestoneCount > 0
+                ? Math.round((p.milestonesCompleted / p.milestoneCount) * 100)
+                : 0,
+        }));
+        res.json(summary);
+    } catch (err) {
+        console.error('[projects/milestones-summary] Error:', err.message);
+        res.status(500).json({ error: 'Failed to fetch milestones summary' });
+    }
+});
+
+// GET /api/projects/recent-releases — latest 8 fund releases across all projects
+router.get('/recent-releases', async (req, res) => {
+    try {
+        const result = await Project.aggregate([
+            { $unwind: '$fundReleases' },
+            { $sort: { 'fundReleases.date': -1 } },
+            { $limit: 8 },
+            {
+                $project: {
+                    projectName: '$name',
+                    province: '$province',
+                    amount: '$fundReleases.amount',
+                    date: '$fundReleases.date',
+                    description: '$fundReleases.description',
+                },
+            },
+        ]);
+        res.json(result);
+    } catch (err) {
+        console.error('[projects/recent-releases] Error:', err.message);
+        res.status(500).json({ error: 'Failed to fetch recent releases' });
+    }
+});
+
+// GET /api/projects/recently-updated — last 4 updated projects
+router.get('/recently-updated', async (req, res) => {
+    try {
+        const projects = await Project.find()
+            .sort({ updatedAt: -1 })
+            .limit(4)
+            .select('projectId name province sector status totalBudget updatedAt')
+            .lean();
+        res.json(projects);
+    } catch (err) {
+        console.error('[projects/recently-updated] Error:', err.message);
+        res.status(500).json({ error: 'Failed to fetch recently updated projects' });
+    }
+});
+
 // GET single project by projectId - blockchain first
 router.get('/:projectId', async (req, res) => {
     try {

@@ -34,6 +34,9 @@ const tabContentVariants = {
     exit: { opacity: 0, y: -8, transition: { duration: 0.2, ease: [0.22, 1, 0.36, 1] } },
 };
 
+// ── Format helpers ───────────────────────────────────────────────────────────
+const fmtNPR = (v) => `NPR ${Number(v).toLocaleString('en-IN')}B`;
+
 // ── Utilization color helper ─────────────────────────────────────────────────
 function utilizationColor(pct) {
     if (pct < 20) return { bar: '#C2410C', text: 'text-[#C2410C]', bg: 'bg-[#C2410C]' };
@@ -189,22 +192,19 @@ export default function Budget() {
                 {[
                     {
                         label: t('budgetTotalAllocated'),
-                        value: `${data.summary.totalBudget}B`,
-                        sub: 'NPR',
+                        value: fmtNPR(data.summary.totalBudget),
                         borderColor: 'border-t-golden',
                         icon: '💰',
                     },
                     {
                         label: t('budgetTotalSpent'),
-                        value: totalSpent ? `${totalSpent.spent}B` : '—',
-                        sub: 'NPR',
+                        value: totalSpent ? fmtNPR(totalSpent.spent) : '—',
                         borderColor: 'border-t-bronze',
                         icon: '📊',
                     },
                     {
                         label: t('budgetOverallUtil'),
                         value: totalSpent ? `${totalSpent.percentage}%` : '—',
-                        sub: '',
                         borderColor: 'border-t-gov-green',
                         icon: '📈',
                     },
@@ -219,7 +219,7 @@ export default function Budget() {
                             <p className="text-xs text-parchment-ghost font-medium uppercase tracking-wider">{stat.label}</p>
                         </div>
                         <p className="text-2xl md:text-3xl font-heading font-bold text-parchment tabular-nums">
-                            {stat.value} <span className="text-sm text-parchment-muted font-normal">{stat.sub}</span>
+                            {stat.value}
                         </p>
                     </motion.div>
                 ))}
@@ -287,7 +287,7 @@ export default function Budget() {
                                                                 label: (ctx) => {
                                                                     const total = data.summary.totalBudget;
                                                                     const pct = ((ctx.raw / total) * 100).toFixed(2);
-                                                                    return ` ${ctx.label}: ${ctx.raw}B NPR (${pct}%)`;
+                                                                    return ` ${ctx.label}: ${fmtNPR(ctx.raw)} (${pct}%)`;
                                                                 },
                                                             },
                                                         },
@@ -314,7 +314,7 @@ export default function Budget() {
                                             >
                                                 <span className="text-parchment text-sm font-medium">{row.label}</span>
                                                 <div className="flex items-center gap-3">
-                                                    <span className="text-golden font-heading font-bold text-sm tabular-nums">{row.val}B</span>
+                                                    <span className="text-golden font-heading font-bold text-sm tabular-nums">{fmtNPR(row.val)}</span>
                                                     <span className="text-amber-glow text-xs font-semibold px-2 py-0.5 rounded-full border border-bronze/40">
                                                         {row.pct}%
                                                     </span>
@@ -324,7 +324,7 @@ export default function Budget() {
                                         {/* Total row */}
                                         <div className="flex items-center justify-between px-4 py-3.5 bg-earth-light border-t border-[rgba(142,111,62,0.28)]">
                                             <span className="text-parchment font-heading font-bold text-sm">{t('budgetCat_Total')}</span>
-                                            <span className="text-golden font-heading font-bold text-sm tabular-nums">{data.summary.totalBudget}B NPR</span>
+                                            <span className="text-golden font-heading font-bold text-sm tabular-nums">{fmtNPR(data.summary.totalBudget)}</span>
                                         </div>
                                     </div>
                                 </div>
@@ -352,7 +352,7 @@ export default function Budget() {
                                                     legend: { display: false },
                                                     tooltip: {
                                                         ...tooltipStyle,
-                                                        callbacks: { label: (ctx) => ` ${ctx.raw}B NPR` },
+                                                        callbacks: { label: (ctx) => ` ${fmtNPR(ctx.raw)}` },
                                                     },
                                                 },
                                                 scales: {
@@ -377,7 +377,7 @@ export default function Budget() {
                                                 >
                                                     <span className="text-parchment text-sm font-medium">{p.name}</span>
                                                     <div className="flex items-center gap-3">
-                                                        <span className="text-golden font-heading font-bold text-sm tabular-nums">{p.grant}B</span>
+                                                        <span className="text-golden font-heading font-bold text-sm tabular-nums">{fmtNPR(p.grant)}</span>
                                                         <span className="text-amber-glow text-xs font-semibold px-2 py-0.5 rounded-full border border-bronze/40">
                                                             {pct}%
                                                         </span>
@@ -388,7 +388,7 @@ export default function Budget() {
                                         {/* Total row */}
                                         <div className="flex items-center justify-between px-4 py-3 bg-earth-light border-t border-[rgba(142,111,62,0.28)]">
                                             <span className="text-parchment font-heading font-bold text-sm">{t('budgetCat_Total')}</span>
-                                            <span className="text-golden font-heading font-bold text-sm tabular-nums">{totalGrants.toFixed(2)}B NPR</span>
+                                            <span className="text-golden font-heading font-bold text-sm tabular-nums">{fmtNPR(totalGrants.toFixed(2))}</span>
                                         </div>
                                     </div>
                                 </div>
@@ -418,7 +418,7 @@ export default function Budget() {
                                                         callbacks: {
                                                             label: (ctx) => {
                                                                 const ministry = data.ministries[ctx.dataIndex];
-                                                                return ` ${ministry.amount}B NPR (${ministry.percentage}%)`;
+                                                                return ` ${fmtNPR(ministry.amount)} (${ministry.percentage}%)`;
                                                             },
                                                         },
                                                     },
@@ -448,7 +448,7 @@ export default function Budget() {
                                                     {m.name}
                                                 </span>
                                                 <div className="flex items-center gap-3 shrink-0">
-                                                    <span className="text-golden font-heading font-bold text-sm tabular-nums">{m.amount}B</span>
+                                                    <span className="text-golden font-heading font-bold text-sm tabular-nums">{fmtNPR(m.amount)}</span>
                                                     <span className="text-amber-glow text-xs font-semibold px-2 py-0.5 rounded-full border border-bronze/40">
                                                         {m.percentage}%
                                                     </span>
@@ -506,8 +506,8 @@ export default function Budget() {
                                                     />
                                                 </div>
                                                 <div className="flex justify-between mt-1 text-xs text-parchment-ghost">
-                                                    <span>{t('budgetAllocatedLabel')}: {u.allocated}B NPR</span>
-                                                    <span>{t('budgetSpentLabel')}: {u.spent}B NPR</span>
+                                                    <span>{t('budgetAllocatedLabel')}: {fmtNPR(u.allocated)}</span>
+                                                    <span>{t('budgetSpentLabel')}: {fmtNPR(u.spent)}</span>
                                                 </div>
                                             </motion.div>
                                         );
@@ -548,8 +548,8 @@ export default function Budget() {
                                                         />
                                                     </div>
                                                     <div className="flex justify-between text-xs">
-                                                        <span className="text-parchment-ghost">{u.allocated}B</span>
-                                                        <span className="text-golden font-semibold">{u.spent}B {t('budgetSpentLabel').toLowerCase()}</span>
+                                                        <span className="text-parchment-ghost">{fmtNPR(u.allocated)}</span>
+                                                        <span className="text-golden font-semibold">{fmtNPR(u.spent)}</span>
                                                     </div>
                                                 </div>
                                             );

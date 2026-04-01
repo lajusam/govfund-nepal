@@ -3,7 +3,6 @@ import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useLanguage } from '../context/LanguageContext';
 import { TubesBackground } from '../components/ui/tubes-background';
-import { MousePointer2 } from 'lucide-react';
 
 // ─── Counter badge (trust signal) ────────────────────────────────────────────
 function TrustBadge({ icon, label, delay }) {
@@ -256,32 +255,8 @@ export default function Welcome() {
                                 <TrustBadge icon="🔐" label={t('immutableRecordsBadge')}  delay={1.90} />
                                 <TrustBadge icon="🇳🇵" label={t('builtForNepal')}   delay={2.00} />
                             </motion.div>
-
-                            {/* Click hint */}
-                            <motion.div
-                                initial={{ opacity: 0 }}
-                                animate={{ opacity: 1 }}
-                                transition={{ delay: 2.5, duration: 0.8 }}
-                                className="absolute bottom-20 flex flex-col items-center gap-2 text-white/40 animate-pulse pointer-events-none"
-                            >
-                                <MousePointer2 className="w-5 h-5" />
-                                <span className="text-xs uppercase tracking-widest">Click to randomize</span>
-                            </motion.div>
                         </div>
                     </TubesBackground>
-
-                    {/* ── Bottom brand strip ── */}
-                    <motion.div
-                        className="absolute bottom-7 left-0 right-0 flex justify-center pointer-events-none"
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: 1 }}
-                        transition={{ delay: 2.2, duration: 0.8 }}
-                        style={{ zIndex: 15 }}
-                    >
-                        <span style={{ color: 'rgba(255,255,255,0.35)', fontSize: '0.7rem', letterSpacing: '0.20em', fontFamily: 'JetBrains Mono, monospace' }}>
-                            {t('decentralizedStrip')}
-                        </span>
-                    </motion.div>
                 </motion.div>
             )}
         </AnimatePresence>

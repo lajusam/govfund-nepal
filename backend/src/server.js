@@ -12,6 +12,7 @@ const feedbackRoutes = require('./routes/feedback');
 const ipfsRoutes = require('./routes/ipfs');
 const complaintRoutes = require('./routes/complaints');
 const budgetRoutes = require('./routes/budget');
+const authRoutes = require('./routes/auth');
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -54,6 +55,7 @@ app.get('/api', (req, res) => {
             '/api/ipfs',
             '/api/complaints',
             '/api/budget',
+            '/api/auth',
             '/api/health',
         ]
     });
@@ -68,6 +70,7 @@ app.use('/api/feedback', feedbackRoutes);
 app.use('/api/ipfs', ipfsRoutes);
 app.use('/api/complaints', complaintRoutes);
 app.use('/api/budget', budgetRoutes);
+app.use('/api/auth', authRoutes);
 
 // Health check
 app.get('/api/health', (req, res) => {
