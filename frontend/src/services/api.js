@@ -338,6 +338,10 @@ export async function getTopComplaints(limit = 20) {
 
 export function formatNPR(amount) {
     if (!amount || amount === 0) return 'NPR 0';
+    // For budget values >= 10, display with B (Billion) suffix
+    // This covers all budget-related values like 667.62B, 16.04B, 222.86B, 1860.33B
+    if (amount >= 10) return `NPR ${amount.toFixed(2)} B`;
+    if (amount >= 1) return `NPR ${amount.toFixed(2)}`;
     if (amount >= 10_000_000) return `NPR ${(amount / 10_000_000).toFixed(1)} Cr`;
     if (amount >= 100_000)    return `NPR ${(amount / 100_000).toFixed(1)} L`;
     return `NPR ${amount.toLocaleString()}`;
