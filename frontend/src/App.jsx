@@ -45,7 +45,7 @@ function AppShell() {
     const location = useLocation();
     const isWelcome = location.pathname === '/';
     return (
-        <div className="min-h-screen flex flex-col">
+        <div className="min-h-screen flex flex-col overflow-x-hidden">
             {!isWelcome && <TubelightNavbar items={tubelightItems} />}
             <main className="flex-1">
                 <ErrorBoundary>

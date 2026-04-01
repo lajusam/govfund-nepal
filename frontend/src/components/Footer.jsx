@@ -6,11 +6,11 @@ export default function Footer() {
     const { t } = useLanguage();
     return (
         <footer className="bg-basalt border-t border-white/10">
-            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 md:py-12">
                 <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
                     {/* Brand */}
-                    <div className="md:col-span-2">
-                        <div className="flex items-center gap-3 mb-4">
+                    <div className="md:col-span-2 text-center md:text-left">
+                        <div className="flex items-center justify-center md:justify-start gap-3 mb-4">
                             <div className="w-10 h-10 rounded-lg bg-gov-slate flex items-center justify-center">
                                 <img src="/logo.png" alt="GovFund Nepal" className="w-6 h-6 object-contain rounded" />
                             </div>

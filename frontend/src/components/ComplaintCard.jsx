@@ -26,7 +26,7 @@ export default function ComplaintCard({ complaint, walletAddress, onReact, react
     const typeColor = TYPE_COLORS[complaint.complaintType] || TYPE_COLORS['Other'];
 
     return (
-        <div className="card p-6 relative">
+        <div className="card p-4 md:p-6 relative">
             {/* Public Investigation Badge */}
             {isPublicInvestigation && (
                 <div className="absolute -top-3 right-4 flex items-center gap-1.5 px-3 py-1 rounded-full bg-red-900/40 border border-red-500/40 text-red-400 text-xs font-semibold">
