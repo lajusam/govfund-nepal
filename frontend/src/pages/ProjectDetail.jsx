@@ -214,7 +214,7 @@ export default function ProjectDetail() {
     const isDemoProject = allSignatures.length > 0 && !allSignatures.some(sig => isValidSignature(sig)) && !p.onChain;
 
     return (
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+        <div className="max-w-7xl mx-auto px-4 md:px-6 lg:px-8 py-6 md:py-8 lg:py-12">
             {/* Breadcrumb */}
             <div className="flex items-center gap-2 text-sm text-parchment-muted mb-6">
                 <Link to="/projects" className="hover:text-golden transition-colors">Projects</Link>
@@ -238,7 +238,7 @@ export default function ProjectDetail() {
             )}
 
             {/* Header */}
-            <div className="card p-8 mb-8">
+            <div className="card p-4 md:p-6 lg:p-8 mb-6 md:mb-8">
                 <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-4 mb-6">
                     <div>
                         <div className="flex items-center gap-3 mb-2">
@@ -267,22 +267,22 @@ export default function ProjectDetail() {
                 </div>
 
                 {/* Budget overview */}
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-6">
                     <div>
                         <p className="text-xs text-parchment-ghost mb-1">{t('totalBudgetLabel')}</p>
-                        <p className="text-xl font-heading font-bold text-parchment">{formatNPR(p.totalBudget)}</p>
+                        <p className="text-base md:text-xl font-heading font-bold text-parchment">{formatNPR(p.totalBudget)}</p>
                     </div>
                     <div>
                         <p className="text-xs text-parchment-ghost mb-1">{t('allocated')}</p>
-                        <p className="text-xl font-heading font-bold text-amber-glow">{formatNPR(p.allocatedBudget)}</p>
+                        <p className="text-base md:text-xl font-heading font-bold text-amber-glow">{formatNPR(p.allocatedBudget)}</p>
                     </div>
                     <div>
                         <p className="text-xs text-parchment-ghost mb-1">{t('released')}</p>
-                        <p className="text-xl font-heading font-bold text-golden">{formatNPR(p.releasedAmount)}</p>
+                        <p className="text-base md:text-xl font-heading font-bold text-golden">{formatNPR(p.releasedAmount)}</p>
                     </div>
                     <div>
                         <p className="text-xs text-parchment-ghost mb-1">{t('completion')}</p>
-                        <p className="text-xl font-heading font-bold text-bronze-light">{milestonePct}%</p>
+                        <p className="text-base md:text-xl font-heading font-bold text-bronze-light">{milestonePct}%</p>
                     </div>
                 </div>
 
@@ -316,7 +316,7 @@ export default function ProjectDetail() {
             </div>
 
             {/* Tab Navigation */}
-            <div className="flex items-center gap-1 mb-8 border-b border-earth-border overflow-x-auto">
+            <div className="flex items-center gap-1 mb-6 md:mb-8 border-b border-earth-border overflow-x-auto">
                 {[
                     { key: 'overview', label: 'Overview', icon: '📋' },
                     { key: 'complaints', label: `Complaints (${complaints.length})`, icon: '🚨' },
@@ -337,12 +337,12 @@ export default function ProjectDetail() {
             </div>
 
             {activeTab === 'overview' ? (
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 md:gap-6 lg:gap-8">
                 {/* Left: Milestones + Documents */}
-                <div className="lg:col-span-2 space-y-8">
+                <div className="lg:col-span-2 space-y-4 md:space-y-6 lg:space-y-8">
                     {/* Milestones */}
-                    <div className="card p-6">
-                        <h3 className="font-heading font-bold text-lg text-parchment mb-6">
+                    <div className="card p-4 md:p-6">
+                        <h3 className="font-heading font-bold text-lg text-parchment mb-4 md:mb-6">
                             {t('milestonePipeline')}
                         </h3>
                         {p.milestones?.length > 0 ? (
@@ -354,7 +354,7 @@ export default function ProjectDetail() {
 
                     {/* Fund Release Chart */}
                     {releaseChartData && (
-                        <div className="card p-6">
+                        <div className="card p-4 md:p-6">
                             <h3 className="font-heading font-bold text-lg text-parchment mb-4">
                                 {t('fundReleaseTimeline')}
                             </h3>
@@ -397,7 +397,7 @@ export default function ProjectDetail() {
 
                     {/* Fund Release Table */}
                     {p.fundReleases?.length > 0 && (
-                        <div className="card p-6 overflow-x-auto">
+                        <div className="card p-4 md:p-6 overflow-x-auto">
                             <h3 className="font-heading font-bold text-lg text-parchment mb-4">
                                 {t('fundReleaseHistory')}
                             </h3>
@@ -452,7 +452,7 @@ export default function ProjectDetail() {
                     )}
 
                     {/* Public Feedback */}
-                    <div className="card p-6">
+                    <div className="card p-4 md:p-6">
                         <h3 className="font-heading font-bold text-lg text-parchment mb-4">
                             {t('publicReviews')}
                         </h3>
@@ -505,9 +505,9 @@ export default function ProjectDetail() {
                 </div>
 
                 {/* Right sidebar */}
-                <div className="space-y-6">
+                <div className="space-y-4 md:space-y-6">
                     {/* Documents */}
-                    <div className="card p-6">
+                    <div className="card p-4 md:p-6">
                         <h3 className="font-heading font-bold text-lg text-parchment mb-4">
                             📄 {t('documentsIPFS')}
                         </h3>
@@ -528,7 +528,7 @@ export default function ProjectDetail() {
 
                     {/* Budget Allocations */}
                     {p.budgetAllocations?.length > 0 && (
-                        <div className="card p-6">
+                        <div className="card p-4 md:p-6">
                             <h3 className="font-heading font-bold text-lg text-parchment mb-4">
                                 💰 {t('budgetAllocationsTitle')}
                             </h3>
@@ -569,7 +569,7 @@ export default function ProjectDetail() {
                     )}
 
                     {/* Solana On-Chain Info */}
-                    <div className="card p-6">
+                    <div className="card p-4 md:p-6">
                         <h3 className="font-heading font-bold text-lg text-parchment mb-4">
                             ⛓️ {t('onChainData')}
                         </h3>

@@ -100,16 +100,16 @@ export default function Dashboard() {
         : '0.0';
 
     return (
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+        <div className="max-w-7xl mx-auto px-4 md:px-6 lg:px-8 py-6 md:py-8 lg:py-12">
             {/* Header with subtle golden radial backdrop */}
-            <div className="mb-10 relative">
+            <div className="mb-6 md:mb-10 relative">
                 <div className="absolute -top-20 left-1/2 -translate-x-1/2 w-[600px] h-[300px] bg-golden-radial opacity-40 pointer-events-none" />
                 <h1 className="section-title text-parchment relative z-10">{t('dashboardTitle')}</h1>
                 <p className="section-subtitle relative z-10">{t('dashboardSubtitle')}</p>
             </div>
 
             {/* Overview Cards — glass-card style with semantic top-border colors */}
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4 mb-12">
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3 md:gap-4 mb-8 md:mb-12">
                 {[
                     { label: t('totalBudgetLabel'), value: formatNPR(overview.totalBudget), borderColor: 'border-t-golden', icon: '💰' },
                     { label: t('allocated'), value: formatNPR(overview.totalAllocated), borderColor: 'border-t-bronze', icon: '📊' },
@@ -120,21 +120,21 @@ export default function Dashboard() {
                 ].map((stat, i) => (
                     <div
                         key={i}
-                        className={`glass-card p-4 relative overflow-hidden group hover:-translate-y-1 transition-all border-t-[3px] ${stat.borderColor}`}
+                        className={`glass-card p-3 md:p-4 relative overflow-hidden group hover:-translate-y-1 transition-all border-t-[3px] ${stat.borderColor}`}
                     >
                         <div className="flex items-center gap-1.5 mb-1.5">
                             <span className="text-base">{stat.icon}</span>
                             <p className="text-xs text-parchment-ghost font-medium">{stat.label}</p>
                         </div>
-                        <p className="text-lg md:text-xl font-heading font-bold text-parchment tabular-nums">{stat.value}</p>
+                        <p className="text-base md:text-lg lg:text-xl font-heading font-bold text-parchment tabular-nums">{stat.value}</p>
                     </div>
                 ))}
             </div>
 
             {/* Charts — deeper card styling */}
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-12">
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 md:gap-6 lg:gap-8 mb-8 md:mb-12">
                 {/* Province Spending */}
-                <div className="lg:col-span-2 glass-card p-6">
+                <div className="lg:col-span-2 glass-card p-4 md:p-6">
                     <h3 className="font-heading font-bold text-lg mb-4 text-parchment flex items-center gap-2">
                         <span className="w-1 h-5 rounded bg-golden inline-block"></span>
                         {t('provinceSpending')}
@@ -180,7 +180,7 @@ export default function Dashboard() {
                 </div>
 
                 {/* Sector Distribution */}
-                <div className="glass-card p-6">
+                <div className="glass-card p-4 md:p-6">
                     <h3 className="font-heading font-bold text-lg mb-4 text-parchment flex items-center gap-2">
                         <span className="w-1 h-5 rounded bg-bronze inline-block"></span>
                         {t('sectorDistribution')}
@@ -218,7 +218,7 @@ export default function Dashboard() {
             </div>
 
             {/* Budget Utilization Bar — semantic color coding */}
-            <div className="glass-card p-6 mb-12">
+            <div className="glass-card p-4 md:p-6 mb-8 md:mb-12">
                 <h3 className="font-heading font-bold text-lg mb-6 text-parchment flex items-center gap-2">
                     <span className="w-1 h-5 rounded bg-golden inline-block"></span>
                     {t('overallBudgetUtilization')}

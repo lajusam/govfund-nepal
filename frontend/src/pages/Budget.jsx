@@ -160,10 +160,10 @@ export default function Budget() {
     const totalGrants = sortedProvinces.reduce((s, p) => s + p.grant, 0);
 
     return (
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+        <div className="max-w-7xl mx-auto px-4 md:px-6 lg:px-8 py-6 md:py-8 lg:py-12">
             {/* ═══ Page Header ═══ */}
             <motion.div
-                className="mb-10 relative"
+                className="mb-6 md:mb-10 relative"
                 initial="hidden" animate="visible" variants={slideUp}
             >
                 <div className="absolute -top-20 left-1/2 -translate-x-1/2 w-[600px] h-[300px] bg-golden-radial opacity-40 pointer-events-none" />
@@ -185,7 +185,7 @@ export default function Budget() {
             </motion.div>
 
             {/* ═══ Summary Stat Cards ═══ */}
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-12">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 md:gap-4 mb-8 md:mb-12">
                 {[
                     {
                         label: t('budgetTotalAllocated'),
@@ -211,7 +211,7 @@ export default function Budget() {
                 ].map((stat, i) => (
                     <motion.div
                         key={i}
-                        className={`glass-card p-5 relative overflow-hidden group hover:-translate-y-1 transition-all border-t-[3px] ${stat.borderColor}`}
+                        className={`glass-card p-4 md:p-5 relative overflow-hidden group hover:-translate-y-1 transition-all border-t-[3px] ${stat.borderColor}`}
                         variants={scaleIn} initial="hidden" animate="visible" custom={i}
                     >
                         <div className="flex items-center gap-2 mb-2">
@@ -226,14 +226,14 @@ export default function Budget() {
             </div>
 
             {/* ═══ Tab Selector ═══ */}
-            <div className="flex flex-wrap gap-2 mb-8">
+            <div className="flex overflow-x-auto gap-2 mb-6 md:mb-8 pb-1 -mx-4 px-4 md:mx-0 md:px-0 md:flex-wrap">
                 {tabs.map((tab) => (
                     <motion.button
                         key={tab.id}
                         whileHover={{ scale: 1.05, y: -2 }}
                         whileTap={{ scale: 0.95 }}
                         onClick={() => setActiveTab(tab.id)}
-                        className={`px-4 py-2.5 rounded-xl text-sm font-medium transition-all relative ${
+                        className={`px-4 py-2.5 rounded-xl text-sm font-medium transition-all relative whitespace-nowrap ${
                             activeTab === tab.id
                                 ? 'bg-gradient-to-r from-golden to-golden-600 text-basalt font-bold shadow-golden-sm'
                                 : 'bg-earth text-parchment-muted hover:bg-earth-light hover:text-amber-glow border border-earth-border'
@@ -262,12 +262,12 @@ export default function Budget() {
                 >
                     {/* ──── Total Budget Split ──── */}
                     {activeTab === 'split' && (
-                        <div className="glass-card p-6 mb-8">
-                            <h3 className="font-heading font-bold text-lg mb-5 text-parchment flex items-center gap-2">
+                        <div className="glass-card p-4 md:p-6 mb-6 md:mb-8">
+                            <h3 className="font-heading font-bold text-base md:text-lg mb-4 md:mb-5 text-parchment flex items-center gap-2">
                                 <span className="w-1 h-5 rounded bg-golden inline-block"></span>
                                 {t('budgetSplitTitle')}
                             </h3>
-                            <div className="grid grid-cols-1 lg:grid-cols-5 gap-6">
+                            <div className="grid grid-cols-1 lg:grid-cols-5 gap-4 md:gap-6">
                                 {/* Left — Chart (60%) */}
                                 <div className="lg:col-span-3 flex items-center justify-center">
                                     <div className="w-full max-w-sm">
@@ -334,12 +334,12 @@ export default function Budget() {
 
                     {/* ──── Province Grants ──── */}
                     {activeTab === 'provinces' && (
-                        <div className="glass-card p-6 mb-8">
-                            <h3 className="font-heading font-bold text-lg mb-5 text-parchment flex items-center gap-2">
+                        <div className="glass-card p-4 md:p-6 mb-6 md:mb-8">
+                            <h3 className="font-heading font-bold text-base md:text-lg mb-4 md:mb-5 text-parchment flex items-center gap-2">
                                 <span className="w-1 h-5 rounded bg-golden inline-block"></span>
                                 {t('budgetProvinceGrants')}
                             </h3>
-                            <div className="grid grid-cols-1 lg:grid-cols-5 gap-6">
+                            <div className="grid grid-cols-1 lg:grid-cols-5 gap-4 md:gap-6">
                                 {/* Left — Chart */}
                                 <div className="lg:col-span-3">
                                     {provinceChartData && (
@@ -398,12 +398,12 @@ export default function Budget() {
 
                     {/* ──── Ministry Breakdown ──── */}
                     {activeTab === 'ministries' && (
-                        <div className="glass-card p-6 mb-8">
-                            <h3 className="font-heading font-bold text-lg mb-5 text-parchment flex items-center gap-2">
+                        <div className="glass-card p-4 md:p-6 mb-6 md:mb-8">
+                            <h3 className="font-heading font-bold text-base md:text-lg mb-4 md:mb-5 text-parchment flex items-center gap-2">
                                 <span className="w-1 h-5 rounded bg-golden inline-block"></span>
                                 {t('budgetMinistryBreakdown')}
                             </h3>
-                            <div className="grid grid-cols-1 lg:grid-cols-5 gap-6">
+                            <div className="grid grid-cols-1 lg:grid-cols-5 gap-4 md:gap-6">
                                 {/* Left — Chart */}
                                 <div className="lg:col-span-3">
                                     {ministryChartData && (
@@ -463,12 +463,12 @@ export default function Budget() {
 
                     {/* ──── Budget Utilization ──── */}
                     {activeTab === 'utilization' && (
-                        <div className="glass-card p-6 mb-8">
-                            <h3 className="font-heading font-bold text-lg mb-5 text-parchment flex items-center gap-2">
+                        <div className="glass-card p-4 md:p-6 mb-6 md:mb-8">
+                            <h3 className="font-heading font-bold text-base md:text-lg mb-4 md:mb-5 text-parchment flex items-center gap-2">
                                 <span className="w-1 h-5 rounded bg-golden inline-block"></span>
                                 {t('budgetUtilization')}
                             </h3>
-                            <div className="grid grid-cols-1 lg:grid-cols-5 gap-6">
+                            <div className="grid grid-cols-1 lg:grid-cols-5 gap-4 md:gap-6">
                                 {/* Left — Progress bars (chart area) */}
                                 <div className="lg:col-span-3 space-y-6">
                                     {data.utilization.map((u, i) => {
@@ -564,7 +564,7 @@ export default function Budget() {
 
             {/* ═══ IPFS Verification Footer ═══ */}
             <motion.div
-                className="glass-card p-6"
+                className="glass-card p-4 md:p-6"
                 variants={slideUp} initial="hidden" animate="visible" custom={6}
             >
                 <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">

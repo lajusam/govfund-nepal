@@ -306,7 +306,7 @@ function BudgetSummaryPanel({ totalBudget, t }) {
   ];
 
   return (
-    <AnimatedCard className="p-6 sticky top-24">
+    <AnimatedCard className="p-4 md:p-6 lg:sticky lg:top-24">
       <h3 className="font-heading font-bold text-lg text-parchment mb-6 flex items-center gap-2">
         📈 {t('budgetSummary')}
       </h3>
@@ -1330,10 +1330,10 @@ export default function Admin() {
       initial="hidden"
       animate="visible"
       exit="exit"
-      className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12"
+      className="max-w-7xl mx-auto px-4 md:px-6 lg:px-8 py-6 md:py-8 lg:py-12"
     >
       {/* ── Header ── */}
-      <motion.div variants={cardVariants} className="mb-10">
+      <motion.div variants={cardVariants} className="mb-6 md:mb-10">
         <div className="flex flex-wrap items-center justify-between gap-4 mb-2">
           <h1 className="section-title text-parchment">{t('adminDashboard')}</h1>
           <LanguageToggle />
@@ -1408,7 +1408,7 @@ export default function Admin() {
       </AnimatePresence>
 
       {/* ── Tab navigation ── */}
-      <motion.div variants={stagger} initial="hidden" animate="visible" className="flex flex-wrap gap-2 mb-8">
+      <motion.div variants={stagger} initial="hidden" animate="visible" className="flex overflow-x-auto gap-2 mb-6 md:mb-8 pb-1 -mx-4 px-4 md:mx-0 md:px-0 md:flex-wrap">
         {tabs.map((tab) => (
           <motion.button
             key={tab.id}
@@ -1417,7 +1417,7 @@ export default function Admin() {
             whileTap={{ scale: 0.95 }}
             onClick={() => setActiveTab(tab.id)}
             disabled={!programReady && tab.id !== 'create'}
-            className={`px-4 py-2.5 rounded-xl text-sm font-medium transition-all relative ${
+            className={`px-4 py-2.5 rounded-xl text-sm font-medium transition-all relative whitespace-nowrap ${
               activeTab === tab.id
                 ? 'bg-gradient-to-r from-golden to-golden-600 text-basalt font-bold shadow-golden-sm'
                 : 'bg-earth text-parchment-muted hover:bg-earth-light hover:text-amber-glow border border-earth-border'
@@ -1446,11 +1446,11 @@ export default function Admin() {
         >
           {/* ────────────── CREATE PROJECT ────────────── */}
           {activeTab === 'create' && (
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 md:gap-6 lg:gap-8">
               {/* Form (left 2 cols) */}
               <div className="lg:col-span-2">
-                <AnimatedCard className="p-6">
-                  <h3 className="font-heading font-bold text-lg text-parchment mb-6 flex items-center gap-2">
+                <AnimatedCard className="p-4 md:p-6">
+                  <h3 className="font-heading font-bold text-lg text-parchment mb-4 md:mb-6 flex items-center gap-2">
                     📋 {t('createTitle')}
                   </h3>
                   <form onSubmit={handleCreate} className="space-y-4">
@@ -1615,8 +1615,8 @@ export default function Admin() {
           {/* ────────────── ALLOCATE BUDGET ────────────── */}
           {activeTab === 'allocate' && (
             <div className="max-w-2xl">
-              <AnimatedCard className="p-6">
-                <h3 className="font-heading font-bold text-lg text-parchment mb-6 flex items-center gap-2">
+              <AnimatedCard className="p-4 md:p-6">
+                <h3 className="font-heading font-bold text-lg text-parchment mb-4 md:mb-6 flex items-center gap-2">
                   💵 {t('allocateTitle')}
                 </h3>
                 <form onSubmit={handleAllocate} className="space-y-4">
@@ -1641,8 +1641,8 @@ export default function Admin() {
           {/* ────────────── RELEASE FUNDS ────────────── */}
           {activeTab === 'release' && (
             <div className="max-w-2xl">
-              <AnimatedCard className="p-6">
-                <h3 className="font-heading font-bold text-lg text-parchment mb-6 flex items-center gap-2">
+              <AnimatedCard className="p-4 md:p-6">
+                <h3 className="font-heading font-bold text-lg text-parchment mb-4 md:mb-6 flex items-center gap-2">
                   📤 {t('releaseTitle')}
                 </h3>
                 <form onSubmit={handleRelease} className="space-y-4">
@@ -1667,8 +1667,8 @@ export default function Admin() {
           {/* ────────────── MILESTONE UPDATE ────────────── */}
           {activeTab === 'milestone' && (
             <div className="max-w-2xl">
-              <AnimatedCard className="p-6">
-                <h3 className="font-heading font-bold text-lg text-parchment mb-6 flex items-center gap-2">
+              <AnimatedCard className="p-4 md:p-6">
+                <h3 className="font-heading font-bold text-lg text-parchment mb-4 md:mb-6 flex items-center gap-2">
                   🎯 {t('milestoneTitle')}
                 </h3>
                 <form onSubmit={handleMilestone} className="space-y-4">
@@ -1709,8 +1709,8 @@ export default function Admin() {
           {/* ────────────── DOCUMENT RECORD ────────────── */}
           {activeTab === 'document' && (
             <div className="max-w-2xl">
-              <AnimatedCard className="p-6">
-                <h3 className="font-heading font-bold text-lg text-parchment mb-6 flex items-center gap-2">
+              <AnimatedCard className="p-4 md:p-6">
+                <h3 className="font-heading font-bold text-lg text-parchment mb-4 md:mb-6 flex items-center gap-2">
                   📄 {t('documentTitle')}
                 </h3>
                 <form onSubmit={handleDoc} className="space-y-4">
@@ -1851,8 +1851,8 @@ export default function Admin() {
           {/* ────────────── CLOSE PROJECT ────────────── */}
           {activeTab === 'close' && (
             <div className="max-w-2xl">
-              <AnimatedCard className="p-6">
-                <h3 className="font-heading font-bold text-lg text-parchment mb-6 flex items-center gap-2">
+              <AnimatedCard className="p-4 md:p-6">
+                <h3 className="font-heading font-bold text-lg text-parchment mb-4 md:mb-6 flex items-center gap-2">
                   🔒 {t('closeTitle')}
                 </h3>
                 <form onSubmit={handleClose} className="space-y-4">

@@ -130,36 +130,36 @@ export default function Complaints() {
     }
 
     return (
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+        <div className="max-w-6xl mx-auto px-4 md:px-6 lg:px-8 py-6 md:py-8 lg:py-12">
             {/* Header */}
-            <div className="mb-8">
-                <h1 className="text-3xl font-heading font-bold text-parchment mb-2">Citizen Complaints</h1>
+            <div className="mb-6 md:mb-8">
+                <h1 className="text-2xl md:text-3xl font-heading font-bold text-parchment mb-2">Citizen Complaints</h1>
                 <p className="text-parchment-muted">
                     Report corruption, irregularities, and misuse of public funds. All complaints are publicly visible and backed by IPFS evidence.
                 </p>
             </div>
 
             {/* Stats */}
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
-                <div className="card p-4">
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4 mb-6 md:mb-8">
+                <div className="card p-3 md:p-4">
                     <p className="text-xs text-parchment-ghost mb-1">Total Complaints</p>
-                    <p className="text-2xl font-heading font-bold text-parchment">{complaints.length}</p>
+                    <p className="text-xl md:text-2xl font-heading font-bold text-parchment">{complaints.length}</p>
                 </div>
-                <div className="card p-4">
+                <div className="card p-3 md:p-4">
                     <p className="text-xs text-parchment-ghost mb-1">Projects Affected</p>
-                    <p className="text-2xl font-heading font-bold text-amber-glow">
+                    <p className="text-xl md:text-2xl font-heading font-bold text-amber-glow">
                         {new Set(complaints.map(c => c.projectId)).size}
                     </p>
                 </div>
-                <div className="card p-4">
+                <div className="card p-3 md:p-4">
                     <p className="text-xs text-parchment-ghost mb-1">Under Investigation</p>
-                    <p className="text-2xl font-heading font-bold text-red-400">
+                    <p className="text-xl md:text-2xl font-heading font-bold text-red-400">
                         {complaints.filter(c => (c.reactions?.support || 0) > 50).length}
                     </p>
                 </div>
-                <div className="card p-4">
+                <div className="card p-3 md:p-4">
                     <p className="text-xs text-parchment-ghost mb-1">Total Evidence Files</p>
-                    <p className="text-2xl font-heading font-bold text-golden">
+                    <p className="text-xl md:text-2xl font-heading font-bold text-golden">
                         {complaints.reduce((sum, c) => sum + (c.evidence?.length || 0), 0)}
                     </p>
                 </div>
@@ -207,12 +207,12 @@ export default function Complaints() {
             {/* Location & Project Filters */}
             <div className="flex items-end gap-3 mb-6 flex-wrap">
                 {/* Province */}
-                <div className="flex flex-col gap-1">
+                <div className="flex flex-col gap-1 w-full sm:w-auto">
                     <label className="text-[10px] text-parchment-ghost uppercase tracking-wider">Province</label>
                     <select
                         value={provinceFilter}
                         onChange={e => handleProvinceChange(e.target.value)}
-                        className="bg-earth border border-earth-border text-parchment text-sm rounded-lg px-3 py-2 focus:border-golden/40 focus:outline-none min-w-[160px]"
+                        className="bg-earth border border-earth-border text-parchment text-sm rounded-lg px-3 py-2 focus:border-golden/40 focus:outline-none w-full sm:min-w-[160px]"
                     >
                         <option value="all">All Provinces</option>
                         {PROVINCES.map(p => (
@@ -222,12 +222,12 @@ export default function Complaints() {
                 </div>
 
                 {/* District */}
-                <div className="flex flex-col gap-1">
+                <div className="flex flex-col gap-1 w-full sm:w-auto">
                     <label className="text-[10px] text-parchment-ghost uppercase tracking-wider">District</label>
                     <select
                         value={districtFilter}
                         onChange={e => handleDistrictChange(e.target.value)}
-                        className="bg-earth border border-earth-border text-parchment text-sm rounded-lg px-3 py-2 focus:border-golden/40 focus:outline-none min-w-[160px]"
+                        className="bg-earth border border-earth-border text-parchment text-sm rounded-lg px-3 py-2 focus:border-golden/40 focus:outline-none w-full sm:min-w-[160px]"
                     >
                         <option value="all">All Districts</option>
                         {availableDistricts.map(d => (
@@ -237,12 +237,12 @@ export default function Complaints() {
                 </div>
 
                 {/* Project */}
-                <div className="flex flex-col gap-1">
+                <div className="flex flex-col gap-1 w-full sm:w-auto">
                     <label className="text-[10px] text-parchment-ghost uppercase tracking-wider">Project</label>
                     <select
                         value={projectFilter}
                         onChange={e => setProjectFilter(e.target.value)}
-                        className="bg-earth border border-earth-border text-parchment text-sm rounded-lg px-3 py-2 focus:border-golden/40 focus:outline-none min-w-[200px] max-w-[300px]"
+                        className="bg-earth border border-earth-border text-parchment text-sm rounded-lg px-3 py-2 focus:border-golden/40 focus:outline-none w-full sm:min-w-[200px] sm:max-w-[300px]"
                     >
                         <option value="all">All Projects</option>
                         {availableProjects.map(p => (

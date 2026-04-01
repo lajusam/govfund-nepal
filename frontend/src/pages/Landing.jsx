@@ -71,7 +71,7 @@ function AnimatedCounter({ value, label, icon, suffix = '' }) {
             variants={scaleIn}
             className="relative group"
         >
-            <div className="card p-6 text-center hover:-translate-y-2 transition-all duration-500 hover:border-golden/30 hover:shadow-golden-md">
+                <div className="card p-4 md:p-6 text-center hover:-translate-y-2 transition-all duration-500 hover:border-golden/30 hover:shadow-golden-md">
                 <motion.div
                     className="text-3xl mb-3"
                     whileHover={{ scale: 1.3, rotate: [0, -10, 10, 0] }}
@@ -79,7 +79,7 @@ function AnimatedCounter({ value, label, icon, suffix = '' }) {
                 >
                     {icon}
                 </motion.div>
-                <div className="text-2xl md:text-3xl font-heading font-bold text-parchment mb-1">
+                <div className="text-xl md:text-2xl lg:text-3xl font-heading font-bold text-parchment mb-1">
                     {display}
                 </div>
                 <div className="text-sm text-parchment-muted">{label}</div>
@@ -157,7 +157,7 @@ export default function Landing() {
 
                 <motion.div
                     style={{ y: heroY, opacity: heroOpacity }}
-                    className="relative z-[5] max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24 sm:py-28 flex items-center w-full pointer-events-none"
+                    className="relative z-[5] max-w-7xl mx-auto px-4 md:px-6 lg:px-8 py-16 md:py-24 lg:py-28 flex items-center w-full pointer-events-none"
                 >
                     <motion.div
                         variants={staggerContainer}
@@ -178,7 +178,7 @@ export default function Landing() {
                         </motion.div>
 
                         {/* Kinetic headline */}
-                        <motion.h1 className="text-5xl md:text-6xl lg:text-7xl font-heading font-extrabold leading-[1.05] mb-8">
+                        <motion.h1 className="text-3xl sm:text-4xl md:text-6xl lg:text-7xl font-heading font-extrabold leading-[1.05] mb-6 md:mb-8">
                             <motion.span
                                 variants={fadeUp}
                                 custom={1}
@@ -212,7 +212,7 @@ export default function Landing() {
                         <motion.p
                             variants={fadeUp}
                             custom={4}
-                            className="text-lg md:text-xl text-white/80 max-w-lg mb-10 leading-relaxed on-image-text-sm"
+                            className="text-base md:text-lg lg:text-xl text-white/80 max-w-lg mb-8 md:mb-10 leading-relaxed on-image-text-sm"
                         >
                             {t('heroSubtitle')}
                                 <span className="font-semibold text-gov-amber">{t('technicallyRestricted')}</span>
@@ -220,12 +220,12 @@ export default function Landing() {
                         </motion.p>
 
                         {/* CTA buttons */}
-                        <motion.div variants={fadeUp} custom={5} className="flex flex-wrap gap-4 mb-10">
+                        <motion.div variants={fadeUp} custom={5} className="flex flex-col sm:flex-row flex-wrap gap-3 sm:gap-4 mb-8 md:mb-10">
                             <Link to="/dashboard">
                                 <motion.button
                                     whileHover={{ scale: 1.05, boxShadow: '0 20px 40px rgba(255,184,28,0.40)' }}
                                     whileTap={{ scale: 0.97 }}
-                                    className="btn-primary text-lg px-8 py-3"
+                                    className="btn-primary text-base md:text-lg px-6 md:px-8 py-3 w-full sm:w-auto text-center"
                                 >
                                     {t('viewDashboard')}
                                 </motion.button>
@@ -234,7 +234,7 @@ export default function Landing() {
                                 <motion.button
                                     whileHover={{ scale: 1.05 }}
                                     whileTap={{ scale: 0.97 }}
-                                    className="inline-flex items-center gap-2 px-8 py-3 rounded-lg text-white border-2 border-white/40 hover:bg-white/10 hover:border-white/70 transition-all font-semibold text-lg"
+                                    className="inline-flex items-center justify-center gap-2 px-6 md:px-8 py-3 rounded-lg text-white border-2 border-white/40 hover:bg-white/10 hover:border-white/70 transition-all font-semibold text-base md:text-lg w-full sm:w-auto"
                                 >
                                     {t('exploreProjectsBtn')}
                                 </motion.button>
@@ -242,7 +242,7 @@ export default function Landing() {
                         </motion.div>
 
                         {/* Trust badges */}
-                        <motion.div variants={fadeUp} custom={6} className="flex flex-wrap items-center gap-6 text-sm text-white/65">
+                        <motion.div variants={fadeUp} custom={6} className="flex flex-col sm:flex-row flex-wrap items-start sm:items-center gap-3 sm:gap-6 text-sm text-white/65">
                             {[t('immutableRecords'), t('publicVerification'), t('noTampering')].map((text, i) => (
                                 <motion.div
                                     key={text}
@@ -281,7 +281,7 @@ export default function Landing() {
                 STATS SECTION — Scroll-triggered counters
                ══════════════════════════════════════════ */}
             <motion.section
-                className="py-24 bg-earth relative overflow-hidden"
+                className="py-12 md:py-16 lg:py-24 bg-earth relative overflow-hidden"
                 initial="hidden"
                 whileInView="visible"
                 viewport={{ once: true, amount: 0.3 }}
@@ -296,19 +296,19 @@ export default function Landing() {
                     transition={{ duration: 1.2, ease: [0.22, 1, 0.36, 1] }}
                 />
 
-                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                    <motion.div variants={fadeUp} className="text-center mb-16">
-                        <h2 className="text-3xl md:text-4xl font-heading font-bold text-parchment mb-3">
+                <div className="max-w-7xl mx-auto px-4 md:px-6 lg:px-8">
+                    <motion.div variants={fadeUp} className="text-center mb-8 md:mb-16">
+                        <h2 className="text-2xl md:text-3xl lg:text-4xl font-heading font-bold text-parchment mb-3">
                             {t('transparencyGlance')}
                         </h2>
-                        <p className="text-parchment-muted text-lg">
+                        <p className="text-parchment-muted text-base md:text-lg">
                             {t('realtimeBlockchainData')}
                         </p>
                     </motion.div>
 
                     <motion.div
                         variants={staggerContainer}
-                        className="grid grid-cols-2 md:grid-cols-4 gap-6"
+                        className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-6"
                     >
                         <AnimatedCounter label={t('totalBudgetLabel')} value={stats.totalBudget ? formatNPR(stats.totalBudget).replace('NPR ', '') : '0'} icon="💰" />
                         <AnimatedCounter label={t('fundsReleasedLabel')} value={stats.totalReleased ? formatNPR(stats.totalReleased).replace('NPR ', '') : '0'} icon="📤" />
@@ -322,23 +322,23 @@ export default function Landing() {
                 HOW IT WORKS — Staggered card animation
                ══════════════════════════════════════════ */}
             <motion.section
-                className="py-24 bg-basalt relative"
+                className="py-12 md:py-16 lg:py-24 bg-basalt relative"
                 initial="hidden"
                 whileInView="visible"
                 viewport={{ once: true, amount: 0.2 }}
                 variants={staggerContainer}
             >
-                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                    <motion.div variants={fadeUp} className="text-center mb-16">
-                        <h2 className="text-3xl md:text-4xl font-heading font-bold text-white mb-3">
+                <div className="max-w-7xl mx-auto px-4 md:px-6 lg:px-8">
+                    <motion.div variants={fadeUp} className="text-center mb-8 md:mb-16">
+                        <h2 className="text-2xl md:text-3xl lg:text-4xl font-heading font-bold text-white mb-3">
                             {t('howItWorks')}
                         </h2>
-                        <p className="text-white/70 text-lg">
+                        <p className="text-white/70 text-base md:text-lg">
                             {t('blockchainSteps')}
                         </p>
                     </motion.div>
 
-                    <motion.div variants={staggerContainer} className="grid grid-cols-1 md:grid-cols-4 gap-8">
+                    <motion.div variants={staggerContainer} className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-8">
                         {[
                             {
                                 step: '01', title: t('stepProjectCreated'),
@@ -367,9 +367,9 @@ export default function Landing() {
                                 custom={i}
                                 whileHover={{ y: -12, transition: { duration: 0.3 } }}
                             >
-                                <div className={`card p-8 text-center h-full bg-gradient-to-b ${item.color}`}>
+                                <div className={`card p-4 md:p-6 lg:p-8 text-center h-full bg-gradient-to-b ${item.color}`}>
                                     <motion.div
-                                        className="text-5xl mb-5"
+                                        className="text-3xl md:text-5xl mb-3 md:mb-5"
                                         whileHover={{ scale: 1.2, rotate: [0, -5, 5, 0] }}
                                         transition={{ duration: 0.4 }}
                                     >
@@ -398,20 +398,20 @@ export default function Landing() {
                 WHY BLOCKCHAIN — Split layout with animations
                ══════════════════════════════════════════ */}
             <motion.section
-                className="py-24 bg-earth"
+                className="py-12 md:py-16 lg:py-24 bg-earth"
                 initial="hidden"
                 whileInView="visible"
                 viewport={{ once: true, amount: 0.3 }}
             >
-                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
+                <div className="max-w-7xl mx-auto px-4 md:px-6 lg:px-8 grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-16 items-center">
                     <motion.div variants={slideInLeft}>
                         <span className="text-sm font-semibold text-golden uppercase tracking-wider mb-3 block">
                             {t('whyBlockchain')}
                         </span>
-                        <h2 className="text-3xl md:text-4xl font-heading font-bold text-parchment mb-6">
+                        <h2 className="text-2xl md:text-3xl lg:text-4xl font-heading font-bold text-parchment mb-4 md:mb-6">
                             {t('corruptionTitle')}
                         </h2>
-                        <p className="text-parchment-dim mb-8 leading-relaxed text-lg">
+                        <p className="text-parchment-dim mb-6 md:mb-8 leading-relaxed text-base md:text-lg">
                             {t('corruptionDesc')}
                         </p>
 
@@ -527,7 +527,7 @@ export default function Landing() {
                 CTA SECTION — Full-bleed gradient
                ══════════════════════════════════════════ */}
             <motion.section
-                className="relative py-28 overflow-hidden"
+                className="relative py-12 md:py-20 lg:py-28 overflow-hidden"
                 initial="hidden"
                 whileInView="visible"
                 viewport={{ once: true, amount: 0.4 }}
@@ -550,7 +550,7 @@ export default function Landing() {
                     <motion.h2
                         variants={fadeUp}
                         custom={0}
-                        className="text-3xl md:text-5xl font-heading font-bold text-white mb-6"
+                        className="text-2xl md:text-4xl lg:text-5xl font-heading font-bold text-white mb-4 md:mb-6"
                     >
                         {t('readyToExplore')}
                         <br />
@@ -562,7 +562,7 @@ export default function Landing() {
                     <motion.p
                         variants={fadeUp}
                         custom={1}
-                        className="text-white/75 text-lg mb-10 max-w-2xl mx-auto"
+                        className="text-white/75 text-base md:text-lg mb-8 md:mb-10 max-w-2xl mx-auto"
                     >
                         {t('connectWalletCTA')}
                     </motion.p>
@@ -572,7 +572,7 @@ export default function Landing() {
                             <motion.button
                                 whileHover={{ scale: 1.05, boxShadow: '0 25px 50px rgba(255,184,28,0.45)' }}
                                 whileTap={{ scale: 0.97 }}
-                                className="btn-primary text-lg px-10 py-4"
+                                className="btn-primary text-base md:text-lg px-8 md:px-10 py-3 md:py-4"
                             >
                                 {t('exploreAllProjects')}
                             </motion.button>
