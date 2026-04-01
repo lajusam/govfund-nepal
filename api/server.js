@@ -33,6 +33,7 @@ const adminRoutes     = require('../backend/src/routes/admin');
 const feedbackRoutes  = require('../backend/src/routes/feedback');
 const ipfsRoutes      = require('../backend/src/routes/ipfs');
 const complaintRoutes = require('../backend/src/routes/complaints');
+const budgetRoutes    = require('../backend/src/routes/budget');
 const Project         = require('../backend/src/models/Project');
 
 // ── MongoDB connection cache ────────────────────────────────────────────────
@@ -123,6 +124,7 @@ app.get('/api', (req, res) => {
       '/api/health',
       '/api/ipfs',
       '/api/complaints',
+      '/api/budget',
       '/api/demo-projects',
     ],
   });
@@ -156,6 +158,7 @@ app.use('/api/admin',     adminRoutes);
 app.use('/api/feedback',  feedbackRoutes);
 app.use('/api/ipfs',      ipfsRoutes);
 app.use('/api/complaints', complaintRoutes);
+app.use('/api/budget',     budgetRoutes);
 
 // Global error handler
 app.use((err, req, res, _next) => {
