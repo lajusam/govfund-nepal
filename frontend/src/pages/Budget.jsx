@@ -35,7 +35,7 @@ const tabContentVariants = {
 };
 
 // ── Format helpers ───────────────────────────────────────────────────────────
-const fmtNPR = (v) => `NPR ${Number(v).toLocaleString('en-IN')}B`;
+const fmtNPR = (v) => `NPR ${Number(v).toLocaleString('en-IN')} B`;
 
 // ── Utilization color helper ─────────────────────────────────────────────────
 function utilizationColor(pct) {
