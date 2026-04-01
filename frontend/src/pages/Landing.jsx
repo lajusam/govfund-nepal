@@ -157,9 +157,8 @@ export default function Landing() {
 
                 <motion.div
                     style={{ y: heroY, opacity: heroOpacity }}
-                    className="relative z-[5] max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24 sm:py-28 flex items-center justify-start w-full pointer-events-none"
+                    className="relative z-[5] max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24 sm:py-28 flex items-center w-full pointer-events-none"
                 >
-                    {/* Left-aligned text content */}
                     <motion.div
                         variants={staggerContainer}
                         initial="hidden"
@@ -259,7 +258,6 @@ export default function Landing() {
                             ))}
                         </motion.div>
                     </motion.div>
-
 
                 </motion.div>
 

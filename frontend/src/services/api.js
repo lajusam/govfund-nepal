@@ -239,6 +239,46 @@ export async function resolveIPFSUrl(ipfsHash) {
 }
 
 // ═════════════════════════════════════════════════════════════════════════════
+// National Budget routes  (no auth required)
+// ═════════════════════════════════════════════════════════════════════════════
+
+/** GET /api/budget/all — returns all budget sections in one call */
+export async function getBudgetAll() {
+    const data = await safeFetch('/budget/all');
+    return data || null;
+}
+
+/** GET /api/budget/summary — total budget split */
+export async function getBudgetSummary() {
+    const data = await safeFetch('/budget/summary');
+    return data || null;
+}
+
+/** GET /api/budget/provinces — province-wise federal grants */
+export async function getBudgetProvinces() {
+    const data = await safeFetch('/budget/provinces');
+    return data || [];
+}
+
+/** GET /api/budget/ministries — ministry-wise breakdown */
+export async function getBudgetMinistries() {
+    const data = await safeFetch('/budget/ministries');
+    return data || [];
+}
+
+/** GET /api/budget/utilization — allocated vs spent */
+export async function getBudgetUtilization() {
+    const data = await safeFetch('/budget/utilization');
+    return data || [];
+}
+
+/** GET /api/budget/verify — IPFS CID verification */
+export async function getBudgetVerify() {
+    const data = await safeFetch('/budget/verify');
+    return data || { verified: false };
+}
+
+// ═════════════════════════════════════════════════════════════════════════════
 // Complaint routes
 // ═════════════════════════════════════════════════════════════════════════════
 
