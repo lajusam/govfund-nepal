@@ -69,10 +69,10 @@ async function seedBudget() {
         // Seed new data
         const budget = await NationalBudget.create(budgetData);
         console.log(`✅ National Budget seeded for FY ${budget.fiscalYear}`);
-        console.log(`   Total Budget:           ${budget.totalBudget}B NPR`);
-        console.log(`   Recurrent Expenditure:  ${budget.recurrentExpenditure}B NPR`);
-        console.log(`   Capital Expenditure:    ${budget.capitalExpenditure}B NPR`);
-        console.log(`   Financial Management:   ${budget.financialManagement}B NPR`);
+        console.log(`   Total Budget:           ${budget.totalBudget} B NPR`);
+        console.log(`   Recurrent Expenditure:  ${budget.recurrentExpenditure} B NPR`);
+        console.log(`   Capital Expenditure:    ${budget.capitalExpenditure} B NPR`);
+        console.log(`   Financial Management:   ${budget.financialManagement} B NPR`);
         console.log(`   Province Grants:        ${budget.provinceGrants.length} provinces`);
         console.log(`   Ministries:             ${budget.ministries.length} entries`);
         console.log(`   Utilization Records:    ${budget.utilization.length} categories`);
