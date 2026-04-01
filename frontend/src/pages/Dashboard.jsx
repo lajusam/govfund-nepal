@@ -1,77 +1,101 @@
 import React, { useEffect, useState, useMemo } from 'react';
 import { Link } from 'react-router-dom';
-import { getAnalytics, formatNPR } from '../services/api';
+import { motion } from 'framer-motion';
+import {
+    getProjectStats,
+    getProjectsByProvince,
+    getProjectsBySector,
+    getMilestonesSummary,
+    getRecentReleases,
+    getRecentlyUpdatedProjects,
+    formatNPR,
+} from '../services/api';
 import { useLanguage } from '../context/LanguageContext';
 import {
     Chart as ChartJS, CategoryScale, LinearScale, BarElement, ArcElement,
     Title, Tooltip, Legend,
 } from 'chart.js';
 import { Bar, Doughnut } from 'react-chartjs-2';
+import {
+    FolderKanban, Activity, AlertTriangle, CheckCircle2,
+    ArrowUpRight, Clock,
+} from 'lucide-react';
 
 ChartJS.register(CategoryScale, LinearScale, BarElement, ArcElement, Title, Tooltip, Legend);
 
+// ── Framer Motion variants ────────────────────────────────────────────────
+const fadeUp = {
+    hidden: { opacity: 0, y: 24 },
+    visible: (i = 0) => ({
+        opacity: 1,
+        y: 0,
+        transition: { delay: i * 0.08, duration: 0.5, ease: [0.25, 0.46, 0.45, 0.94] },
+    }),
+};
+
+const scaleIn = {
+    hidden: { opacity: 0, scale: 0.92 },
+    visible: {
+        opacity: 1,
+        scale: 1,
+        transition: { duration: 0.5, ease: [0.25, 0.46, 0.45, 0.94] },
+    },
+};
+
 export default function Dashboard() {
-    const [analytics, setAnalytics] = useState(null);
+    const [stats, setStats] = useState(null);
+    const [byProvince, setByProvince] = useState([]);
+    const [bySector, setBySector] = useState([]);
+    const [milestones, setMilestones] = useState([]);
+    const [releases, setReleases] = useState([]);
+    const [recentProjects, setRecentProjects] = useState([]);
     const [loading, setLoading] = useState(true);
     const { t } = useLanguage();
 
     useEffect(() => {
-        getAnalytics().then(data => { setAnalytics(data); setLoading(false); });
+        Promise.all([
+            getProjectStats(),
+            getProjectsByProvince(),
+            getProjectsBySector(),
+            getMilestonesSummary(),
+            getRecentReleases(),
+            getRecentlyUpdatedProjects(),
+        ]).then(([s, bp, bs, ms, rl, rp]) => {
+            setStats(s);
+            setByProvince(bp);
+            setBySector(bs);
+            setMilestones(ms);
+            setReleases(rl);
+            setRecentProjects(rp);
+            setLoading(false);
+        });
     }, []);
 
+    // ── Province horizontal bar chart data ────────────────────────────────
     const provinceChartData = useMemo(() => {
-        if (!analytics) return null;
-        // Earth / Golden palette — harmonized with the cinematic dark theme
-        const colors = [
-            '#FFB81C', // Golden Sun
-            '#8E6F3E', // Bronze
-            '#1E7F4E', // Gov Green
-            '#C2410C', // Civic Orange
-            '#FAD980', // Amber Glow
-            '#A8875A', // Bronze Light
-            '#6E5428', // Bronze Dark
-        ];
+        if (!byProvince.length) return null;
         return {
-            labels: analytics.provinceStats.map(s => s.province),
-            datasets: [
-                {
-                    label: 'Total Budget',
-                    data: analytics.provinceStats.map(s => s.budget),
-                    backgroundColor: colors.map(c => c + '30'),
-                    borderColor: colors,
-                    borderWidth: 2,
-                    borderRadius: 8,
-                    hoverBackgroundColor: colors.map(c => c + '55'),
-                },
-                {
-                    label: 'Released',
-                    data: analytics.provinceStats.map(s => s.released),
-                    backgroundColor: colors.map(c => c + '80'),
-                    borderColor: colors,
-                    borderWidth: 2,
-                    borderRadius: 8,
-                    hoverBackgroundColor: colors.map(c => c + 'BB'),
-                },
-            ],
-        };
-    }, [analytics]);
-
-    const sectorChartData = useMemo(() => {
-        if (!analytics) return null;
-        // Doughnut palette — distinct, high-contrast on dark backgrounds
-        const bgColors = [
-            '#FFB81C', // Golden Sun
-            '#1E7F4E', // Gov Green
-            '#C2410C', // Civic Orange
-            '#8E6F3E', // Bronze
-            '#FAD980', // Amber Glow
-            '#A8875A', // Bronze Light
-        ];
-        return {
-            labels: analytics.sectorStats.map(s => s.sector),
+            labels: byProvince.map(p => p.province),
             datasets: [{
-                data: analytics.sectorStats.map(s => s.budget),
-                backgroundColor: bgColors.map(c => c + 'CC'),
+                label: t('projectsLabel'),
+                data: byProvince.map(p => p.count),
+                backgroundColor: 'rgba(255,184,28,0.7)',
+                borderColor: '#FFB81C',
+                borderWidth: 1,
+                borderRadius: 6,
+                hoverBackgroundColor: 'rgba(255,184,28,0.9)',
+            }],
+        };
+    }, [byProvince, t]);
+
+    // ── Status doughnut chart data ────────────────────────────────────────
+    const statusChartData = useMemo(() => {
+        if (!stats) return null;
+        return {
+            labels: [t('active'), t('delayed'), t('completed')],
+            datasets: [{
+                data: [stats.active, stats.delayed, stats.completed],
+                backgroundColor: ['#1E7F4E', '#C2410C', '#2563EB'],
                 borderColor: '#1A160F',
                 borderWidth: 3,
                 hoverOffset: 8,
@@ -79,7 +103,91 @@ export default function Dashboard() {
                 hoverBorderWidth: 2,
             }],
         };
-    }, [analytics]);
+    }, [stats, t]);
+
+    // ── Sector horizontal bar chart data ──────────────────────────────────
+    const sectorChartData = useMemo(() => {
+        if (!bySector.length) return null;
+        return {
+            labels: bySector.map(s => s.sector),
+            datasets: [{
+                label: t('projectsLabel'),
+                data: bySector.map(s => s.count),
+                backgroundColor: 'rgba(255,184,28,0.7)',
+                borderColor: '#FFB81C',
+                borderWidth: 1,
+                borderRadius: 6,
+                hoverBackgroundColor: 'rgba(255,184,28,0.9)',
+            }],
+        };
+    }, [bySector, t]);
+
+    // ── Shared chart options ──────────────────────────────────────────────
+    const horizontalBarOptions = useMemo(() => ({
+        indexAxis: 'y',
+        responsive: true,
+        plugins: {
+            legend: { display: false },
+            tooltip: {
+                backgroundColor: 'rgba(45,37,24,0.95)',
+                borderColor: 'rgba(142,111,62,0.28)',
+                borderWidth: 1,
+                titleColor: '#F5F1E6',
+                bodyColor: '#C4A96E',
+                padding: 12,
+            },
+        },
+        scales: {
+            x: {
+                ticks: { color: '#C4A96E', font: { size: 11 }, stepSize: 1 },
+                grid: { color: 'rgba(142,111,62,0.18)' },
+                border: { color: 'rgba(142,111,62,0.28)' },
+            },
+            y: {
+                ticks: { color: '#C4A96E', font: { size: 11 } },
+                grid: { display: false },
+                border: { color: 'rgba(142,111,62,0.28)' },
+            },
+        },
+    }), []);
+
+    const doughnutOptions = useMemo(() => ({
+        responsive: true,
+        plugins: {
+            legend: {
+                position: 'bottom',
+                labels: {
+                    padding: 14, usePointStyle: true,
+                    color: '#C4A96E', font: { size: 11 },
+                },
+            },
+            tooltip: {
+                backgroundColor: 'rgba(45,37,24,0.95)',
+                borderColor: 'rgba(142,111,62,0.28)',
+                borderWidth: 1,
+                titleColor: '#F5F1E6',
+                bodyColor: '#C4A96E',
+                padding: 12,
+            },
+        },
+        cutout: '62%',
+    }), []);
+
+    // ── Helpers ───────────────────────────────────────────────────────────
+    const progressColor = (pct) => {
+        if (pct >= 75) return '#1E7F4E';
+        if (pct >= 40) return '#FFB81C';
+        return '#C2410C';
+    };
+
+    const statusBadge = (status) => {
+        switch (status) {
+            case 'Active':    return 'bg-[#1E7F4E]/20 text-[#1E7F4E]';
+            case 'Completed': return 'bg-[#2563EB]/20 text-[#2563EB]';
+            case 'Delayed':   return 'bg-[#C2410C]/20 text-[#C2410C]';
+            default:          return 'bg-[#8E6F3E]/20 text-[#8E6F3E]';
+        }
+    };
 
     if (loading) {
         return (
@@ -89,15 +197,12 @@ export default function Dashboard() {
         );
     }
 
-    const { overview } = analytics;
-
-    // Budget semantic colors: allocated vs released vs remaining
-    const allocPct = overview.totalBudget > 0
-        ? ((overview.totalAllocated / overview.totalBudget) * 100).toFixed(1)
-        : '0.0';
-    const releasePct = overview.totalAllocated > 0
-        ? ((overview.totalReleased / overview.totalAllocated) * 100).toFixed(1)
-        : '0.0';
+    const statCards = [
+        { label: t('totalProjectsLabel'),      value: stats?.total ?? 0,     icon: FolderKanban,  accent: '#FFB81C' },
+        { label: t('activeProjectsOverview'),   value: stats?.active ?? 0,    icon: Activity,      accent: '#1E7F4E' },
+        { label: t('delayedProjectsLabel'),     value: stats?.delayed ?? 0,   icon: AlertTriangle, accent: '#C2410C' },
+        { label: t('completedProjectsLabel'),   value: stats?.completed ?? 0, icon: CheckCircle2,  accent: '#1E7F4E' },
+    ];
 
     return (
         <div className="max-w-7xl mx-auto px-4 md:px-6 lg:px-8 py-6 md:py-8 lg:py-12">
@@ -108,189 +213,175 @@ export default function Dashboard() {
                 <p className="section-subtitle relative z-10">{t('dashboardSubtitle')}</p>
             </div>
 
-            {/* Overview Cards — glass-card style with semantic top-border colors */}
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3 md:gap-4 mb-8 md:mb-12">
-                {[
-                    { label: t('totalBudgetLabel'), value: formatNPR(overview.totalBudget), borderColor: 'border-t-golden', icon: '💰' },
-                    { label: t('allocated'), value: formatNPR(overview.totalAllocated), borderColor: 'border-t-bronze', icon: '📊' },
-                    { label: t('released'), value: formatNPR(overview.totalReleased), borderColor: 'border-t-gov-green', icon: '💵' },
-                    { label: t('projectsLabel'), value: overview.totalProjects, borderColor: 'border-t-amber-glow', icon: '🏗️' },
-                    { label: t('active'), value: overview.activeProjects, borderColor: 'border-t-gov-green', icon: '✅' },
-                    { label: t('utilization'), value: `${overview.utilizationRate}%`, borderColor: 'border-t-golden', icon: '📈' },
-                ].map((stat, i) => (
-                    <div
-                        key={i}
-                        className={`glass-card p-3 md:p-4 relative overflow-hidden group hover:-translate-y-1 transition-all border-t-[3px] ${stat.borderColor}`}
-                    >
-                        <div className="flex items-center gap-1.5 mb-1.5">
-                            <span className="text-base">{stat.icon}</span>
-                            <p className="text-xs text-parchment-ghost font-medium">{stat.label}</p>
-                        </div>
-                        <p className="text-base md:text-lg lg:text-xl font-heading font-bold text-parchment tabular-nums">{stat.value}</p>
-                    </div>
-                ))}
+            {/* ─── A) Top Stat Cards ─────────────────────────────────────────── */}
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4 mb-8 md:mb-12">
+                {statCards.map((card, i) => {
+                    const Icon = card.icon;
+                    return (
+                        <motion.div
+                            key={card.label}
+                            custom={i}
+                            variants={fadeUp}
+                            initial="hidden"
+                            animate="visible"
+                            className="glass-card p-3 md:p-4 relative overflow-hidden group hover:-translate-y-1 transition-all border-t-[3px]"
+                            style={{ borderTopColor: card.accent }}
+                        >
+                            <div className="flex items-center gap-1.5 mb-1.5">
+                                <Icon size={16} style={{ color: card.accent }} />
+                                <p className="text-xs text-parchment-ghost font-medium">{card.label}</p>
+                            </div>
+                            <p className="text-base md:text-lg lg:text-xl font-heading font-bold text-parchment tabular-nums">
+                                {card.value}
+                            </p>
+                        </motion.div>
+                    );
+                })}
             </div>
 
-            {/* Charts — deeper card styling */}
+            {/* ─── B & C) Province Bar + Status Doughnut ─────────────────────── */}
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 md:gap-6 lg:gap-8 mb-8 md:mb-12">
-                {/* Province Spending */}
-                <div className="lg:col-span-2 glass-card p-4 md:p-6">
+                {/* B) Province-wise Project Distribution */}
+                <motion.div variants={scaleIn} initial="hidden" animate="visible" className="lg:col-span-2 glass-card p-4 md:p-6">
                     <h3 className="font-heading font-bold text-lg mb-4 text-parchment flex items-center gap-2">
                         <span className="w-1 h-5 rounded bg-golden inline-block"></span>
-                        {t('provinceSpending')}
+                        {t('projectsByProvince')}
                     </h3>
-                    {provinceChartData && (
-                        <Bar
-                            data={provinceChartData}
-                            options={{
-                                responsive: true,
-                                plugins: {
-                                    legend: {
-                                        position: 'top',
-                                        labels: { color: '#C4A96E', padding: 14, usePointStyle: true, font: { size: 12 } },
-                                    },
-                                    tooltip: {
-                                        backgroundColor: 'rgba(45,37,24,0.95)',
-                                        borderColor: 'rgba(142,111,62,0.28)',
-                                        borderWidth: 1,
-                                        titleColor: '#F5F1E6',
-                                        bodyColor: '#C4A96E',
-                                        padding: 12,
-                                        boxShadow: '0 4px 16px rgba(13,11,7,0.25)',
-                                        callbacks: {
-                                            label: (ctx) => ` ${ctx.dataset.label}: ${formatNPR(ctx.raw)}`,
-                                        },
-                                    },
-                                },
-                                scales: {
-                                    y: {
-                                        ticks: { callback: (v) => formatNPR(v), color: '#C4A96E', font: { size: 11 } },
-                                        grid: { color: 'rgba(142,111,62,0.18)' },
-                                        border: { color: 'rgba(142,111,62,0.28)' },
-                                    },
-                                    x: {
-                                        grid: { display: false },
-                                        ticks: { color: '#C4A96E', font: { size: 11 } },
-                                        border: { color: 'rgba(142,111,62,0.28)' },
-                                    },
-                                },
-                            }}
-                        />
-                    )}
-                </div>
+                    {provinceChartData && <Bar data={provinceChartData} options={horizontalBarOptions} />}
+                </motion.div>
 
-                {/* Sector Distribution */}
-                <div className="glass-card p-4 md:p-6">
+                {/* C) Project Status Breakdown */}
+                <motion.div variants={scaleIn} initial="hidden" animate="visible" className="glass-card p-4 md:p-6">
                     <h3 className="font-heading font-bold text-lg mb-4 text-parchment flex items-center gap-2">
                         <span className="w-1 h-5 rounded bg-bronze inline-block"></span>
-                        {t('sectorDistribution')}
+                        {t('projectStatusBreakdown')}
                     </h3>
-                    {sectorChartData && (
-                        <Doughnut
-                            data={sectorChartData}
-                            options={{
-                                responsive: true,
-                                plugins: {
-                                    legend: {
-                                        position: 'bottom',
-                                        labels: {
-                                            padding: 14, usePointStyle: true,
-                                            color: '#C4A96E', font: { size: 11 },
-                                        },
-                                    },
-                                    tooltip: {
-                                        backgroundColor: 'rgba(45,37,24,0.95)',
-                                        borderColor: 'rgba(142,111,62,0.28)',
-                                        borderWidth: 1,
-                                        titleColor: '#F5F1E6',
-                                        bodyColor: '#C4A96E',
-                                        padding: 12,
-                                        callbacks: {
-                                            label: (ctx) => ` ${ctx.label}: ${formatNPR(ctx.raw)}`,
-                                        },
-                                    },
-                                },
-                                cutout: '62%',
-                            }}
-                        />
-                    )}
-                </div>
+                    {statusChartData && <Doughnut data={statusChartData} options={doughnutOptions} />}
+                </motion.div>
             </div>
 
-            {/* Budget Utilization Bar — semantic color coding */}
-            <div className="glass-card p-4 md:p-6 mb-8 md:mb-12">
-                <h3 className="font-heading font-bold text-lg mb-6 text-parchment flex items-center gap-2">
+            {/* ─── D) Sector Distribution ────────────────────────────────────── */}
+            <motion.div variants={scaleIn} initial="hidden" animate="visible" className="glass-card p-4 md:p-6 mb-8 md:mb-12">
+                <h3 className="font-heading font-bold text-lg mb-4 text-parchment flex items-center gap-2">
                     <span className="w-1 h-5 rounded bg-golden inline-block"></span>
-                    {t('overallBudgetUtilization')}
+                    {t('projectsBySector')}
                 </h3>
-                <div className="space-y-6">
-                    {/* Allocated vs Total — bronze→golden gradient */}
-                    <div>
-                        <div className="flex justify-between text-sm mb-2">
-                            <span className="text-parchment-muted">{t('allocatedTotalBudget')}</span>
-                            <span className="font-bold tabular-nums text-golden">
-                                {allocPct}%
-                            </span>
-                        </div>
-                        <div className="progress-bar h-3 rounded-full">
-                            <div
-                                className="h-full rounded-full transition-all duration-700"
-                                style={{
-                                    width: `${allocPct}%`,
-                                    background: `linear-gradient(90deg, #8E6F3E 0%, #FFB81C ${Math.min(Number(allocPct) * 1.2, 100)}%, #FAD980 100%)`,
-                                }}
-                            ></div>
-                        </div>
-                        <div className="flex justify-between text-xs text-parchment-ghost mt-1">
-                            <span>{formatNPR(overview.totalAllocated)} {t('allocatedSuffix')}</span>
-                            <span>{formatNPR(overview.totalBudget)} {t('totalSuffix')}</span>
-                        </div>
-                    </div>
+                {sectorChartData && <Bar data={sectorChartData} options={horizontalBarOptions} />}
+            </motion.div>
 
-                    {/* Released vs Allocated — green gradient for spent funds */}
-                    <div>
-                        <div className="flex justify-between text-sm mb-2">
-                            <span className="text-parchment-muted">{t('releasedAllocated')}</span>
-                            <span className={`font-bold tabular-nums ${
-                                Number(releasePct) >= 80 ? 'text-gov-green' :
-                                Number(releasePct) >= 50 ? 'text-golden' :
-                                'text-gov-orange'
-                            }`}>
-                                {releasePct}%
-                            </span>
-                        </div>
-                        <div className="progress-bar h-3 rounded-full">
-                            <div
-                                className="h-full rounded-full transition-all duration-700"
-                                style={{
-                                    width: `${releasePct}%`,
-                                    background: Number(releasePct) >= 80
-                                        ? 'linear-gradient(90deg, #1E7F4E 0%, #2DA562 100%)'
-                                        : Number(releasePct) >= 50
-                                        ? 'linear-gradient(90deg, #FFB81C 0%, #FAD980 100%)'
-                                        : 'linear-gradient(90deg, #C2410C 0%, #E8690A 100%)',
-                                }}
-                            ></div>
-                        </div>
-                        <div className="flex justify-between text-xs text-parchment-ghost mt-1">
-                            <span>{formatNPR(overview.totalReleased)} {t('releasedSuffix')}</span>
-                            <span>{formatNPR(overview.totalAllocated)} {t('allocatedSuffix')}</span>
-                        </div>
+            {/* ─── E & F) Milestone Table + Recent Fund Releases ─────────────── */}
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 md:gap-6 lg:gap-8 mb-8 md:mb-12">
+                {/* E) Milestone Progress Table */}
+                <motion.div variants={scaleIn} initial="hidden" animate="visible" className="lg:col-span-2 glass-card p-4 md:p-6">
+                    <h3 className="font-heading font-bold text-lg mb-4 text-parchment flex items-center gap-2">
+                        <span className="w-1 h-5 rounded bg-golden inline-block"></span>
+                        {t('milestoneProgressByProject')}
+                    </h3>
+                    <div className="overflow-x-auto">
+                        <table className="w-full min-w-[500px] text-sm">
+                            <thead>
+                                <tr className="border-b border-[rgba(142,111,62,0.28)]">
+                                    <th className="text-left py-2 text-parchment-ghost font-medium">{t('projectName')}</th>
+                                    <th className="text-left py-2 text-parchment-ghost font-medium">{t('province')}</th>
+                                    <th className="text-center py-2 text-parchment-ghost font-medium">{t('totalLabel')}</th>
+                                    <th className="text-center py-2 text-parchment-ghost font-medium">{t('completedLabel')}</th>
+                                    <th className="text-left py-2 text-parchment-ghost font-medium pl-4">{t('progressLabel')}</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {milestones.map((m, i) => (
+                                    <tr key={m.projectId} className={i < milestones.length - 1 ? 'border-b border-[rgba(142,111,62,0.15)]' : ''}>
+                                        <td className="py-2.5 text-parchment font-medium">{m.name}</td>
+                                        <td className="py-2.5 text-parchment-muted">{m.province}</td>
+                                        <td className="py-2.5 text-center text-parchment-ghost tabular-nums">{m.totalMilestones}</td>
+                                        <td className="py-2.5 text-center text-parchment-ghost tabular-nums">{m.completedMilestones}</td>
+                                        <td className="py-2.5 pl-4">
+                                            <div className="flex items-center gap-2">
+                                                <div className="flex-1 h-1 rounded-full bg-[rgba(142,111,62,0.18)]">
+                                                    <div
+                                                        className="h-full rounded-full transition-all duration-500"
+                                                        style={{ width: `${m.progress}%`, backgroundColor: progressColor(m.progress) }}
+                                                    />
+                                                </div>
+                                                <span className="text-xs text-parchment-ghost tabular-nums w-8 text-right">{m.progress}%</span>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                ))}
+                                {milestones.length === 0 && (
+                                    <tr><td colSpan={5} className="py-6 text-center text-parchment-ghost">{t('noMilestones')}</td></tr>
+                                )}
+                            </tbody>
+                        </table>
                     </div>
+                </motion.div>
 
-                    {/* Remaining unallocated — subtle indicator */}
-                    {overview.totalBudget > overview.totalAllocated && (
-                        <div className="pt-2 border-t border-earth-border">
-                            <div className="flex items-center justify-between text-sm">
-                                <span className="text-parchment-ghost">{t('unallocatedFunds')}</span>
-                                <span className="font-semibold text-parchment-muted tabular-nums">
-                                    {formatNPR(overview.totalBudget - overview.totalAllocated)}
-                                </span>
+                {/* F) Recent Fund Releases Feed */}
+                <motion.div variants={scaleIn} initial="hidden" animate="visible" className="glass-card p-4 md:p-6">
+                    <h3 className="font-heading font-bold text-lg mb-4 text-parchment flex items-center gap-2">
+                        <span className="w-1 h-5 rounded bg-bronze inline-block"></span>
+                        {t('recentFundReleases')}
+                    </h3>
+                    <div className="space-y-0">
+                        {releases.map((r, i) => (
+                            <div key={i} className={`py-3 ${i < releases.length - 1 ? 'border-b border-[rgba(142,111,62,0.18)]' : ''}`}>
+                                <div className="flex items-start justify-between gap-2">
+                                    <div className="flex-1 min-w-0">
+                                        <p className="text-parchment font-semibold text-sm truncate">{r.projectName}</p>
+                                        <p className="text-golden font-mono text-sm mt-0.5">{formatNPR(r.amount)}</p>
+                                        <div className="flex items-center gap-2 mt-1">
+                                            <span className="text-xs text-parchment-ghost">
+                                                {r.date ? new Date(r.date).toLocaleDateString('en-NP', { year: 'numeric', month: 'short', day: 'numeric' }) : '—'}
+                                            </span>
+                                            <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-[rgba(142,111,62,0.18)] text-parchment-ghost">
+                                                {r.province}
+                                            </span>
+                                        </div>
+                                    </div>
+                                    <ArrowUpRight size={14} className="text-parchment-ghost mt-1 shrink-0" />
+                                </div>
                             </div>
-                        </div>
+                        ))}
+                        {releases.length === 0 && (
+                            <p className="text-center text-parchment-ghost py-6 text-sm">{t('noRecentReleases')}</p>
+                        )}
+                    </div>
+                </motion.div>
+            </div>
+
+            {/* ─── G) Recently Updated Projects ──────────────────────────────── */}
+            <motion.div variants={scaleIn} initial="hidden" animate="visible" className="mb-8 md:mb-12">
+                <h3 className="font-heading font-bold text-lg mb-4 text-parchment flex items-center gap-2">
+                    <span className="w-1 h-5 rounded bg-golden inline-block"></span>
+                    {t('recentlyUpdated')}
+                </h3>
+                <div className="flex gap-4 overflow-x-auto pb-2 scrollbar-thin">
+                    {recentProjects.map((p) => (
+                        <Link
+                            key={p.projectId}
+                            to={`/project/${p.projectId}`}
+                            className="glass-card p-4 min-w-[260px] max-w-[300px] shrink-0 hover:-translate-y-1 transition-all border border-[rgba(142,111,62,0.28)] group"
+                        >
+                            <p className="text-parchment font-heading font-semibold text-sm truncate">{p.name}</p>
+                            <div className="flex items-center gap-2 mt-1.5 text-xs text-parchment-ghost">
+                                <span>{p.province}</span>
+                                <span className="text-[rgba(142,111,62,0.4)]">·</span>
+                                <span>{p.sector}</span>
+                            </div>
+                            <div className="flex items-center justify-between mt-3">
+                                <span className={`text-[10px] px-2 py-0.5 rounded-full font-medium ${statusBadge(p.status)}`}>
+                                    {p.status}
+                                </span>
+                                <span className="text-xs text-golden font-mono">{formatNPR(p.totalBudget)}</span>
+                            </div>
+                            <p className="text-xs text-golden mt-3 group-hover:underline">{t('viewProjectLink')}</p>
+                        </Link>
+                    ))}
+                    {recentProjects.length === 0 && (
+                        <p className="text-parchment-ghost text-sm py-6">{t('noProjectsMatch')}</p>
                     )}
                 </div>
-            </div>
+            </motion.div>
 
             {/* Explore link */}
             <div className="text-center">

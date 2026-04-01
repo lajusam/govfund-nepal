@@ -3,14 +3,16 @@ import { motion, AnimatePresence } from "framer-motion"
 import { Link, useLocation } from "react-router-dom"
 import { useWallet } from "@solana/wallet-adapter-react"
 import { WalletMultiButton } from "@solana/wallet-adapter-react-ui"
-import { Menu, X } from "lucide-react"
+import { Menu, X, ShieldCheck } from "lucide-react"
 import { cn } from "@/lib/utils"
+import { useSolana } from "@/context/WalletContext"
 
 export function NavBar({ items, className }) {
   const location = useLocation()
   const [isMobile, setIsMobile] = useState(false)
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   const { publicKey } = useWallet()
+  const { isAdmin } = useSolana()
 
   useEffect(() => {
     const handleResize = () => {
@@ -110,7 +112,16 @@ export function NavBar({ items, className }) {
         {/* Right side: wallet + hamburger */}
         <div className="flex items-center gap-2 shrink-0">
           {/* Wallet button — hidden on mobile, shown on md+ */}
-          <div className="hidden md:block">
+          <div className="hidden md:flex items-center gap-2">
+            {isAdmin && (
+              <Link
+                to="/admin"
+                className="flex items-center justify-center w-9 h-9 rounded-full bg-golden/10 text-golden hover:bg-golden/20 transition-colors"
+                title="Admin Panel"
+              >
+                <ShieldCheck size={18} strokeWidth={2} />
+              </Link>
+            )}
             <WalletMultiButton />
           </div>
 
@@ -179,6 +190,21 @@ export function NavBar({ items, className }) {
                   </Link>
                 )
               })}
+              {isAdmin && (
+                <Link
+                  to="/admin"
+                  onClick={() => setMobileMenuOpen(false)}
+                  className={cn(
+                    "flex items-center gap-4 py-4 text-lg font-medium transition-colors border-t border-[rgba(142,111,62,0.20)]",
+                    location.pathname === '/admin'
+                      ? "text-[#FFB81C]"
+                      : "text-[#F5F1E6] hover:text-[#FFB81C]",
+                  )}
+                >
+                  <ShieldCheck size={22} strokeWidth={2} />
+                  Admin
+                </Link>
+              )}
             </div>
 
             {/* Mobile wallet section */}
