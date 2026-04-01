@@ -6,7 +6,7 @@ import LanguageProvider from './context/LanguageContext';
 import ErrorBoundary from './components/ErrorBoundary';
 import Footer from './components/Footer';
 import { NavBar as TubelightNavbar } from './components/ui/tubelight-navbar';
-import { Home, LayoutDashboard, FolderKanban, ShieldCheck, Megaphone } from 'lucide-react';
+import { Home, LayoutDashboard, FolderKanban, ShieldCheck, Megaphone, PieChart } from 'lucide-react';
 
 const Welcome     = lazy(() => import('./pages/Welcome'));
 const Landing     = lazy(() => import('./pages/Landing'));
@@ -16,6 +16,7 @@ const ProjectDetail = lazy(() => import('./pages/ProjectDetail'));
 const ComplaintPage = lazy(() => import('./pages/ComplaintPage'));
 const Complaints  = lazy(() => import('./pages/Complaints'));
 const Admin       = lazy(() => import('./pages/Admin'));
+const Budget      = lazy(() => import('./pages/Budget'));
 
 function LoadingSpinner() {
     return (
@@ -35,6 +36,7 @@ const tubelightItems = [
     { name: 'Home',      url: '/home',       icon: Home },
     { name: 'Dashboard', url: '/dashboard',  icon: LayoutDashboard },
     { name: 'Projects',  url: '/projects',   icon: FolderKanban },
+    { name: 'Budget',     url: '/budget',     icon: PieChart },
     { name: 'Complaints', url: '/complaints', icon: Megaphone },
     { name: 'Admin',     url: '/admin',      icon: ShieldCheck },
 ];
@@ -55,6 +57,7 @@ function AppShell() {
                         <Route path="/projects"   element={<Projects />} />
                         <Route path="/project/:projectId" element={<ProjectDetail />} />
                         <Route path="/project/:projectId/complaints" element={<ComplaintPage />} />
+                        <Route path="/budget"     element={<Budget />} />
                         <Route path="/complaints" element={<Complaints />} />
                         <Route path="/admin"      element={<Admin />} />
                     </Routes>
