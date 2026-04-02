@@ -221,13 +221,13 @@ export default function Landing() {
 
                         {/* CTA buttons */}
                         <motion.div variants={fadeUp} custom={5} className="flex flex-col sm:flex-row flex-wrap gap-3 sm:gap-4 mb-8 md:mb-10">
-                            <Link to="/dashboard">
+                            <Link to="/budget">
                                 <motion.button
                                     whileHover={{ scale: 1.05, boxShadow: '0 20px 40px rgba(255,184,28,0.40)' }}
                                     whileTap={{ scale: 0.97 }}
                                     className="btn-primary text-base md:text-lg px-6 md:px-8 py-3 w-full sm:w-auto text-center"
                                 >
-                                    {t('viewDashboard')}
+                                    {t('viewBudget')}
                                 </motion.button>
                             </Link>
                             <Link to="/projects">

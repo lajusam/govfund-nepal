@@ -341,13 +341,14 @@ export default function Budget() {
                             </h3>
                             <div className="grid grid-cols-1 lg:grid-cols-5 gap-4 md:gap-6">
                                 {/* Left — Chart */}
-                                <div className="lg:col-span-3">
+                                <div className="lg:col-span-3" style={{ minHeight: `${Math.max(sortedProvinces.length * 44, 280)}px` }}>
                                     {provinceChartData && (
                                         <Bar
                                             data={provinceChartData}
                                             options={{
                                                 indexAxis: 'y',
                                                 responsive: true,
+                                                maintainAspectRatio: false,
                                                 plugins: {
                                                     legend: { display: false },
                                                     tooltip: {
@@ -357,7 +358,7 @@ export default function Budget() {
                                                 },
                                                 scales: {
                                                     x: { ticks: chartFont, grid: gridStyle },
-                                                    y: { ticks: { ...chartFont, font: { size: 13 } }, grid: { display: false } },
+                                                    y: { ticks: { ...chartFont, font: { size: 11 }, autoSkip: false }, grid: { display: false } },
                                                 },
                                             }}
                                         />
@@ -371,14 +372,14 @@ export default function Budget() {
                                             return (
                                                 <div
                                                     key={p.name}
-                                                    className={`flex items-center justify-between px-4 py-3 ${
+                                                    className={`flex flex-wrap items-center justify-between px-3 md:px-4 py-2.5 md:py-3 gap-1 ${
                                                         i % 2 === 0 ? 'bg-earth' : 'bg-[#352D1E]'
                                                     } ${i > 0 ? 'border-t border-[rgba(142,111,62,0.28)]' : ''}`}
                                                 >
-                                                    <span className="text-parchment text-sm font-medium">{p.name}</span>
-                                                    <div className="flex items-center gap-3">
-                                                        <span className="text-golden font-heading font-bold text-sm tabular-nums">{fmtNPR(p.grant)}</span>
-                                                        <span className="text-amber-glow text-xs font-semibold px-2 py-0.5 rounded-full border border-bronze/40">
+                                                    <span className="text-parchment text-xs md:text-sm font-medium min-w-0 break-words">{p.name}</span>
+                                                    <div className="flex items-center gap-2 md:gap-3 ml-auto">
+                                                        <span className="text-golden font-heading font-bold text-xs md:text-sm tabular-nums">{fmtNPR(p.grant)}</span>
+                                                        <span className="text-amber-glow text-xs font-semibold px-1.5 md:px-2 py-0.5 rounded-full border border-bronze/40">
                                                             {pct}%
                                                         </span>
                                                     </div>
@@ -386,9 +387,9 @@ export default function Budget() {
                                             );
                                         })}
                                         {/* Total row */}
-                                        <div className="flex items-center justify-between px-4 py-3 bg-earth-light border-t border-[rgba(142,111,62,0.28)]">
-                                            <span className="text-parchment font-heading font-bold text-sm">{t('budgetCat_Total')}</span>
-                                            <span className="text-golden font-heading font-bold text-sm tabular-nums">{fmtNPR(totalGrants.toFixed(2))}</span>
+                                        <div className="flex items-center justify-between px-3 md:px-4 py-2.5 md:py-3 bg-earth-light border-t border-[rgba(142,111,62,0.28)]">
+                                            <span className="text-parchment font-heading font-bold text-xs md:text-sm">{t('budgetCat_Total')}</span>
+                                            <span className="text-golden font-heading font-bold text-xs md:text-sm tabular-nums">{fmtNPR(totalGrants.toFixed(2))}</span>
                                         </div>
                                     </div>
                                 </div>
