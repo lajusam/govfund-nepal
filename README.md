@@ -295,7 +295,7 @@ This is a demonstration/prototype. Devnet provides free SOL for testing with ide
 4. Push to the branch (`git push origin feature/amazing-feature`)
 5. Open a Pull Request
 
----
+--
 
 ## License
 
